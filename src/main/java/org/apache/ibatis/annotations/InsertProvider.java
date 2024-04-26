@@ -50,30 +50,27 @@ import java.lang.annotation.Target;
 @Repeatable(InsertProvider.List.class)
 public @interface InsertProvider {
 
-  /**
-   * Specify a type that implements an SQL provider method.
-   *
-   * @return a type that implements an SQL provider method
-   *
-   * @since 3.5.2
-   *
-   * @see #type()
-   */
-  Class<?> value() default void.class;
+    /**
+     * Specify a type that implements an SQL provider method.
+     *
+     * @return a type that implements an SQL provider method
+     * @see #type()
+     * @since 3.5.2
+     */
+    Class<?> value() default void.class;
 
-  /**
-   * Specify a type that implements an SQL provider method.
-   * <p>
-   * This attribute is alias of {@link #value()}.
-   * </p>
-   *
-   * @return a type that implements an SQL provider method
-   *
-   * @see #value()
-   */
-  Class<?> type() default void.class;
+    /**
+     * Specify a type that implements an SQL provider method.
+     * <p>
+     * This attribute is alias of {@link #value()}.
+     * </p>
+     *
+     * @return a type that implements an SQL provider method
+     * @see #value()
+     */
+    Class<?> type() default void.class;
 
-  // @formatter:off
+    // @formatter:off
   /**
    * Specify a method for providing an SQL.
    * <p>
@@ -97,25 +94,23 @@ public @interface InsertProvider {
   // @formatter:on
   String method() default "";
 
-  /**
-   * @return A database id that correspond this provider
-   *
-   * @since 3.5.5
-   */
-  String databaseId() default "";
+    /**
+     * @return A database id that correspond this provider
+     * @since 3.5.5
+     */
+    String databaseId() default "";
 
-  /**
-   * The container annotation for {@link InsertProvider}.
-   *
-   * @author Kazuki Shimizu
-   *
-   * @since 3.5.5
-   */
-  @Documented
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.METHOD)
-  @interface List {
-    InsertProvider[] value();
-  }
+    /**
+     * The container annotation for {@link InsertProvider}.
+     *
+     * @author Kazuki Shimizu
+     * @since 3.5.5
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface List {
+        InsertProvider[] value();
+    }
 
 }

@@ -19,12 +19,12 @@ import java.util.List;
 
 public interface Mapper {
 
-  List<Vehicle> selectVehicles();
+    List<Vehicle> selectVehicles();
 
-  List<Owner> selectOwnersWithAVehicle();
+    List<Owner> selectOwnersWithAVehicle();
 
-  List<Owner> selectOwnersWithAVehicleConstructor();
+    List<Owner> selectOwnersWithAVehicleConstructor();
 
-  List<Contract> selectContracts();
+    List<Contract> selectContracts();
 
 }

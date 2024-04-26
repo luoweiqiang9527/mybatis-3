@@ -29,71 +29,71 @@ import org.junit.jupiter.api.Test;
 
 class AssociationTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create a SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/associationtest/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create a SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/associationtest/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/associationtest/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/associationtest/CreateDB.sql");
-  }
-
-  @Test
-  void shouldGetAllCars() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Car> cars = mapper.getCars();
-      Assertions.assertEquals(4, cars.size());
-      Assertions.assertEquals("VW", cars.get(0).getType());
-      Assertions.assertNotNull(cars.get(0).getEngine());
-      Assertions.assertNull(cars.get(0).getBrakes());
-      Assertions.assertEquals("Opel", cars.get(1).getType());
-      Assertions.assertNull(cars.get(1).getEngine());
-      Assertions.assertNotNull(cars.get(1).getBrakes());
+    @Test
+    void shouldGetAllCars() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Car> cars = mapper.getCars();
+            Assertions.assertEquals(4, cars.size());
+            Assertions.assertEquals("VW", cars.get(0).getType());
+            Assertions.assertNotNull(cars.get(0).getEngine());
+            Assertions.assertNull(cars.get(0).getBrakes());
+            Assertions.assertEquals("Opel", cars.get(1).getType());
+            Assertions.assertNull(cars.get(1).getEngine());
+            Assertions.assertNotNull(cars.get(1).getBrakes());
+        }
     }
-  }
 
-  @Test
-  void shouldGetOneCarWithOneEngineAndBrakes() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Car> cars = mapper.getCars2();
-      Assertions.assertEquals(1, cars.size());
-      Assertions.assertNotNull(cars.get(0).getEngine());
-      Assertions.assertNotNull(cars.get(0).getBrakes());
+    @Test
+    void shouldGetOneCarWithOneEngineAndBrakes() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Car> cars = mapper.getCars2();
+            Assertions.assertEquals(1, cars.size());
+            Assertions.assertNotNull(cars.get(0).getEngine());
+            Assertions.assertNotNull(cars.get(0).getBrakes());
+        }
     }
-  }
 
-  @Test
-  void shouldGetAllCarsNonUnique() {
-    // this is a little weird - we might expect 4 objects back, but there are only
-    // 1 distinct carid, so we get one back.
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Car> cars = mapper.getCars2();
-      Assertions.assertEquals(1, cars.size());
+    @Test
+    void shouldGetAllCarsNonUnique() {
+        // this is a little weird - we might expect 4 objects back, but there are only
+        // 1 distinct carid, so we get one back.
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Car> cars = mapper.getCars2();
+            Assertions.assertEquals(1, cars.size());
+        }
     }
-  }
 
-  @Test
-  void shouldGetAllCarsAndDetectAssociationType() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Car> cars = mapper.getCarsAndDetectAssociationType();
-      Assertions.assertEquals(4, cars.size());
-      Assertions.assertEquals("VW", cars.get(0).getType());
-      Assertions.assertNotNull(cars.get(0).getEngine());
-      Assertions.assertNull(cars.get(0).getBrakes());
-      Assertions.assertEquals("Opel", cars.get(1).getType());
-      Assertions.assertNull(cars.get(1).getEngine());
-      Assertions.assertNotNull(cars.get(1).getBrakes());
+    @Test
+    void shouldGetAllCarsAndDetectAssociationType() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Car> cars = mapper.getCarsAndDetectAssociationType();
+            Assertions.assertEquals(4, cars.size());
+            Assertions.assertEquals("VW", cars.get(0).getType());
+            Assertions.assertNotNull(cars.get(0).getEngine());
+            Assertions.assertNull(cars.get(0).getBrakes());
+            Assertions.assertEquals("Opel", cars.get(1).getType());
+            Assertions.assertNull(cars.get(1).getEngine());
+            Assertions.assertNotNull(cars.get(1).getBrakes());
+        }
     }
-  }
 
 }

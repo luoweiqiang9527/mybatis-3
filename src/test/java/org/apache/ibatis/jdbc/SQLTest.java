@@ -25,14 +25,14 @@ import org.junit.jupiter.api.Test;
 
 class SQLTest {
 
-  @Test
-  void shouldDemonstrateProvidedStringBuilder() {
-    // You can pass in your own StringBuilder
-    final StringBuilder sb = new StringBuilder();
-    // From the tutorial
-    final String sql = example1().usingAppender(sb).toString();
+    @Test
+    void shouldDemonstrateProvidedStringBuilder() {
+        // You can pass in your own StringBuilder
+        final StringBuilder sb = new StringBuilder();
+        // From the tutorial
+        final String sql = example1().usingAppender(sb).toString();
 
-    // @formatter:off
+        // @formatter:off
     assertEquals("SELECT P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME, P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON\n"
         + "FROM PERSON P, ACCOUNT A\n"
         + "INNER JOIN DEPARTMENT D on D.ID = P.DEPARTMENT_ID\n"
@@ -44,90 +44,90 @@ class SQLTest {
         + "OR (P.FIRST_NAME like ?)\n"
         + "ORDER BY P.ID, P.FULL_NAME", sql);
     // @formatter:on
-  }
+    }
 
-  @Test
-  void shouldDemonstrateMixedStyle() {
-    // Mixed
-    final String sql = new SQL() {
-      {
-        SELECT("id, name");
-        FROM("PERSON A");
-        WHERE("name like ?").WHERE("id = ?");
-      }
-    }.toString();
+    @Test
+    void shouldDemonstrateMixedStyle() {
+        // Mixed
+        final String sql = new SQL() {
+            {
+                SELECT("id, name");
+                FROM("PERSON A");
+                WHERE("name like ?").WHERE("id = ?");
+            }
+        }.toString();
 
-    // @formatter:off
+        // @formatter:off
     assertEquals(""
         + "SELECT id, name\n"
         + "FROM PERSON A\n"
         + "WHERE (name like ? AND id = ?)", sql);
     // @formatter:on
-  }
+    }
 
-  @Test
-  void shouldDemonstrateFluentStyle() {
-    // Fluent Style
-    final String sql = new SQL().SELECT("id, name").FROM("PERSON A").WHERE("name like ?").WHERE("id = ?").toString();
+    @Test
+    void shouldDemonstrateFluentStyle() {
+        // Fluent Style
+        final String sql = new SQL().SELECT("id, name").FROM("PERSON A").WHERE("name like ?").WHERE("id = ?").toString();
 
-    // @formatter:off
+        // @formatter:off
     assertEquals(""
         + "SELECT id, name\n"
         + "FROM PERSON A\n"
         + "WHERE (name like ? AND id = ?)", sql);
     // @formatter:on
-  }
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatement() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatement() {
+        // @formatter:off
     final String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.ID like #id# AND P.FIRST_NAME like #firstName# AND P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2("a", "b", "c"));
-  }
+        assertEquals(expected, example2("a", "b", "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingFirstParam() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingFirstParam() {
+        // @formatter:off
     final String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.FIRST_NAME like #firstName# AND P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, "b", "c"));
-  }
+        assertEquals(expected, example2(null, "b", "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingFirstTwoParams() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingFirstTwoParams() {
+        // @formatter:off
     final String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, null, "c"));
-  }
+        assertEquals(expected, example2(null, null, "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingAllParams() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingAllParams() {
+        // @formatter:off
     final String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, null, null));
-  }
+        assertEquals(expected, example2(null, null, null));
+    }
 
-  @Test
-  void shouldProduceExpectedComplexSelectStatement() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedComplexSelectStatement() {
+        // @formatter:off
     final String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME, P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON\n"
             + "FROM PERSON P, ACCOUNT A\n"
@@ -140,373 +140,373 @@ class SQLTest {
             + "OR (P.FIRST_NAME like ?)\n"
             + "ORDER BY P.ID, P.FULL_NAME";
     // @formatter:on
-    assertEquals(expected, example1().toString());
-  }
+        assertEquals(expected, example1().toString());
+    }
 
-  private static SQL example1() {
-    return new SQL() {
-      {
-        SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME");
-        SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON");
-        FROM("PERSON P");
-        FROM("ACCOUNT A");
-        INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID");
-        INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID");
-        WHERE("P.ID = A.ID");
-        WHERE("P.FIRST_NAME like ?");
-        OR();
-        WHERE("P.LAST_NAME like ?");
-        GROUP_BY("P.ID");
-        HAVING("P.LAST_NAME like ?");
-        OR();
-        HAVING("P.FIRST_NAME like ?");
-        ORDER_BY("P.ID");
-        ORDER_BY("P.FULL_NAME");
-      }
-    };
-  }
+    private static SQL example1() {
+        return new SQL() {
+            {
+                SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME");
+                SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON");
+                FROM("PERSON P");
+                FROM("ACCOUNT A");
+                INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID");
+                INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID");
+                WHERE("P.ID = A.ID");
+                WHERE("P.FIRST_NAME like ?");
+                OR();
+                WHERE("P.LAST_NAME like ?");
+                GROUP_BY("P.ID");
+                HAVING("P.LAST_NAME like ?");
+                OR();
+                HAVING("P.FIRST_NAME like ?");
+                ORDER_BY("P.ID");
+                ORDER_BY("P.FULL_NAME");
+            }
+        };
+    }
 
-  private static String example2(final String id, final String firstName, final String lastName) {
-    return new SQL() {
-      {
-        SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME");
-        FROM("PERSON P");
-        if (id != null) {
-          WHERE("P.ID like #id#");
-        }
-        if (firstName != null) {
-          WHERE("P.FIRST_NAME like #firstName#");
-        }
-        if (lastName != null) {
-          WHERE("P.LAST_NAME like #lastName#");
-        }
-        ORDER_BY("P.LAST_NAME");
-      }
-    }.toString();
-  }
+    private static String example2(final String id, final String firstName, final String lastName) {
+        return new SQL() {
+            {
+                SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME");
+                FROM("PERSON P");
+                if (id != null) {
+                    WHERE("P.ID like #id#");
+                }
+                if (firstName != null) {
+                    WHERE("P.FIRST_NAME like #firstName#");
+                }
+                if (lastName != null) {
+                    WHERE("P.LAST_NAME like #lastName#");
+                }
+                ORDER_BY("P.LAST_NAME");
+            }
+        }.toString();
+    }
 
-  @Test
-  void variableLengthArgumentOnSelect() {
-    final String sql = new SQL() {
-      {
-        SELECT("P.ID", "P.USERNAME");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnSelect() {
+        final String sql = new SQL() {
+            {
+                SELECT("P.ID", "P.USERNAME");
+            }
+        }.toString();
 
-    assertEquals("SELECT P.ID, P.USERNAME", sql);
-  }
+        assertEquals("SELECT P.ID, P.USERNAME", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnSelectDistinct() {
-    final String sql = new SQL() {
-      {
-        SELECT_DISTINCT("P.ID", "P.USERNAME");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnSelectDistinct() {
+        final String sql = new SQL() {
+            {
+                SELECT_DISTINCT("P.ID", "P.USERNAME");
+            }
+        }.toString();
 
-    assertEquals("SELECT DISTINCT P.ID, P.USERNAME", sql);
-  }
+        assertEquals("SELECT DISTINCT P.ID, P.USERNAME", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnFrom() {
-    final String sql = new SQL() {
-      {
-        SELECT().FROM("TABLE_A a", "TABLE_B b");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnFrom() {
+        final String sql = new SQL() {
+            {
+                SELECT().FROM("TABLE_A a", "TABLE_B b");
+            }
+        }.toString();
 
-    assertEquals("FROM TABLE_A a, TABLE_B b", sql);
-  }
+        assertEquals("FROM TABLE_A a, TABLE_B b", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnJoin() {
-    final String sql = new SQL() {
-      {
-        SELECT().JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnJoin() {
+        final String sql = new SQL() {
+            {
+                SELECT().JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
+            }
+        }.toString();
 
-    assertEquals("JOIN TABLE_A b ON b.id = a.id\n" + "JOIN TABLE_C c ON c.id = a.id", sql);
-  }
+        assertEquals("JOIN TABLE_A b ON b.id = a.id\n" + "JOIN TABLE_C c ON c.id = a.id", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnInnerJoin() {
-    final String sql = new SQL() {
-      {
-        SELECT().INNER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnInnerJoin() {
+        final String sql = new SQL() {
+            {
+                SELECT().INNER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
+            }
+        }.toString();
 
-    assertEquals("INNER JOIN TABLE_A b ON b.id = a.id\n" + "INNER JOIN TABLE_C c ON c.id = a.id", sql);
-  }
+        assertEquals("INNER JOIN TABLE_A b ON b.id = a.id\n" + "INNER JOIN TABLE_C c ON c.id = a.id", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnOuterJoin() {
-    final String sql = new SQL() {
-      {
-        SELECT().OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnOuterJoin() {
+        final String sql = new SQL() {
+            {
+                SELECT().OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
+            }
+        }.toString();
 
-    assertEquals("OUTER JOIN TABLE_A b ON b.id = a.id\n" + "OUTER JOIN TABLE_C c ON c.id = a.id", sql);
-  }
+        assertEquals("OUTER JOIN TABLE_A b ON b.id = a.id\n" + "OUTER JOIN TABLE_C c ON c.id = a.id", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnLeftOuterJoin() {
-    final String sql = new SQL() {
-      {
-        SELECT().LEFT_OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnLeftOuterJoin() {
+        final String sql = new SQL() {
+            {
+                SELECT().LEFT_OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
+            }
+        }.toString();
 
-    assertEquals("LEFT OUTER JOIN TABLE_A b ON b.id = a.id\n" + "LEFT OUTER JOIN TABLE_C c ON c.id = a.id", sql);
-  }
+        assertEquals("LEFT OUTER JOIN TABLE_A b ON b.id = a.id\n" + "LEFT OUTER JOIN TABLE_C c ON c.id = a.id", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnRightOuterJoin() {
-    final String sql = new SQL() {
-      {
-        SELECT().RIGHT_OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnRightOuterJoin() {
+        final String sql = new SQL() {
+            {
+                SELECT().RIGHT_OUTER_JOIN("TABLE_A b ON b.id = a.id", "TABLE_C c ON c.id = a.id");
+            }
+        }.toString();
 
-    assertEquals("RIGHT OUTER JOIN TABLE_A b ON b.id = a.id\n" + "RIGHT OUTER JOIN TABLE_C c ON c.id = a.id", sql);
-  }
+        assertEquals("RIGHT OUTER JOIN TABLE_A b ON b.id = a.id\n" + "RIGHT OUTER JOIN TABLE_C c ON c.id = a.id", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnWhere() {
-    final String sql = new SQL() {
-      {
-        SELECT().WHERE("a = #{a}", "b = #{b}");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnWhere() {
+        final String sql = new SQL() {
+            {
+                SELECT().WHERE("a = #{a}", "b = #{b}");
+            }
+        }.toString();
 
-    assertEquals("WHERE (a = #{a} AND b = #{b})", sql);
-  }
+        assertEquals("WHERE (a = #{a} AND b = #{b})", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnGroupBy() {
-    final String sql = new SQL() {
-      {
-        SELECT().GROUP_BY("a", "b");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnGroupBy() {
+        final String sql = new SQL() {
+            {
+                SELECT().GROUP_BY("a", "b");
+            }
+        }.toString();
 
-    assertEquals("GROUP BY a, b", sql);
-  }
+        assertEquals("GROUP BY a, b", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnHaving() {
-    final String sql = new SQL() {
-      {
-        SELECT().HAVING("a = #{a}", "b = #{b}");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnHaving() {
+        final String sql = new SQL() {
+            {
+                SELECT().HAVING("a = #{a}", "b = #{b}");
+            }
+        }.toString();
 
-    assertEquals("HAVING (a = #{a} AND b = #{b})", sql);
-  }
+        assertEquals("HAVING (a = #{a} AND b = #{b})", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnOrderBy() {
-    final String sql = new SQL() {
-      {
-        SELECT().ORDER_BY("a", "b");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnOrderBy() {
+        final String sql = new SQL() {
+            {
+                SELECT().ORDER_BY("a", "b");
+            }
+        }.toString();
 
-    assertEquals("ORDER BY a, b", sql);
-  }
+        assertEquals("ORDER BY a, b", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnSet() {
-    final String sql = new SQL() {
-      {
-        UPDATE("TABLE_A").SET("a = #{a}", "b = #{b}");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnSet() {
+        final String sql = new SQL() {
+            {
+                UPDATE("TABLE_A").SET("a = #{a}", "b = #{b}");
+            }
+        }.toString();
 
-    assertEquals("UPDATE TABLE_A\n" + "SET a = #{a}, b = #{b}", sql);
-  }
+        assertEquals("UPDATE TABLE_A\n" + "SET a = #{a}, b = #{b}", sql);
+    }
 
-  @Test
-  void variableLengthArgumentOnIntoColumnsAndValues() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("TABLE_A").INTO_COLUMNS("a", "b").INTO_VALUES("#{a}", "#{b}");
-      }
-    }.toString();
+    @Test
+    void variableLengthArgumentOnIntoColumnsAndValues() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("TABLE_A").INTO_COLUMNS("a", "b").INTO_VALUES("#{a}", "#{b}");
+            }
+        }.toString();
 
-    assertEquals("INSERT INTO TABLE_A\n (a, b)\nVALUES (#{a}, #{b})", sql);
-  }
+        assertEquals("INSERT INTO TABLE_A\n (a, b)\nVALUES (#{a}, #{b})", sql);
+    }
 
-  @Test
-  void fixFor903UpdateJoins() {
-    final SQL sql = new SQL().UPDATE("table1 a").INNER_JOIN("table2 b USING (ID)").SET("a.value = b.value");
-    assertThat(sql.toString()).isEqualTo("UPDATE table1 a\nINNER JOIN table2 b USING (ID)\nSET a.value = b.value");
-  }
+    @Test
+    void fixFor903UpdateJoins() {
+        final SQL sql = new SQL().UPDATE("table1 a").INNER_JOIN("table2 b USING (ID)").SET("a.value = b.value");
+        assertThat(sql.toString()).isEqualTo("UPDATE table1 a\nINNER JOIN table2 b USING (ID)\nSET a.value = b.value");
+    }
 
-  @Test
-  void selectUsingLimitVariableName() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").LIMIT("#{limit}");
-      }
-    }.toString();
+    @Test
+    void selectUsingLimitVariableName() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").LIMIT("#{limit}");
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id LIMIT #{limit}", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id LIMIT #{limit}", sql);
+    }
 
-  @Test
-  void selectUsingOffsetVariableName() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").OFFSET("#{offset}");
-      }
-    }.toString();
+    @Test
+    void selectUsingOffsetVariableName() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").OFFSET("#{offset}");
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET #{offset}", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET #{offset}", sql);
+    }
 
-  @Test
-  void selectUsingLimitAndOffset() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").LIMIT(20).OFFSET(100);
-      }
-    }.toString();
+    @Test
+    void selectUsingLimitAndOffset() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").LIMIT(20).OFFSET(100);
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id LIMIT 20 OFFSET 100", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id LIMIT 20 OFFSET 100", sql);
+    }
 
-  @Test
-  void updateUsingLimit() {
-    final String sql = new SQL() {
-      {
-        UPDATE("test").SET("status = #{updStatus}").WHERE("status = #{status}").LIMIT(20);
-      }
-    }.toString();
+    @Test
+    void updateUsingLimit() {
+        final String sql = new SQL() {
+            {
+                UPDATE("test").SET("status = #{updStatus}").WHERE("status = #{status}").LIMIT(20);
+            }
+        }.toString();
 
-    assertEquals("UPDATE test\nSET status = #{updStatus}\nWHERE (status = #{status}) LIMIT 20", sql);
-  }
+        assertEquals("UPDATE test\nSET status = #{updStatus}\nWHERE (status = #{status}) LIMIT 20", sql);
+    }
 
-  @Test
-  void deleteUsingLimit() {
-    final String sql = new SQL() {
-      {
-        DELETE_FROM("test").WHERE("status = #{status}").LIMIT(20);
-      }
-    }.toString();
+    @Test
+    void deleteUsingLimit() {
+        final String sql = new SQL() {
+            {
+                DELETE_FROM("test").WHERE("status = #{status}").LIMIT(20);
+            }
+        }.toString();
 
-    assertEquals("DELETE FROM test\nWHERE (status = #{status}) LIMIT 20", sql);
-  }
+        assertEquals("DELETE FROM test\nWHERE (status = #{status}) LIMIT 20", sql);
+    }
 
-  @Test
-  void selectUsingFetchFirstRowsOnlyVariableName() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").FETCH_FIRST_ROWS_ONLY("#{fetchFirstRows}");
-      }
-    }.toString();
+    @Test
+    void selectUsingFetchFirstRowsOnlyVariableName() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").FETCH_FIRST_ROWS_ONLY("#{fetchFirstRows}");
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id FETCH FIRST #{fetchFirstRows} ROWS ONLY", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id FETCH FIRST #{fetchFirstRows} ROWS ONLY", sql);
+    }
 
-  @Test
-  void selectUsingOffsetRowsVariableName() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").OFFSET_ROWS("#{offsetRows}");
-      }
-    }.toString();
+    @Test
+    void selectUsingOffsetRowsVariableName() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").OFFSET_ROWS("#{offsetRows}");
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET #{offsetRows} ROWS", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET #{offsetRows} ROWS", sql);
+    }
 
-  @Test
-  void selectUsingOffsetRowsAndFetchFirstRowsOnly() {
-    final String sql = new SQL() {
-      {
-        SELECT("*").FROM("test").ORDER_BY("id").OFFSET_ROWS(100).FETCH_FIRST_ROWS_ONLY(20);
-      }
-    }.toString();
+    @Test
+    void selectUsingOffsetRowsAndFetchFirstRowsOnly() {
+        final String sql = new SQL() {
+            {
+                SELECT("*").FROM("test").ORDER_BY("id").OFFSET_ROWS(100).FETCH_FIRST_ROWS_ONLY(20);
+            }
+        }.toString();
 
-    assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET 100 ROWS FETCH FIRST 20 ROWS ONLY", sql);
-  }
+        assertEquals("SELECT *\nFROM test\nORDER BY id OFFSET 100 ROWS FETCH FIRST 20 ROWS ONLY", sql);
+    }
 
-  @Test
-  void supportBatchInsert() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("table1 a");
-        INTO_COLUMNS("col1,col2");
-        INTO_VALUES("val1", "val2");
-        ADD_ROW();
-        INTO_VALUES("val1", "val2");
-      }
-    }.toString();
+    @Test
+    void supportBatchInsert() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("table1 a");
+                INTO_COLUMNS("col1,col2");
+                INTO_VALUES("val1", "val2");
+                ADD_ROW();
+                INTO_VALUES("val1", "val2");
+            }
+        }.toString();
 
-    assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO table1 a (col1,col2) VALUES (val1,val2), (val1,val2)");
-  }
+        assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO table1 a (col1,col2) VALUES (val1,val2), (val1,val2)");
+    }
 
-  @Test
-  void singleInsert() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("table1 a");
-        INTO_COLUMNS("col1,col2");
-        INTO_VALUES("val1", "val2");
-      }
-    }.toString();
+    @Test
+    void singleInsert() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("table1 a");
+                INTO_COLUMNS("col1,col2");
+                INTO_VALUES("val1", "val2");
+            }
+        }.toString();
 
-    assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO table1 a (col1,col2) VALUES (val1,val2)");
-  }
+        assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO table1 a (col1,col2) VALUES (val1,val2)");
+    }
 
-  @Test
-  void singleInsertWithMultipleInsertValues() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("TABLE_A").INTO_COLUMNS("a", "b").INTO_VALUES("#{a}").INTO_VALUES("#{b}");
-      }
-    }.toString();
+    @Test
+    void singleInsertWithMultipleInsertValues() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("TABLE_A").INTO_COLUMNS("a", "b").INTO_VALUES("#{a}").INTO_VALUES("#{b}");
+            }
+        }.toString();
 
-    assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO TABLE_A (a, b) VALUES (#{a}, #{b})");
-  }
+        assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO TABLE_A (a, b) VALUES (#{a}, #{b})");
+    }
 
-  @Test
-  void batchInsertWithMultipleInsertValues() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("TABLE_A");
-        INTO_COLUMNS("a", "b");
-        INTO_VALUES("#{a1}");
-        INTO_VALUES("#{b1}");
-        ADD_ROW();
-        INTO_VALUES("#{a2}");
-        INTO_VALUES("#{b2}");
-      }
-    }.toString();
+    @Test
+    void batchInsertWithMultipleInsertValues() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("TABLE_A");
+                INTO_COLUMNS("a", "b");
+                INTO_VALUES("#{a1}");
+                INTO_VALUES("#{b1}");
+                ADD_ROW();
+                INTO_VALUES("#{a2}");
+                INTO_VALUES("#{b2}");
+            }
+        }.toString();
 
-    assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO TABLE_A (a, b) VALUES (#{a1}, #{b1}), (#{a2}, #{b2})");
-  }
+        assertThat(sql).isEqualToIgnoringWhitespace("INSERT INTO TABLE_A (a, b) VALUES (#{a1}, #{b1}), (#{a2}, #{b2})");
+    }
 
-  @Test
-  void testValues() {
-    final String sql = new SQL() {
-      {
-        INSERT_INTO("PERSON");
-        VALUES("ID, FIRST_NAME", "#{id}, #{firstName}");
-        VALUES("LAST_NAME", "#{lastName}");
-      }
-    }.toString();
+    @Test
+    void testValues() {
+        final String sql = new SQL() {
+            {
+                INSERT_INTO("PERSON");
+                VALUES("ID, FIRST_NAME", "#{id}, #{firstName}");
+                VALUES("LAST_NAME", "#{lastName}");
+            }
+        }.toString();
 
-    assertThat(sql).isEqualToIgnoringWhitespace(
-        "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (#{id}, #{firstName}, #{lastName})");
-  }
+        assertThat(sql).isEqualToIgnoringWhitespace(
+            "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (#{id}, #{firstName}, #{lastName})");
+    }
 
-  @Test
-  void testApplyIf() {
-    Bean bean = new Bean();
-    // @formatter:off
+    @Test
+    void testApplyIf() {
+        Bean bean = new Bean();
+        // @formatter:off
     String sqlString = new SQL()
       .UPDATE("test")
       .applyIf(bean.a != null, sql -> sql.SET("a=#{a}"))
@@ -515,16 +515,16 @@ class SQLTest {
       .WHERE("id=#{id}").toString();
     // @formatter:on
 
-    assertThat(sqlString).isEqualToIgnoringWhitespace("UPDATE test SET a=#{a} WHERE (id=#{id})");
-  }
+        assertThat(sqlString).isEqualToIgnoringWhitespace("UPDATE test SET a=#{a} WHERE (id=#{id})");
+    }
 
-  @Test
-  void testApplyForEach() {
-    List<Bean> beans = new ArrayList<>();
-    beans.add(new Bean());
-    beans.add(new Bean());
+    @Test
+    void testApplyForEach() {
+        List<Bean> beans = new ArrayList<>();
+        beans.add(new Bean());
+        beans.add(new Bean());
 
-    // @formatter:off
+        // @formatter:off
     String sqlString = new SQL()
       .INSERT_INTO("test")
       .INTO_COLUMNS("a", "b", "c")
@@ -537,17 +537,17 @@ class SQLTest {
       .toString();
     // @formatter:on
 
-    assertThat(sqlString).isEqualToIgnoringWhitespace(
-        "INSERT INTO test (a, b, c) VALUES (#{list[0].a}, #{list[0].b}, #{list[0].c}), (#{list[1].a}, #{list[1].b}, #{list[1].c})");
-  }
-
-  static class Bean {
-    private String a = "foo";
-    private String b;
-    private String c;
-
-    boolean hasC() {
-      return c != null;
+        assertThat(sqlString).isEqualToIgnoringWhitespace(
+            "INSERT INTO test (a, b, c) VALUES (#{list[0].a}, #{list[0].b}, #{list[0].c}), (#{list[1].a}, #{list[1].b}, #{list[1].c})");
     }
-  }
+
+    static class Bean {
+        private String a = "foo";
+        private String b;
+        private String c;
+
+        boolean hasC() {
+            return c != null;
+        }
+    }
 }

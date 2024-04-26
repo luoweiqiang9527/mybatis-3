@@ -32,73 +32,73 @@ import org.junit.jupiter.api.Test;
 // issue #524
 class BlockingCacheTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    // create a SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/blocking_cache/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeEach
+    void setUp() throws Exception {
+        // create a SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/blocking_cache/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/blocking_cache/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/blocking_cache/CreateDB.sql");
-  }
+    @Test
+    void testBlockingCache() throws InterruptedException {
+        ExecutorService defaultThreadPool = Executors.newFixedThreadPool(2);
 
-  @Test
-  void testBlockingCache() throws InterruptedException {
-    ExecutorService defaultThreadPool = Executors.newFixedThreadPool(2);
+        long init = System.currentTimeMillis();
 
-    long init = System.currentTimeMillis();
+        for (int i = 0; i < 2; i++) {
+            defaultThreadPool.execute(this::accessDB);
+        }
 
-    for (int i = 0; i < 2; i++) {
-      defaultThreadPool.execute(this::accessDB);
+        defaultThreadPool.shutdown();
+        if (!defaultThreadPool.awaitTermination(5, TimeUnit.SECONDS)) {
+            defaultThreadPool.shutdownNow();
+        }
+
+        long totalTime = System.currentTimeMillis() - init;
+        Assertions.assertThat(totalTime).isGreaterThanOrEqualTo(1000);
     }
 
-    defaultThreadPool.shutdown();
-    if (!defaultThreadPool.awaitTermination(5, TimeUnit.SECONDS)) {
-      defaultThreadPool.shutdownNow();
+    private void accessDB() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            PersonMapper pm = sqlSession.getMapper(PersonMapper.class);
+            pm.findAll();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Assertions.fail(e.getMessage());
+            }
+        }
     }
 
-    long totalTime = System.currentTimeMillis() - init;
-    Assertions.assertThat(totalTime).isGreaterThanOrEqualTo(1000);
-  }
+    @Test
+    void ensureLockIsAcquiredBeforePut() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+            mapper.delete(-1);
+            mapper.findAll();
+            sqlSession.commit();
+        }
+    }
 
-  private void accessDB() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      PersonMapper pm = sqlSession.getMapper(PersonMapper.class);
-      pm.findAll();
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        Assertions.fail(e.getMessage());
-      }
+    @Test
+    void ensureLockIsReleasedOnRollback() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+            mapper.delete(-1);
+            mapper.findAll();
+            sqlSession.rollback();
+        }
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+            mapper.findAll();
+        }
     }
-  }
-
-  @Test
-  void ensureLockIsAcquiredBeforePut() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
-      mapper.delete(-1);
-      mapper.findAll();
-      sqlSession.commit();
-    }
-  }
-
-  @Test
-  void ensureLockIsReleasedOnRollback() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
-      mapper.delete(-1);
-      mapper.findAll();
-      sqlSession.rollback();
-    }
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
-      mapper.findAll();
-    }
-  }
 }

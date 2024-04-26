@@ -24,7 +24,7 @@ import org.apache.ibatis.annotations.Select;
 
 public interface Mapper {
 
-  // @formatter:off
+    // @formatter:off
   @Results(id = "userResult", value = {
       @Result(id = true, column = "uid", property = "id"),
       @Result(column = "name", property = "name")
@@ -33,21 +33,21 @@ public interface Mapper {
   @Select("select * from users where uid = #{id}")
   User getUserById(Integer id);
 
-  @ResultMap("userResult")
-  @Select("select * from users where name = #{name}")
-  User getUserByName(String name);
+    @ResultMap("userResult")
+    @Select("select * from users where name = #{name}")
+    User getUserByName(String name);
 
-  @Results(id = "userResultConstructor")
-  // @formatter:off
+    @Results(id = "userResultConstructor")
+    // @formatter:off
   @ConstructorArgs({
       @Arg(id = true, column = "uid", javaType = Integer.class),
       @Arg(column = "name", javaType = String.class)
     })
   // @formatter:on
-  @Select("select * from users where uid = #{id}")
-  User getUserByIdConstructor(Integer id);
+    @Select("select * from users where uid = #{id}")
+    User getUserByIdConstructor(Integer id);
 
-  @ResultMap("userResultConstructor")
-  @Select("select * from users where name = #{name}")
-  User getUserByNameConstructor(String name);
+    @ResultMap("userResultConstructor")
+    @Select("select * from users where name = #{name}")
+    User getUserByNameConstructor(String name);
 }

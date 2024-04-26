@@ -20,20 +20,20 @@ import java.util.List;
 
 public class SimpleObject {
 
-  private final String id;
-  private final List<SimpleChildObject> simpleChildObjects;
+    private final String id;
+    private final List<SimpleChildObject> simpleChildObjects;
 
-  public SimpleObject(String id) {
-    this.id = id;
-    this.simpleChildObjects = new ArrayList<>();
-  }
+    public SimpleObject(String id) {
+        this.id = id;
+        this.simpleChildObjects = new ArrayList<>();
+    }
 
-  public String getId() {
-    return id;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public List<SimpleChildObject> getSimpleChildObjects() {
-    return simpleChildObjects;
-  }
+    public List<SimpleChildObject> getSimpleChildObjects() {
+        return simpleChildObjects;
+    }
 
 }

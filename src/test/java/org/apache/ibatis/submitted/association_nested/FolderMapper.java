@@ -24,6 +24,6 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface FolderMapper {
 
-  List<FolderFlatTree> findWithSubFolders(@Param("name") String name);
+    List<FolderFlatTree> findWithSubFolders(@Param("name") String name);
 
 }

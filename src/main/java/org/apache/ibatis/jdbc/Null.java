@@ -42,63 +42,63 @@ import org.apache.ibatis.type.TypeHandler;
  * @author Adam Gent
  */
 public enum Null {
-  BOOLEAN(new BooleanTypeHandler(), JdbcType.BOOLEAN),
+    BOOLEAN(new BooleanTypeHandler(), JdbcType.BOOLEAN),
 
-  BYTE(new ByteTypeHandler(), JdbcType.TINYINT),
+    BYTE(new ByteTypeHandler(), JdbcType.TINYINT),
 
-  SHORT(new ShortTypeHandler(), JdbcType.SMALLINT),
+    SHORT(new ShortTypeHandler(), JdbcType.SMALLINT),
 
-  INTEGER(new IntegerTypeHandler(), JdbcType.INTEGER),
+    INTEGER(new IntegerTypeHandler(), JdbcType.INTEGER),
 
-  LONG(new LongTypeHandler(), JdbcType.BIGINT),
+    LONG(new LongTypeHandler(), JdbcType.BIGINT),
 
-  FLOAT(new FloatTypeHandler(), JdbcType.FLOAT),
+    FLOAT(new FloatTypeHandler(), JdbcType.FLOAT),
 
-  DOUBLE(new DoubleTypeHandler(), JdbcType.DOUBLE),
+    DOUBLE(new DoubleTypeHandler(), JdbcType.DOUBLE),
 
-  BIGDECIMAL(new BigDecimalTypeHandler(), JdbcType.DECIMAL),
+    BIGDECIMAL(new BigDecimalTypeHandler(), JdbcType.DECIMAL),
 
-  STRING(new StringTypeHandler(), JdbcType.VARCHAR),
+    STRING(new StringTypeHandler(), JdbcType.VARCHAR),
 
-  CLOB(new ClobTypeHandler(), JdbcType.CLOB),
+    CLOB(new ClobTypeHandler(), JdbcType.CLOB),
 
-  LONGVARCHAR(new ClobTypeHandler(), JdbcType.LONGVARCHAR),
+    LONGVARCHAR(new ClobTypeHandler(), JdbcType.LONGVARCHAR),
 
-  BYTEARRAY(new ByteArrayTypeHandler(), JdbcType.LONGVARBINARY),
+    BYTEARRAY(new ByteArrayTypeHandler(), JdbcType.LONGVARBINARY),
 
-  BLOB(new BlobTypeHandler(), JdbcType.BLOB),
+    BLOB(new BlobTypeHandler(), JdbcType.BLOB),
 
-  LONGVARBINARY(new BlobTypeHandler(), JdbcType.LONGVARBINARY),
+    LONGVARBINARY(new BlobTypeHandler(), JdbcType.LONGVARBINARY),
 
-  OBJECT(new ObjectTypeHandler(), JdbcType.OTHER),
+    OBJECT(new ObjectTypeHandler(), JdbcType.OTHER),
 
-  OTHER(new ObjectTypeHandler(), JdbcType.OTHER),
+    OTHER(new ObjectTypeHandler(), JdbcType.OTHER),
 
-  TIMESTAMP(new DateTypeHandler(), JdbcType.TIMESTAMP),
+    TIMESTAMP(new DateTypeHandler(), JdbcType.TIMESTAMP),
 
-  DATE(new DateOnlyTypeHandler(), JdbcType.DATE),
+    DATE(new DateOnlyTypeHandler(), JdbcType.DATE),
 
-  TIME(new TimeOnlyTypeHandler(), JdbcType.TIME),
+    TIME(new TimeOnlyTypeHandler(), JdbcType.TIME),
 
-  SQLTIMESTAMP(new SqlTimestampTypeHandler(), JdbcType.TIMESTAMP),
+    SQLTIMESTAMP(new SqlTimestampTypeHandler(), JdbcType.TIMESTAMP),
 
-  SQLDATE(new SqlDateTypeHandler(), JdbcType.DATE),
+    SQLDATE(new SqlDateTypeHandler(), JdbcType.DATE),
 
-  SQLTIME(new SqlTimeTypeHandler(), JdbcType.TIME);
+    SQLTIME(new SqlTimeTypeHandler(), JdbcType.TIME);
 
-  private final TypeHandler<?> typeHandler;
-  private final JdbcType jdbcType;
+    private final TypeHandler<?> typeHandler;
+    private final JdbcType jdbcType;
 
-  Null(TypeHandler<?> typeHandler, JdbcType jdbcType) {
-    this.typeHandler = typeHandler;
-    this.jdbcType = jdbcType;
-  }
+    Null(TypeHandler<?> typeHandler, JdbcType jdbcType) {
+        this.typeHandler = typeHandler;
+        this.jdbcType = jdbcType;
+    }
 
-  public TypeHandler<?> getTypeHandler() {
-    return typeHandler;
-  }
+    public TypeHandler<?> getTypeHandler() {
+        return typeHandler;
+    }
 
-  public JdbcType getJdbcType() {
-    return jdbcType;
-  }
+    public JdbcType getJdbcType() {
+        return jdbcType;
+    }
 }

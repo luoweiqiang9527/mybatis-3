@@ -35,77 +35,77 @@ import org.junit.jupiter.api.Test;
  */
 class MultipleResultSetTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        // Could not get the table creation, procedure creation, and data population to work from the same script.
+        // Once it was in three scripts, all seemed well.
+        try (SqlSession session = sqlSessionFactory.openSession(); Connection conn = session.getConnection()) {
+            try (Reader reader = Resources
+                .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB1.sql")) {
+                runReaderScript(conn, reader);
+            }
+            try (Reader reader = Resources
+                .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB2.sql")) {
+                runReaderScript(conn, reader);
+            }
+            try (Reader reader = Resources
+                .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB3.sql")) {
+                runReaderScript(conn, reader);
+            }
+        }
     }
 
-    // populate in-memory database
-    // Could not get the table creation, procedure creation, and data population to work from the same script.
-    // Once it was in three scripts, all seemed well.
-    try (SqlSession session = sqlSessionFactory.openSession(); Connection conn = session.getConnection()) {
-      try (Reader reader = Resources
-          .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB1.sql")) {
-        runReaderScript(conn, reader);
-      }
-      try (Reader reader = Resources
-          .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB2.sql")) {
-        runReaderScript(conn, reader);
-      }
-      try (Reader reader = Resources
-          .getResourceAsReader("org/apache/ibatis/submitted/multipleresultsetswithassociation/CreateDB3.sql")) {
-        runReaderScript(conn, reader);
-      }
+    private static void runReaderScript(Connection conn, Reader reader) {
+        ScriptRunner runner = new ScriptRunner(conn);
+        runner.setLogWriter(null);
+        runner.setSendFullScript(true);
+        runner.setAutoCommit(true);
+        runner.setStopOnError(false);
+        runner.runScript(reader);
     }
-  }
 
-  private static void runReaderScript(Connection conn, Reader reader) {
-    ScriptRunner runner = new ScriptRunner(conn);
-    runner.setLogWriter(null);
-    runner.setSendFullScript(true);
-    runner.setAutoCommit(true);
-    runner.setStopOnError(false);
-    runner.runScript(reader);
-  }
+    @Test
+    void shouldGetOrderDetailsEachHavingAnOrderHeader() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeaders();
 
-  @Test
-  void shouldGetOrderDetailsEachHavingAnOrderHeader() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeaders();
+            // There are six order detail records in the database
+            // As long as the data does not change this should be successful
+            Assertions.assertEquals(6, orderDetails.size());
 
-      // There are six order detail records in the database
-      // As long as the data does not change this should be successful
-      Assertions.assertEquals(6, orderDetails.size());
-
-      // Each order detail should have a corresponding OrderHeader
-      // Only 2 of 6 orderDetails have orderHeaders
-      for (OrderDetail orderDetail : orderDetails) {
-        Assertions.assertNotNull(orderDetail.getOrderHeader());
-      }
+            // Each order detail should have a corresponding OrderHeader
+            // Only 2 of 6 orderDetails have orderHeaders
+            for (OrderDetail orderDetail : orderDetails) {
+                Assertions.assertNotNull(orderDetail.getOrderHeader());
+            }
+        }
     }
-  }
 
-  @Test
-  void shouldGetOrderDetailsEachHavingAnOrderHeaderAnnotationBased() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeadersAnnotationBased();
+    @Test
+    void shouldGetOrderDetailsEachHavingAnOrderHeaderAnnotationBased() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<OrderDetail> orderDetails = mapper.getOrderDetailsWithHeadersAnnotationBased();
 
-      // There are six order detail records in the database
-      // As long as the data does not change this should be successful
-      Assertions.assertEquals(6, orderDetails.size());
+            // There are six order detail records in the database
+            // As long as the data does not change this should be successful
+            Assertions.assertEquals(6, orderDetails.size());
 
-      // Each order detail should have a corresponding OrderHeader
-      // Only 2 of 6 orderDetails have orderHeaders
-      for (OrderDetail orderDetail : orderDetails) {
-        Assertions.assertNotNull(orderDetail.getOrderHeader());
-      }
+            // Each order detail should have a corresponding OrderHeader
+            // Only 2 of 6 orderDetails have orderHeaders
+            for (OrderDetail orderDetail : orderDetails) {
+                Assertions.assertNotNull(orderDetail.getOrderHeader());
+            }
+        }
     }
-  }
 
 }

@@ -37,48 +37,48 @@ import org.junit.jupiter.api.Test;
 @Tag("TestcontainersTests")
 class MysqlCursorTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    Configuration configuration = new Configuration();
-    Environment environment = new Environment("development", new JdbcTransactionFactory(),
-        MysqlContainer.getUnpooledDataSource());
-    configuration.setEnvironment(environment);
-    configuration.addMapper(Mapper.class);
-    sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+    @BeforeAll
+    static void setUp() throws Exception {
+        Configuration configuration = new Configuration();
+        Environment environment = new Environment("development", new JdbcTransactionFactory(),
+            MysqlContainer.getUnpooledDataSource());
+        configuration.setEnvironment(environment);
+        configuration.addMapper(Mapper.class);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/cursor_simple/CreateDB.sql");
-  }
-
-  @Test
-  void testMySqlStreamResultSet() throws IOException {
-    // #1654 and https://bugs.mysql.com/bug.php?id=96786
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      {
-        Cursor<User> cursor = mapper.getUsersMysqlStream();
-        Iterator<User> iterator = cursor.iterator();
-        User user = iterator.next();
-        assertEquals("User1", user.getName());
-        cursor.close();
-      }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/cursor_simple/CreateDB.sql");
     }
-  }
 
-  @Test
-  void testMySqlStreamResultSetBatch() throws IOException {
-    // #1654 and https://bugs.mysql.com/bug.php?id=96786
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      {
-        Cursor<User> cursor = mapper.getUsersMysqlStream();
-        Iterator<User> iterator = cursor.iterator();
-        User user = iterator.next();
-        assertEquals("User1", user.getName());
-        cursor.close();
-      }
+    @Test
+    void testMySqlStreamResultSet() throws IOException {
+        // #1654 and https://bugs.mysql.com/bug.php?id=96786
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            {
+                Cursor<User> cursor = mapper.getUsersMysqlStream();
+                Iterator<User> iterator = cursor.iterator();
+                User user = iterator.next();
+                assertEquals("User1", user.getName());
+                cursor.close();
+            }
+        }
     }
-  }
+
+    @Test
+    void testMySqlStreamResultSetBatch() throws IOException {
+        // #1654 and https://bugs.mysql.com/bug.php?id=96786
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            {
+                Cursor<User> cursor = mapper.getUsersMysqlStream();
+                Iterator<User> iterator = cursor.iterator();
+                User user = iterator.next();
+                assertEquals("User1", user.getName());
+                cursor.close();
+            }
+        }
+    }
 }

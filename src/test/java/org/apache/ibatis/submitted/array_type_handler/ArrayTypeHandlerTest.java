@@ -30,56 +30,56 @@ import org.junit.jupiter.api.Test;
 
 class ArrayTypeHandlerTest {
 
-  private SqlSessionFactory sqlSessionFactory;
+    private SqlSessionFactory sqlSessionFactory;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/array_type_handler/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeEach
+    void setUp() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/array_type_handler/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/array_type_handler/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/array_type_handler/CreateDB.sql");
-  }
+    @Test
+    void shouldInsertArrayValue() throws Exception {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            User user = new User();
+            user.setId(1);
+            user.setName("User 1");
+            user.setNicknames(new String[]{"User", "one"});
 
-  @Test
-  void shouldInsertArrayValue() throws Exception {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      User user = new User();
-      user.setId(1);
-      user.setName("User 1");
-      user.setNicknames(new String[] { "User", "one" });
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            mapper.insert(user);
+            sqlSession.commit();
 
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      mapper.insert(user);
-      sqlSession.commit();
+            int usersInDatabase = mapper.getUserCount();
+            assertEquals(1, usersInDatabase);
 
-      int usersInDatabase = mapper.getUserCount();
-      assertEquals(1, usersInDatabase);
-
-      Integer nicknameCount = mapper.getNicknameCount();
-      assertEquals(2, nicknameCount);
+            Integer nicknameCount = mapper.getNicknameCount();
+            assertEquals(2, nicknameCount);
+        }
     }
-  }
 
-  @Test
-  void shouldInsertNullValue() throws Exception {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      User user = new User();
-      user.setId(1);
-      user.setName("User 1");
-      // note how the user does not have nicknames
+    @Test
+    void shouldInsertNullValue() throws Exception {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            User user = new User();
+            user.setId(1);
+            user.setName("User 1");
+            // note how the user does not have nicknames
 
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      mapper.insert(user);
-      sqlSession.commit();
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            mapper.insert(user);
+            sqlSession.commit();
 
-      int usersInDatabase = mapper.getUserCount();
-      assertEquals(1, usersInDatabase);
+            int usersInDatabase = mapper.getUserCount();
+            assertEquals(1, usersInDatabase);
 
-      Integer nicknameCount = mapper.getNicknameCount();
-      assertNull(nicknameCount);
+            Integer nicknameCount = mapper.getNicknameCount();
+            assertNull(nicknameCount);
+        }
     }
-  }
 }

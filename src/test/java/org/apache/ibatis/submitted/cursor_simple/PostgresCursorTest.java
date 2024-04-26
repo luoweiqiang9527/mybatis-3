@@ -37,40 +37,40 @@ import org.junit.jupiter.api.Test;
 @Tag("TestcontainersTests")
 class PostgresCursorTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    Configuration configuration = new Configuration();
-    Environment environment = new Environment("development", new JdbcTransactionFactory(),
-        PgContainer.getUnpooledDataSource());
-    configuration.setEnvironment(environment);
-    configuration.addMapper(Mapper.class);
-    sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+    @BeforeAll
+    static void setUp() throws Exception {
+        Configuration configuration = new Configuration();
+        Environment environment = new Environment("development", new JdbcTransactionFactory(),
+            PgContainer.getUnpooledDataSource());
+        configuration.setEnvironment(environment);
+        configuration.addMapper(Mapper.class);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/cursor_simple/CreateDB.sql");
-  }
-
-  @Test
-  void shouldBeAbleToReuseStatement() throws IOException {
-    // #1351
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.REUSE)) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      {
-        Cursor<User> usersCursor = mapper.getAllUsers();
-        Iterator<User> iterator = usersCursor.iterator();
-        User user = iterator.next();
-        assertEquals("User1", user.getName());
-        usersCursor.close();
-      }
-      {
-        Cursor<User> usersCursor = mapper.getAllUsers();
-        Iterator<User> iterator = usersCursor.iterator();
-        User user = iterator.next();
-        assertEquals("User1", user.getName());
-        usersCursor.close();
-      }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/cursor_simple/CreateDB.sql");
     }
-  }
+
+    @Test
+    void shouldBeAbleToReuseStatement() throws IOException {
+        // #1351
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.REUSE)) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            {
+                Cursor<User> usersCursor = mapper.getAllUsers();
+                Iterator<User> iterator = usersCursor.iterator();
+                User user = iterator.next();
+                assertEquals("User1", user.getName());
+                usersCursor.close();
+            }
+            {
+                Cursor<User> usersCursor = mapper.getAllUsers();
+                Iterator<User> iterator = usersCursor.iterator();
+                User user = iterator.next();
+                assertEquals("User1", user.getName());
+                usersCursor.close();
+            }
+        }
+    }
 }

@@ -20,7 +20,7 @@ import org.apache.ibatis.annotations.Options;
 
 public interface InsertMapper {
 
-  // @formatter:off
+    // @formatter:off
   @Insert({
       "insert into mbtest.test_identity",
       "(first_name, last_name)",
@@ -30,5 +30,5 @@ public interface InsertMapper {
   @Options(keyProperty = "id", useGeneratedKeys = true, keyColumn = "name_id")
   int insertNameAnnotated(Name name);
 
-  int insertNameMapped(Name name);
+    int insertNameMapped(Name name);
 }

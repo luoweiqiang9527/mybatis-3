@@ -31,64 +31,64 @@ import org.junit.jupiter.api.Test;
 
 class OneManyResultMapTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/annotion_many_one_add_resultmapid/SqlMapConfig.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/annotion_many_one_add_resultmapid/SqlMapConfig.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/annotion_many_one_add_resultmapid/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/annotion_many_one_add_resultmapid/CreateDB.sql");
-  }
-
-  @Test
-  void shouldUseResultMapWithMany() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      UserDao mapper = sqlSession.getMapper(UserDao.class);
-      List<User> users = mapper.findAll();
-      assertNotNull(users);
-      assertEquals(4, users.size());
-      assertEquals(2, users.get(0).getRoles().size());
+    @Test
+    void shouldUseResultMapWithMany() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            UserDao mapper = sqlSession.getMapper(UserDao.class);
+            List<User> users = mapper.findAll();
+            assertNotNull(users);
+            assertEquals(4, users.size());
+            assertEquals(2, users.get(0).getRoles().size());
+        }
     }
-  }
 
-  @Test
-  void shouldUseResultMapInXmlWithMany() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      UserDao mapper = sqlSession.getMapper(UserDao.class);
-      List<User> users = mapper.findAll2();
-      assertNotNull(users);
-      assertEquals(4, users.size());
-      assertEquals(2, users.get(0).getRoles().size());
+    @Test
+    void shouldUseResultMapInXmlWithMany() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            UserDao mapper = sqlSession.getMapper(UserDao.class);
+            List<User> users = mapper.findAll2();
+            assertNotNull(users);
+            assertEquals(4, users.size());
+            assertEquals(2, users.get(0).getRoles().size());
+        }
     }
-  }
 
-  @Test
-  void shouldUseResultMapWithOne() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      UserDao mapper = sqlSession.getMapper(UserDao.class);
-      List<User> users = mapper.findAll3();
-      assertNotNull(users);
-      assertEquals(2, users.size());
-      assertNotNull(users.get(0).getRole());
-      assertEquals("teacher", users.get(0).getRole().getRoleName());
+    @Test
+    void shouldUseResultMapWithOne() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            UserDao mapper = sqlSession.getMapper(UserDao.class);
+            List<User> users = mapper.findAll3();
+            assertNotNull(users);
+            assertEquals(2, users.size());
+            assertNotNull(users.get(0).getRole());
+            assertEquals("teacher", users.get(0).getRole().getRoleName());
+        }
     }
-  }
 
-  @Test
-  void shouldResolveResultMapInTheSameNamespace() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      UserDao mapper = sqlSession.getMapper(UserDao.class);
-      User headmaster = mapper.findHeadmaster();
-      assertNotNull(headmaster);
-      assertEquals(3, headmaster.getTeachers().size());
-      assertEquals("Doug Lea", headmaster.getTeachers().get(0).getUsername());
+    @Test
+    void shouldResolveResultMapInTheSameNamespace() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            UserDao mapper = sqlSession.getMapper(UserDao.class);
+            User headmaster = mapper.findHeadmaster();
+            assertNotNull(headmaster);
+            assertEquals(3, headmaster.getTeachers().size());
+            assertEquals("Doug Lea", headmaster.getTeachers().get(0).getUsername());
+        }
     }
-  }
 
 }

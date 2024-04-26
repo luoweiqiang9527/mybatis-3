@@ -21,11 +21,11 @@ import org.apache.ibatis.annotations.Select;
 
 public interface UnmatchedPropTypeMapper {
 
-  // javaType is required for 'id'
-  @Arg(id = true, column = "id", name = "id", javaType = String.class)
-  @Arg(column = "name", name = "name")
-  @Result(column = "dob", property = "dob")
-  @Select("select * from users where id = #{id}")
-  User getUser(Integer id);
+    // javaType is required for 'id'
+    @Arg(id = true, column = "id", name = "id", javaType = String.class)
+    @Arg(column = "name", name = "name")
+    @Result(column = "dob", property = "dob")
+    @Select("select * from users where id = #{id}")
+    User getUser(Integer id);
 
 }

@@ -52,7 +52,6 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * @author Clinton Begin
- *
  * @see <a href="https://mybatis.org/mybatis-3/dynamic-sql.html">How to use Dynamic SQL</a>
  */
 @Documented
@@ -60,42 +59,39 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Repeatable(Select.List.class)
 public @interface Select {
-  /**
-   * Returns an SQL for retrieving record(s).
-   *
-   * @return an SQL for retrieving record(s)
-   */
-  String[] value();
+    /**
+     * Returns an SQL for retrieving record(s).
+     *
+     * @return an SQL for retrieving record(s)
+     */
+    String[] value();
 
-  /**
-   * @return A database id that correspond this statement
-   *
-   * @since 3.5.5
-   */
-  String databaseId() default "";
+    /**
+     * @return A database id that correspond this statement
+     * @since 3.5.5
+     */
+    String databaseId() default "";
 
-  /**
-   * Returns whether this select affects DB data.<br>
-   * e.g. RETURNING of PostgreSQL or OUTPUT of MS SQL Server.
-   *
-   * @return {@code true} if this select affects DB data; {@code false} if otherwise
-   *
-   * @since 3.5.12
-   */
-  boolean affectData() default false;
+    /**
+     * Returns whether this select affects DB data.<br>
+     * e.g. RETURNING of PostgreSQL or OUTPUT of MS SQL Server.
+     *
+     * @return {@code true} if this select affects DB data; {@code false} if otherwise
+     * @since 3.5.12
+     */
+    boolean affectData() default false;
 
-  /**
-   * The container annotation for {@link Select}.
-   *
-   * @author Kazuki Shimizu
-   *
-   * @since 3.5.5
-   */
-  @Documented
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.METHOD)
-  @interface List {
-    Select[] value();
-  }
+    /**
+     * The container annotation for {@link Select}.
+     *
+     * @author Kazuki Shimizu
+     * @since 3.5.5
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface List {
+        Select[] value();
+    }
 
 }

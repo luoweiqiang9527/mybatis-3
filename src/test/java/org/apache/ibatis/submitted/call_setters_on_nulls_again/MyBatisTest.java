@@ -27,23 +27,23 @@ import org.junit.jupiter.api.Test;
 
 class MyBatisTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/call_setters_on_nulls_again/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/call_setters_on_nulls_again/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
     }
-  }
 
-  @Test
-  void test() {
-    try (SqlSession session = sqlSessionFactory.openSession()) {
-      ParentBean parentBean = session.selectOne("test");
-      Assertions.assertEquals("p1", parentBean.getName());
+    @Test
+    void test() {
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            ParentBean parentBean = session.selectOne("test");
+            Assertions.assertEquals("p1", parentBean.getName());
+        }
     }
-  }
 
 }

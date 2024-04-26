@@ -21,7 +21,7 @@ import org.apache.ibatis.annotations.Select;
 
 public interface UseActualNameMapper {
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
       @Arg(column = "name", name = "name"),
       @Arg(id = true, column = "id", name = "userId", javaType = Integer.class)
@@ -30,6 +30,6 @@ public interface UseActualNameMapper {
   @Select("select * from users where id = #{id}")
   User mapConstructorWithoutParamAnnos(Integer id);
 
-  User mapConstructorWithoutParamAnnosXml(Integer id);
+    User mapConstructorWithoutParamAnnosXml(Integer id);
 
 }

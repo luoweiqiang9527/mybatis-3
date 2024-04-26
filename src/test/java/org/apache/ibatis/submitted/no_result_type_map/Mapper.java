@@ -21,8 +21,8 @@ import org.apache.ibatis.annotations.Param;
 
 public interface Mapper extends ParentMapper<User> {
 
-  User getUser(@Param("id") Integer id);
+    User getUser(@Param("id") Integer id);
 
-  List<User> getAllUsers();
+    List<User> getAllUsers();
 
 }

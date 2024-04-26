@@ -35,18 +35,17 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
- * @since 3.2.0
- *
  * @author Jeff Butler
+ * @since 3.2.0
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ResultType {
-  /**
-   * Returns the return type.
-   *
-   * @return the return type
-   */
-  Class<?> value();
+    /**
+     * Returns the return type.
+     *
+     * @return the return type
+     */
+    Class<?> value();
 }

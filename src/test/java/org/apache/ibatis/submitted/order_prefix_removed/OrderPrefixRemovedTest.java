@@ -30,29 +30,29 @@ import org.junit.jupiter.api.Test;
 
 class OrderPrefixRemovedTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void initDatabase() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/order_prefix_removed/ibatisConfig.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void initDatabase() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/order_prefix_removed/ibatisConfig.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/order_prefix_removed/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/order_prefix_removed/CreateDB.sql");
-  }
+    @Test
+    void testOrderPrefixNotRemoved() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.SIMPLE)) {
+            PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
 
-  @Test
-  void testOrderPrefixNotRemoved() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.SIMPLE)) {
-      PersonMapper personMapper = sqlSession.getMapper(PersonMapper.class);
+            Person person = personMapper.select("slow");
 
-      Person person = personMapper.select("slow");
+            assertNotNull(person);
 
-      assertNotNull(person);
-
-      sqlSession.commit();
+            sqlSession.commit();
+        }
     }
-  }
 }

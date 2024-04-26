@@ -25,6 +25,6 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface AnnotatedMapperExtended extends AnnotatedMapper {
 
-  @Select("select * from users")
-  List<User> getAllUsers(int i);
+    @Select("select * from users")
+    List<User> getAllUsers(int i);
 }

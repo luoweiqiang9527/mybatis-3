@@ -34,38 +34,38 @@ import org.apache.ibatis.builder.BuilderException;
  */
 public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 
-  private Properties properties;
+    private Properties properties;
 
-  @Override
-  public String getDatabaseId(DataSource dataSource) {
-    if (dataSource == null) {
-      throw new NullPointerException("dataSource cannot be null");
+    @Override
+    public String getDatabaseId(DataSource dataSource) {
+        if (dataSource == null) {
+            throw new NullPointerException("dataSource cannot be null");
+        }
+        try {
+            return getDatabaseName(dataSource);
+        } catch (SQLException e) {
+            throw new BuilderException("Error occurred when getting DB product name.", e);
+        }
     }
-    try {
-      return getDatabaseName(dataSource);
-    } catch (SQLException e) {
-      throw new BuilderException("Error occurred when getting DB product name.", e);
-    }
-  }
 
-  @Override
-  public void setProperties(Properties p) {
-    this.properties = p;
-  }
-
-  private String getDatabaseName(DataSource dataSource) throws SQLException {
-    String productName = getDatabaseProductName(dataSource);
-    if (this.properties != null) {
-      return properties.entrySet().stream().filter(entry -> productName.contains((String) entry.getKey()))
-          .map(entry -> (String) entry.getValue()).findFirst().orElse(null);
+    @Override
+    public void setProperties(Properties p) {
+        this.properties = p;
     }
-    return productName;
-  }
 
-  private String getDatabaseProductName(DataSource dataSource) throws SQLException {
-    try (Connection con = dataSource.getConnection()) {
-      return con.getMetaData().getDatabaseProductName();
+    private String getDatabaseName(DataSource dataSource) throws SQLException {
+        String productName = getDatabaseProductName(dataSource);
+        if (this.properties != null) {
+            return properties.entrySet().stream().filter(entry -> productName.contains((String) entry.getKey()))
+                .map(entry -> (String) entry.getValue()).findFirst().orElse(null);
+        }
+        return productName;
     }
-  }
+
+    private String getDatabaseProductName(DataSource dataSource) throws SQLException {
+        try (Connection con = dataSource.getConnection()) {
+            return con.getMetaData().getDatabaseProductName();
+        }
+    }
 
 }

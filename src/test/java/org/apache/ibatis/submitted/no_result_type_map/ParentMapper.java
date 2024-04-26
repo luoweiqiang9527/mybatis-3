@@ -19,6 +19,6 @@ import java.util.List;
 
 public interface ParentMapper<T> {
 
-  List<T> getAllUsersInParent();
+    List<T> getAllUsersInParent();
 
 }

@@ -5,7 +5,13 @@ author: Clinton Begin
 
 ### The Problem
 
-One of the nastiest things a Java developer will ever have to do is embed SQL in Java code. Usually this is done because the SQL has to be dynamically generated - otherwise you could externalize it in a file or a stored proc. As you've already seen, MyBatis has a powerful answer for dynamic SQL generation in its XML mapping features. However, sometimes it becomes necessary to build a SQL statement string inside of Java code. In that case, MyBatis has one more feature to help you out, before reducing yourself to the typical mess of plus signs, quotes, newlines, formatting problems and nested conditionals to deal with extra commas or AND conjunctions. Indeed, dynamically generating SQL code in Java can be a real nightmare. For example:
+One of the nastiest things a Java developer will ever have to do is embed SQL in Java code. Usually this is done because
+the SQL has to be dynamically generated - otherwise you could externalize it in a file or a stored proc. As you've
+already seen, MyBatis has a powerful answer for dynamic SQL generation in its XML mapping features. However, sometimes
+it becomes necessary to build a SQL statement string inside of Java code. In that case, MyBatis has one more feature to
+help you out, before reducing yourself to the typical mess of plus signs, quotes, newlines, formatting problems and
+nested conditionals to deal with extra commas or AND conjunctions. Indeed, dynamically generating SQL code in Java can
+be a real nightmare. For example:
 
 ```java
 String sql = "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME, "
@@ -23,7 +29,9 @@ String sql = "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME, "
 
 ### The Solution
 
-MyBatis 3 offers a convenient utility class to help with the problem. With the SQL class, you simply create an instance that lets you call methods against it to build a SQL statement one step at a time. The example problem above would look like this when rewritten with the SQL class:
+MyBatis 3 offers a convenient utility class to help with the problem. With the SQL class, you simply create an instance
+that lets you call methods against it to build a SQL statement one step at a time. The example problem above would look
+like this when rewritten with the SQL class:
 
 ```java
 private String selectPersonSql() {
@@ -48,7 +56,9 @@ private String selectPersonSql() {
 }
 ```
 
-What is so special about that example? Well, if you look closely, it doesn't have to worry about accidentally duplicating "AND" keywords, or choosing between "WHERE" and "AND" or none at all. The SQL class takes care of understanding where "WHERE" needs to go, where an "AND" should be used and all of the String concatenation.
+What is so special about that example? Well, if you look closely, it doesn't have to worry about accidentally
+duplicating "AND" keywords, or choosing between "WHERE" and "AND" or none at all. The SQL class takes care of
+understanding where "WHERE" needs to go, where an "AND" should be used and all of the String concatenation.
 
 ### The SQL Class
 
@@ -140,8 +150,12 @@ public String updatePersonSql() {
 | `INTO_VALUES(String...)`                                                                                                                                                                                                                                                | Appends values phrase to an insert statement. This should be call INTO_COLUMNS() with together.                                                                                                                                                                                                                      |
 | `ADD_ROW()`                                                                                                                                                                                                                                                             | Add new row for bulk insert. (Available since 3.5.2)                                                                                                                                                                                                                                                                 |
 
-
-<span class="label important">NOTE</span> It is important to note that SQL class writes `LIMIT`, `OFFSET`, `OFFSET n ROWS` and `FETCH FIRST n ROWS ONLY` clauses into the generated statement as is. In other words, the library does not attempt to normalize those values for databases that don’t support these clauses directly. Therefore, it is very important for users to understand whether or not the target database supports these clauses. If the target database does not support these clauses, then it is likely that using this support will create SQL that has runtime errors.
+<span class="label important">NOTE</span> It is important to note that SQL class
+writes `LIMIT`, `OFFSET`, `OFFSET n ROWS` and `FETCH FIRST n ROWS ONLY` clauses into the generated statement as is. In
+other words, the library does not attempt to normalize those values for databases that don’t support these clauses
+directly. Therefore, it is very important for users to understand whether or not the target database supports these
+clauses. If the target database does not support these clauses, then it is likely that using this support will create
+SQL that has runtime errors.
 
 Since version 3.4.2, you can use variable-length arguments as follows:
 
@@ -217,7 +231,10 @@ public String selectPersonsWithFetchFirstSql() {
 
 ### SqlBuilder and SelectBuilder (DEPRECATED)
 
-Before version 3.2 we took a bit of a different approach, by utilizing a ThreadLocal variable to mask some of the language limitations that make Java DSLs a bit cumbersome. However, this approach is now deprecated, as modern frameworks have warmed people to the idea of using builder-type patterns and anonymous inner classes for such things. Therefore the SelectBuilder and SqlBuilder classes have been deprecated.
+Before version 3.2 we took a bit of a different approach, by utilizing a ThreadLocal variable to mask some of the
+language limitations that make Java DSLs a bit cumbersome. However, this approach is now deprecated, as modern
+frameworks have warmed people to the idea of using builder-type patterns and anonymous inner classes for such things.
+Therefore the SelectBuilder and SqlBuilder classes have been deprecated.
 
 The following methods apply to only the deprecated SqlBuilder and SelectBuilder classes.
 
@@ -226,8 +243,10 @@ The following methods apply to only the deprecated SqlBuilder and SelectBuilder 
 | `BEGIN()` / `RESET()` | These methods clear the ThreadLocal state of the SelectBuilder class, and prepare it for a new statement to be built. `BEGIN()` reads best when starting a new statement. `RESET()` reads best when clearing a statement in the middle of execution for some reason (perhaps if the logic demands a completely different statement under some conditions). |
 | `SQL()`               | This returns the generated `SQL()` and resets the `SelectBuilder` state (as if `BEGIN()` or `RESET()` were called). Thus, this method can only be called ONCE!                                                                                                                                                                                             |
 
-
-The SelectBuilder and SqlBuilder classes are not magical, but it's important to know how they work. SelectBuilder and SqlBuilder use a combination of Static Imports and a ThreadLocal variable to enable a clean syntax that can be easily interlaced with conditionals. To use them, you statically import the methods from the classes like this (one or the other, not both):
+The SelectBuilder and SqlBuilder classes are not magical, but it's important to know how they work. SelectBuilder and
+SqlBuilder use a combination of Static Imports and a ThreadLocal variable to enable a clean syntax that can be easily
+interlaced with conditionals. To use them, you statically import the methods from the classes like this (one or the
+other, not both):
 
 ```java
 import static org.apache.ibatis.jdbc.SelectBuilder.*;

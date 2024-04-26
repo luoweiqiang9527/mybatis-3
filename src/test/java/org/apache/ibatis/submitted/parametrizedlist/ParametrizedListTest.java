@@ -30,52 +30,52 @@ import org.junit.jupiter.api.Test;
 
 class ParametrizedListTest {
 
-  private SqlSessionFactory sqlSessionFactory;
+    private SqlSessionFactory sqlSessionFactory;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/parametrizedlist/Config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeEach
+    void setUp() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/parametrizedlist/Config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/parametrizedlist/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/parametrizedlist/CreateDB.sql");
-  }
-
-  @Test
-  void testShouldDetectUsersAsParameterInsideAList() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<User<String>> list = mapper.getAListOfUsers();
-      Assertions.assertEquals(User.class, list.get(0).getClass());
+    @Test
+    void testShouldDetectUsersAsParameterInsideAList() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<User<String>> list = mapper.getAListOfUsers();
+            Assertions.assertEquals(User.class, list.get(0).getClass());
+        }
     }
-  }
 
-  @Test
-  void testShouldDetectUsersAsParameterInsideAMap() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Map<Integer, User<String>> map = mapper.getAMapOfUsers();
-      Assertions.assertEquals(User.class, map.get(1).getClass());
+    @Test
+    void testShouldDetectUsersAsParameterInsideAMap() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Map<Integer, User<String>> map = mapper.getAMapOfUsers();
+            Assertions.assertEquals(User.class, map.get(1).getClass());
+        }
     }
-  }
 
-  @Test
-  void testShouldGetAUserAsAMap() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Map<String, Object> map = mapper.getUserAsAMap();
-      Assertions.assertEquals(1, map.get("ID"));
+    @Test
+    void testShouldGetAUserAsAMap() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Map<String, Object> map = mapper.getUserAsAMap();
+            Assertions.assertEquals(1, map.get("ID"));
+        }
     }
-  }
 
-  @Test
-  void testShouldGetAListOfMaps() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Map<String, Object>> map = mapper.getAListOfMaps();
-      Assertions.assertEquals(1, map.get(0).get("ID"));
+    @Test
+    void testShouldGetAListOfMaps() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Map<String, Object>> map = mapper.getAListOfMaps();
+            Assertions.assertEquals(1, map.get(0).get("ID"));
+        }
     }
-  }
 
 }

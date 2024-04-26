@@ -29,27 +29,28 @@ import org.junit.jupiter.api.Test;
 
 class PrimitivesTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/primitives/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/primitives/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/primitives/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/primitives/CreateDB.sql");
-  }
-
-  @Test // issue #69
-  void shouldGetAUser() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Assetright> assetrights = mapper.select();
-      Assertions.assertEquals(2, assetrights.size());
+    @Test
+        // issue #69
+    void shouldGetAUser() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Assetright> assetrights = mapper.select();
+            Assertions.assertEquals(2, assetrights.size());
+        }
     }
-  }
 
 }

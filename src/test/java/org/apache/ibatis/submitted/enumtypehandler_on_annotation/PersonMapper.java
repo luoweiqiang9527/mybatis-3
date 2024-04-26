@@ -26,13 +26,12 @@ import org.apache.ibatis.submitted.enumtypehandler_on_annotation.Person.PersonTy
 import org.apache.ibatis.type.EnumOrdinalTypeHandler;
 
 /**
- * @since #444
- *
  * @author Kazuki Shimizu
+ * @since #444
  */
 public interface PersonMapper {
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
         @Arg(column = "id", javaType = Integer.class, id = true)
       , @Arg(column = "firstName", javaType = String.class)
@@ -44,7 +43,7 @@ public interface PersonMapper {
   @Select("SELECT id, firstName, lastName, personType FROM person WHERE id = #{id}")
   Person findOneUsingConstructor(int id);
 
-  // @formatter:off
+    // @formatter:off
   @Results({
       // target for test (ordinal number -> Enum constant)
       @Result(property = "personType", column = "personType", typeHandler = EnumOrdinalTypeHandler.class)
@@ -53,7 +52,7 @@ public interface PersonMapper {
   @Select("SELECT id, firstName, lastName, personType FROM person WHERE id = #{id}")
   Person findOneUsingSetter(int id);
 
-  // @formatter:off
+    // @formatter:off
   @TypeDiscriminator(
       // target for test (ordinal number -> Enum constant)
       column = "personType", javaType = PersonType.class, typeHandler = EnumOrdinalTypeHandler.class,

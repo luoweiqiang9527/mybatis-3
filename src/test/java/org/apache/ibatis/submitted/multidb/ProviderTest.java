@@ -27,21 +27,21 @@ import org.junit.jupiter.api.Test;
 
 class ProviderTest {
 
-  @Test
-  void shouldUseDefaultId() throws Exception {
-    Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multidb/MultiDbConfig.xml");
-    DefaultSqlSessionFactory sqlSessionFactory = (DefaultSqlSessionFactory) new SqlSessionFactoryBuilder()
-        .build(reader);
-    Configuration c = sqlSessionFactory.getConfiguration();
-    assertEquals("hsql", c.getDatabaseId());
-  }
+    @Test
+    void shouldUseDefaultId() throws Exception {
+        Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multidb/MultiDbConfig.xml");
+        DefaultSqlSessionFactory sqlSessionFactory = (DefaultSqlSessionFactory) new SqlSessionFactoryBuilder()
+            .build(reader);
+        Configuration c = sqlSessionFactory.getConfiguration();
+        assertEquals("hsql", c.getDatabaseId());
+    }
 
-  @Test
-  void shouldUseProvider() throws Exception {
-    Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multidb/ProviderConfig.xml");
-    DefaultSqlSessionFactory sqlSessionFactory = (DefaultSqlSessionFactory) new SqlSessionFactoryBuilder()
-        .build(reader);
-    Configuration c = sqlSessionFactory.getConfiguration();
-    assertEquals("translated", c.getDatabaseId());
-  }
+    @Test
+    void shouldUseProvider() throws Exception {
+        Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multidb/ProviderConfig.xml");
+        DefaultSqlSessionFactory sqlSessionFactory = (DefaultSqlSessionFactory) new SqlSessionFactoryBuilder()
+            .build(reader);
+        Configuration c = sqlSessionFactory.getConfiguration();
+        assertEquals("translated", c.getDatabaseId());
+    }
 }

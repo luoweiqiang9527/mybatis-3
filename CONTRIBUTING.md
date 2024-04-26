@@ -1,21 +1,27 @@
 ## If you have a question or need any help...
 
-Please use [the mailing list](https://groups.google.com/group/mybatis-user) instead of creating issues on the tracker. Thank you!
+Please use [the mailing list](https://groups.google.com/group/mybatis-user) instead of creating issues on the tracker.
+Thank you!
 
 ## Reporting a bug
 
 - Create a new issue on [the tracker](https://github.com/mybatis/mybatis-3/issues).
-- The best way to report a bug is to create a failing test case. Please see the [Contributing code](CONTRIBUTING.md#contributing-code) section.
+- The best way to report a bug is to create a failing test case. Please see
+  the [Contributing code](CONTRIBUTING.md#contributing-code) section.
 
 ## Proposing a new feature
 
-- It is a good idea to discuss your changes on [the mailing list](https://groups.google.com/group/mybatis-user) to get feedback from the community.
-- If you have a patch with unit tests, send a pull request. Please see the [Contributing code](CONTRIBUTING.md#contributing-code) section.
-
+- It is a good idea to discuss your changes on [the mailing list](https://groups.google.com/group/mybatis-user) to get
+  feedback from the community.
+- If you have a patch with unit tests, send a pull request. Please see
+  the [Contributing code](CONTRIBUTING.md#contributing-code) section.
 
 ## Improving documentation
 
-- Documentations are placed under [src/site](https://github.com/mybatis/mybatis-3/tree/master/src/site) directory in [the xdoc format](https://maven.apache.org/doxia/references/xdoc-format.html), so it is basically the same as creating a patch to contribute documentation changes. Please see the [Contributing code](CONTRIBUTING.md#contributing-code) section.
+- Documentations are placed under [src/site](https://github.com/mybatis/mybatis-3/tree/master/src/site) directory
+  in [the xdoc format](https://maven.apache.org/doxia/references/xdoc-format.html), so it is basically the same as
+  creating a patch to contribute documentation changes. Please see
+  the [Contributing code](CONTRIBUTING.md#contributing-code) section.
 
 ## Contributing code
 
@@ -23,7 +29,8 @@ Please use [the mailing list](https://groups.google.com/group/mybatis-user) inst
 
 - You are the author of your contributions and will always be.
 - Everything you can find it this project is licensed under the Apache Software License 2.0
-- Every contribution you do must be licensed under the Apache Software License 2.0. Otherwise we will not be able to accept it.
+- Every contribution you do must be licensed under the Apache Software License 2.0. Otherwise we will not be able to
+  accept it.
 - Please make sure that all the new files you create hold the following header:
 
 ```
@@ -56,7 +63,9 @@ Here are the steps of a typical workflow.
 5. Push commits to your fork on GitHub.
 6. Send a [pull request](https://help.github.com/articles/using-pull-requests).
 
-For steps 1 to 3, please read [this GitHub help](https://help.github.com/articles/fork-a-repo) if you are not familiar with these operations.  
-Step 4 and 5 are basic [git](https://git-scm.com/) operations. Please see the [online documentation](https://git-scm.com/documentation) for its usage.
+For steps 1 to 3, please read [this GitHub help](https://help.github.com/articles/fork-a-repo) if you are not familiar
+with these operations.  
+Step 4 and 5 are basic [git](https://git-scm.com/) operations. Please see
+the [online documentation](https://git-scm.com/documentation) for its usage.
 
 For how to write a unit test, please see the [unit test](https://github.com/mybatis/mybatis-3/wiki/Unit-Test) page.

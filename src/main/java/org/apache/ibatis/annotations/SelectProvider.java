@@ -50,29 +50,26 @@ import java.lang.annotation.Target;
 @Repeatable(SelectProvider.List.class)
 public @interface SelectProvider {
 
-  /**
-   * Specify a type that implements an SQL provider method.
-   *
-   * @return a type that implements an SQL provider method
-   *
-   * @since 3.5.2
-   *
-   * @see #type()
-   */
-  Class<?> value() default void.class;
+    /**
+     * Specify a type that implements an SQL provider method.
+     *
+     * @return a type that implements an SQL provider method
+     * @see #type()
+     * @since 3.5.2
+     */
+    Class<?> value() default void.class;
 
-  /**
-   * Specify a type that implements an SQL provider method.
-   * <p>
-   * This attribute is alias of {@link #value()}.
-   *
-   * @return a type that implements an SQL provider method
-   *
-   * @see #value()
-   */
-  Class<?> type() default void.class;
+    /**
+     * Specify a type that implements an SQL provider method.
+     * <p>
+     * This attribute is alias of {@link #value()}.
+     *
+     * @return a type that implements an SQL provider method
+     * @see #value()
+     */
+    Class<?> type() default void.class;
 
-  // @formatter:off
+    // @formatter:off
   /**
    * Specify a method for providing an SQL.
    * <p>
@@ -99,35 +96,32 @@ public @interface SelectProvider {
   // @formatter:on
   String method() default "";
 
-  /**
-   * @return A database id that correspond this provider
-   *
-   * @since 3.5.5
-   */
-  String databaseId() default "";
+    /**
+     * @return A database id that correspond this provider
+     * @since 3.5.5
+     */
+    String databaseId() default "";
 
-  /**
-   * Returns whether this select affects DB data.<br>
-   * e.g. RETURNING of PostgreSQL or OUTPUT of MS SQL Server.
-   *
-   * @return {@code true} if this select affects DB data; {@code false} if otherwise
-   *
-   * @since 3.5.12
-   */
-  boolean affectData() default false;
+    /**
+     * Returns whether this select affects DB data.<br>
+     * e.g. RETURNING of PostgreSQL or OUTPUT of MS SQL Server.
+     *
+     * @return {@code true} if this select affects DB data; {@code false} if otherwise
+     * @since 3.5.12
+     */
+    boolean affectData() default false;
 
-  /**
-   * The container annotation for {@link SelectProvider}.
-   *
-   * @author Kazuki Shimizu
-   *
-   * @since 3.5.5
-   */
-  @Documented
-  @Retention(RetentionPolicy.RUNTIME)
-  @Target(ElementType.METHOD)
-  @interface List {
-    SelectProvider[] value();
-  }
+    /**
+     * The container annotation for {@link SelectProvider}.
+     *
+     * @author Kazuki Shimizu
+     * @since 3.5.5
+     */
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface List {
+        SelectProvider[] value();
+    }
 
 }

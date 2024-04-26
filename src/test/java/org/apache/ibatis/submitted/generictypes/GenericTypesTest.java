@@ -28,25 +28,25 @@ import org.junit.jupiter.api.Test;
 
 class GenericTypesTest {
 
-  private SqlSessionFactory sqlSessionFactory;
+    private SqlSessionFactory sqlSessionFactory;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/Config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeEach
+    void setUp() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/Config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/generictypes/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/generictypes/CreateDB.sql");
-  }
-
-  @Test
-  void testShouldGetAListOfMaps() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Group group = mapper.getGroup();
-      Assertions.assertNotNull(group.getOwner());
+    @Test
+    void testShouldGetAListOfMaps() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Group group = mapper.getGroup();
+            Assertions.assertNotNull(group.getOwner());
+        }
     }
-  }
 
 }

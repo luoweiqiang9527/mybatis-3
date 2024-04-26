@@ -26,55 +26,55 @@ import org.junit.jupiter.api.Test;
 
 class WeakCacheTest {
 
-  @Test
-  void shouldDemonstrateObjectsBeingCollectedAsNeeded() {
-    final int N = 3000000;
-    WeakCache cache = new WeakCache(new PerpetualCache("default"));
-    for (int i = 0; i < N; i++) {
-      cache.putObject(i, i);
-      if (cache.getSize() < i + 1) {
-        // System.out.println("Cache exceeded with " + (i + 1) + " entries.");
-        break;
-      }
-      if ((i + 1) % 100000 == 0) {
-        // Try performing GC.
-        System.gc();
-      }
+    @Test
+    void shouldDemonstrateObjectsBeingCollectedAsNeeded() {
+        final int N = 3000000;
+        WeakCache cache = new WeakCache(new PerpetualCache("default"));
+        for (int i = 0; i < N; i++) {
+            cache.putObject(i, i);
+            if (cache.getSize() < i + 1) {
+                // System.out.println("Cache exceeded with " + (i + 1) + " entries.");
+                break;
+            }
+            if ((i + 1) % 100000 == 0) {
+                // Try performing GC.
+                System.gc();
+            }
+        }
+        assertTrue(cache.getSize() < N);
     }
-    assertTrue(cache.getSize() < N);
-  }
 
-  @Test
-  void shouldDemonstrateCopiesAreEqual() {
-    Cache cache = new WeakCache(new PerpetualCache("default"));
-    cache = new SerializedCache(cache);
-    for (int i = 0; i < 1000; i++) {
-      cache.putObject(i, i);
-      Object value = cache.getObject(i);
-      assertTrue(value == null || value.equals(i));
+    @Test
+    void shouldDemonstrateCopiesAreEqual() {
+        Cache cache = new WeakCache(new PerpetualCache("default"));
+        cache = new SerializedCache(cache);
+        for (int i = 0; i < 1000; i++) {
+            cache.putObject(i, i);
+            Object value = cache.getObject(i);
+            assertTrue(value == null || value.equals(i));
+        }
     }
-  }
 
-  @Test
-  void shouldRemoveItemOnDemand() {
-    WeakCache cache = new WeakCache(new PerpetualCache("default"));
-    cache.putObject(0, 0);
-    assertNotNull(cache.getObject(0));
-    cache.removeObject(0);
-    assertNull(cache.getObject(0));
-  }
-
-  @Test
-  void shouldFlushAllItemsOnDemand() {
-    WeakCache cache = new WeakCache(new PerpetualCache("default"));
-    for (int i = 0; i < 5; i++) {
-      cache.putObject(i, i);
+    @Test
+    void shouldRemoveItemOnDemand() {
+        WeakCache cache = new WeakCache(new PerpetualCache("default"));
+        cache.putObject(0, 0);
+        assertNotNull(cache.getObject(0));
+        cache.removeObject(0);
+        assertNull(cache.getObject(0));
     }
-    assertNotNull(cache.getObject(0));
-    assertNotNull(cache.getObject(4));
-    cache.clear();
-    assertNull(cache.getObject(0));
-    assertNull(cache.getObject(4));
-  }
+
+    @Test
+    void shouldFlushAllItemsOnDemand() {
+        WeakCache cache = new WeakCache(new PerpetualCache("default"));
+        for (int i = 0; i < 5; i++) {
+            cache.putObject(i, i);
+        }
+        assertNotNull(cache.getObject(0));
+        assertNotNull(cache.getObject(4));
+        cache.clear();
+        assertNull(cache.getObject(0));
+        assertNull(cache.getObject(4));
+    }
 
 }

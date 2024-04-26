@@ -35,47 +35,47 @@ import org.junit.jupiter.api.Test;
 @Tag("TestcontainersTests")
 class PostgresSQLTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    Configuration configuration = new Configuration();
-    Environment environment = new Environment("development", new JdbcTransactionFactory(),
-        PgContainer.getUnpooledDataSource());
-    configuration.setEnvironment(environment);
-    configuration.setUseGeneratedKeys(true);
-    configuration.addMapper(Mapper.class);
-    Properties properties = new Properties();
-    properties.setProperty("schema", "mbtest.");
-    configuration.setVariables(properties);
-    sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+    @BeforeAll
+    static void setUp() throws Exception {
+        Configuration configuration = new Configuration();
+        Environment environment = new Environment("development", new JdbcTransactionFactory(),
+            PgContainer.getUnpooledDataSource());
+        configuration.setEnvironment(environment);
+        configuration.setUseGeneratedKeys(true);
+        configuration.addMapper(Mapper.class);
+        Properties properties = new Properties();
+        properties.setProperty("schema", "mbtest.");
+        configuration.setVariables(properties);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/sql/CreateDB.sql");
-  }
-
-  @Test
-  void testFetchFirst() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      {
-        List<User> users = mapper.findAll(0, 2);
-        assertEquals(2, users.size());
-        assertEquals("Jimmy", users.get(0).getName());
-        assertEquals("Iwao", users.get(1).getName());
-      }
-      {
-        List<User> users = mapper.findAll(1, 2);
-        assertEquals(2, users.size());
-        assertEquals("Iwao", users.get(0).getName());
-        assertEquals("Kazuki", users.get(1).getName());
-      }
-      {
-        List<User> users = mapper.findAll(2, 2);
-        assertEquals(1, users.size());
-        assertEquals("Kazuki", users.get(0).getName());
-      }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/sql/CreateDB.sql");
     }
-  }
+
+    @Test
+    void testFetchFirst() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            {
+                List<User> users = mapper.findAll(0, 2);
+                assertEquals(2, users.size());
+                assertEquals("Jimmy", users.get(0).getName());
+                assertEquals("Iwao", users.get(1).getName());
+            }
+            {
+                List<User> users = mapper.findAll(1, 2);
+                assertEquals(2, users.size());
+                assertEquals("Iwao", users.get(0).getName());
+                assertEquals("Kazuki", users.get(1).getName());
+            }
+            {
+                List<User> users = mapper.findAll(2, 2);
+                assertEquals(1, users.size());
+                assertEquals("Kazuki", users.get(0).getName());
+            }
+        }
+    }
 
 }

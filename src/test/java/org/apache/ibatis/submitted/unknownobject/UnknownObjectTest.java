@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 
 class UnknownObjectTest {
 
-  @Test
-  void shouldFailBecauseThereIsAPropertyWithoutTypeHandler() throws Exception {
-    // create a SqlSessionFactory
-    try (
-        Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/unknownobject/mybatis-config.xml")) {
-      Assertions.assertThrows(PersistenceException.class, () -> new SqlSessionFactoryBuilder().build(reader));
+    @Test
+    void shouldFailBecauseThereIsAPropertyWithoutTypeHandler() throws Exception {
+        // create a SqlSessionFactory
+        try (
+            Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/unknownobject/mybatis-config.xml")) {
+            Assertions.assertThrows(PersistenceException.class, () -> new SqlSessionFactoryBuilder().build(reader));
+        }
     }
-  }
 
 }

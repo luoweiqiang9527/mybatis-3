@@ -32,39 +32,39 @@ import org.apache.ibatis.logging.LogFactory;
 @Deprecated
 public class ExternalResources {
 
-  private static final Log log = LogFactory.getLog(ExternalResources.class);
+    private static final Log log = LogFactory.getLog(ExternalResources.class);
 
-  private ExternalResources() {
-    // do nothing
-  }
-
-  public static void copyExternalResource(File sourceFile, File destFile) throws IOException {
-    if (!destFile.exists()) {
-      destFile.createNewFile();
+    private ExternalResources() {
+        // do nothing
     }
 
-    try (FileInputStream source = new FileInputStream(sourceFile);
-        FileOutputStream destination = new FileOutputStream(destFile)) {
-      destination.getChannel().transferFrom(source.getChannel(), 0, source.getChannel().size());
+    public static void copyExternalResource(File sourceFile, File destFile) throws IOException {
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+
+        try (FileInputStream source = new FileInputStream(sourceFile);
+             FileOutputStream destination = new FileOutputStream(destFile)) {
+            destination.getChannel().transferFrom(source.getChannel(), 0, source.getChannel().size());
+        }
+
     }
 
-  }
+    public static String getConfiguredTemplate(String templatePath, String templateProperty)
+        throws FileNotFoundException {
+        String templateName = "";
+        Properties migrationProperties = new Properties();
 
-  public static String getConfiguredTemplate(String templatePath, String templateProperty)
-      throws FileNotFoundException {
-    String templateName = "";
-    Properties migrationProperties = new Properties();
+        try (InputStream is = new FileInputStream(templatePath)) {
+            migrationProperties.load(is);
+            templateName = migrationProperties.getProperty(templateProperty);
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("", e);
+        }
 
-    try (InputStream is = new FileInputStream(templatePath)) {
-      migrationProperties.load(is);
-      templateName = migrationProperties.getProperty(templateProperty);
-    } catch (FileNotFoundException e) {
-      throw e;
-    } catch (Exception e) {
-      log.error("", e);
+        return templateName;
     }
-
-    return templateName;
-  }
 
 }

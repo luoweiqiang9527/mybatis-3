@@ -24,15 +24,15 @@ import org.junit.jupiter.api.Test;
 
 class XNodeTest {
 
-  @Test
-  void formatXNodeToString() {
-    XPathParser parser = new XPathParser(
-        "<users><user><id>100</id><name>Tom</name><age>30</age><cars><car index=\"1\">BMW</car><car index=\"2\">Audi</car><car index=\"3\">Benz</car></cars></user></users>");
-    String usersNodeToString = parser.evalNode("/users").toString();
-    String userNodeToString = parser.evalNode("/users/user").toString();
-    String carsNodeToString = parser.evalNode("/users/user/cars").toString();
+    @Test
+    void formatXNodeToString() {
+        XPathParser parser = new XPathParser(
+            "<users><user><id>100</id><name>Tom</name><age>30</age><cars><car index=\"1\">BMW</car><car index=\"2\">Audi</car><car index=\"3\">Benz</car></cars></user></users>");
+        String usersNodeToString = parser.evalNode("/users").toString();
+        String userNodeToString = parser.evalNode("/users/user").toString();
+        String carsNodeToString = parser.evalNode("/users/user/cars").toString();
 
-    // @formatter:off
+        // @formatter:off
     String usersNodeToStringExpect =
       "<users>\n"
       + "  <user>\n"
@@ -60,7 +60,7 @@ class XNodeTest {
       + "</users>\n";
     // @formatter:on
 
-    // @formatter:off
+        // @formatter:off
     String userNodeToStringExpect =
       "<user>\n"
       + "  <id>\n"
@@ -86,7 +86,7 @@ class XNodeTest {
       + "</user>\n";
     // @formatter:on
 
-    // @formatter:off
+        // @formatter:off
     String carsNodeToStringExpect =
       "<cars>\n"
       + "  <car index=\"1\">\n"
@@ -101,14 +101,14 @@ class XNodeTest {
       + "</cars>\n";
     // @formatter:on
 
-    assertEquals(usersNodeToStringExpect, usersNodeToString);
-    assertEquals(userNodeToStringExpect, userNodeToString);
-    assertEquals(carsNodeToStringExpect, carsNodeToString);
-  }
+        assertEquals(usersNodeToStringExpect, usersNodeToString);
+        assertEquals(userNodeToStringExpect, userNodeToString);
+        assertEquals(carsNodeToStringExpect, carsNodeToString);
+    }
 
-  @Test
-  void xNodeToString() {
-    // @formatter:off
+    @Test
+    void xNodeToString() {
+        // @formatter:off
     String xml = "<mapper>\n" +
         "  <select id='select' resultType='map'>\n" +
         "    select\n" +
@@ -157,21 +157,21 @@ class XNodeTest {
         "</select>\n";
     // @formatter:on
 
-    XPathParser parser = new XPathParser(xml);
-    XNode selectNode = parser.evalNode("/mapper/select");
-    assertEquals(expected, selectNode.toString());
-  }
+        XPathParser parser = new XPathParser(xml);
+        XNode selectNode = parser.evalNode("/mapper/select");
+        assertEquals(expected, selectNode.toString());
+    }
 
-  @Test
-  void testXnodeToStringVariables() throws Exception {
-    String src = "<root attr='${x}'>y = ${y}<sub attr='${y}'>x = ${x}</sub></root>";
-    String expected = "<root attr=\"foo\">\n  y = bar\n  <sub attr=\"bar\">\n    x = foo\n  </sub>\n</root>\n";
-    Properties vars = new Properties();
-    vars.put("x", "foo");
-    vars.put("y", "bar");
-    XPathParser parser = new XPathParser(src, false, vars);
-    XNode selectNode = parser.evalNode("/root");
-    assertEquals(expected, selectNode.toString());
-  }
+    @Test
+    void testXnodeToStringVariables() throws Exception {
+        String src = "<root attr='${x}'>y = ${y}<sub attr='${y}'>x = ${x}</sub></root>";
+        String expected = "<root attr=\"foo\">\n  y = bar\n  <sub attr=\"bar\">\n    x = foo\n  </sub>\n</root>\n";
+        Properties vars = new Properties();
+        vars.put("x", "foo");
+        vars.put("y", "bar");
+        XPathParser parser = new XPathParser(src, false, vars);
+        XNode selectNode = parser.evalNode("/root");
+        assertEquals(expected, selectNode.toString());
+    }
 
 }

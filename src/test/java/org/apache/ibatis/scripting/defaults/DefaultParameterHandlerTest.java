@@ -62,225 +62,225 @@ import org.junit.jupiter.api.Test;
  */
 class DefaultParameterHandlerTest {
 
-  @Test
-  void setParametersThrowsProperException() throws SQLException {
-    final MappedStatement mappedStatement = getMappedStatement();
-    final Object parameterObject = null;
-    final BoundSql boundSql = mock(BoundSql.class);
+    @Test
+    void setParametersThrowsProperException() throws SQLException {
+        final MappedStatement mappedStatement = getMappedStatement();
+        final Object parameterObject = null;
+        final BoundSql boundSql = mock(BoundSql.class);
 
-    TypeHandler<Object> typeHandler = mock(TypeHandler.class);
-    doThrow(new SQLException("foo")).when(typeHandler).setParameter(any(PreparedStatement.class), anyInt(), any(),
-        any(JdbcType.class));
-    ParameterMapping parameterMapping = new ParameterMapping.Builder(mappedStatement.getConfiguration(), "prop",
-        typeHandler).build();
-    List<ParameterMapping> parameterMappings = Collections.singletonList(parameterMapping);
-    when(boundSql.getParameterMappings()).thenReturn(parameterMappings);
+        TypeHandler<Object> typeHandler = mock(TypeHandler.class);
+        doThrow(new SQLException("foo")).when(typeHandler).setParameter(any(PreparedStatement.class), anyInt(), any(),
+            any(JdbcType.class));
+        ParameterMapping parameterMapping = new ParameterMapping.Builder(mappedStatement.getConfiguration(), "prop",
+            typeHandler).build();
+        List<ParameterMapping> parameterMappings = Collections.singletonList(parameterMapping);
+        when(boundSql.getParameterMappings()).thenReturn(parameterMappings);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
-    try {
-      defaultParameterHandler.setParameters(ps);
-      Assertions.fail("Should have thrown TypeException");
-    } catch (Exception e) {
-      Assertions.assertTrue(e instanceof TypeException, "expected TypeException");
-      Assertions.assertTrue(e.getMessage().contains("mapping: ParameterMapping"));
+        PreparedStatement ps = mock(PreparedStatement.class);
+        try {
+            defaultParameterHandler.setParameters(ps);
+            Assertions.fail("Should have thrown TypeException");
+        } catch (Exception e) {
+            Assertions.assertTrue(e instanceof TypeException, "expected TypeException");
+            Assertions.assertTrue(e.getMessage().contains("mapping: ParameterMapping"));
+        }
+
     }
 
-  }
+    MappedStatement getMappedStatement() {
+        final Configuration config = new Configuration();
+        final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+        return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
+            SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
+            private static final long serialVersionUID = 1L;
 
-  MappedStatement getMappedStatement() {
-    final Configuration config = new Configuration();
-    final TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
-    return new MappedStatement.Builder(config, "testSelect", new StaticSqlSource(config, "some select statement"),
-        SqlCommandType.SELECT).resultMaps(new ArrayList<ResultMap>() {
-          private static final long serialVersionUID = 1L;
+            {
+                add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
+                    private static final long serialVersionUID = 1L;
 
-          {
-            add(new ResultMap.Builder(config, "testMap", HashMap.class, new ArrayList<ResultMapping>() {
-              private static final long serialVersionUID = 1L;
-
-              {
-                add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
-                    .build());
-              }
-            }).build());
-          }
+                    {
+                        add(new ResultMapping.Builder(config, "cOlUmN1", "CoLuMn1", registry.getTypeHandler(Integer.class))
+                            .build());
+                    }
+                }).build());
+            }
         }).build();
-  }
+    }
 
-  @Test
-  void testParameterObjectGetPropertyValueWithAdditionalParameter() throws SQLException {
-    Configuration config = new Configuration();
-    TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    @Test
+    void testParameterObjectGetPropertyValueWithAdditionalParameter() throws SQLException {
+        Configuration config = new Configuration();
+        TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
+            new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = 1;
+        Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-      }
-    }, parameterObject) {
-      {
-        setAdditionalParameter("id", 2);
-      }
-    };
+        BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+            {
+                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+            }
+        }, parameterObject) {
+            {
+                setAdditionalParameter("id", 2);
+            }
+        };
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
+        PreparedStatement ps = mock(PreparedStatement.class);
 
-    defaultParameterHandler.setParameters(ps);
+        defaultParameterHandler.setParameters(ps);
 
-    verify(ps, times(1)).setInt(1, 2);
-  }
+        verify(ps, times(1)).setInt(1, 2);
+    }
 
-  @Test
-  void testParameterObjectGetPropertyValueWithNull() throws SQLException {
-    Configuration config = new Configuration();
-    TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    @Test
+    void testParameterObjectGetPropertyValueWithNull() throws SQLException {
+        Configuration config = new Configuration();
+        TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
+            new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = null;
+        Object parameterObject = null;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-      }
-    }, parameterObject);
+        BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+            {
+                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+            }
+        }, parameterObject);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
+        PreparedStatement ps = mock(PreparedStatement.class);
 
-    defaultParameterHandler.setParameters(ps);
+        defaultParameterHandler.setParameters(ps);
 
-    verify(ps, times(1)).setNull(1, config.getJdbcTypeForNull().TYPE_CODE);
-  }
+        verify(ps, times(1)).setNull(1, config.getJdbcTypeForNull().TYPE_CODE);
+    }
 
-  @Test
-  void testParameterObjectGetPropertyValueWithTypeHandler() throws SQLException {
-    Configuration config = new Configuration();
-    TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    @Test
+    void testParameterObjectGetPropertyValueWithTypeHandler() throws SQLException {
+        Configuration config = new Configuration();
+        TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
+            new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
-    Object parameterObject = 1;
+        Object parameterObject = 1;
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-      }
-    }, parameterObject);
+        BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+            {
+                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+            }
+        }, parameterObject);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
+        PreparedStatement ps = mock(PreparedStatement.class);
 
-    defaultParameterHandler.setParameters(ps);
+        defaultParameterHandler.setParameters(ps);
 
-    verify(ps, times(1)).setInt(1, (Integer) parameterObject);
-  }
+        verify(ps, times(1)).setInt(1, (Integer) parameterObject);
+    }
 
-  @Test
-  void testParameterObjectGetPropertyValueWithMetaObject() throws SQLException {
-    Configuration config = new Configuration();
-    TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
+    @Test
+    void testParameterObjectGetPropertyValueWithMetaObject() throws SQLException {
+        Configuration config = new Configuration();
+        TypeHandlerRegistry registry = config.getTypeHandlerRegistry();
 
-    MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
-        new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
+        MappedStatement mappedStatement = new MappedStatement.Builder(config, "testSelect",
+            new StaticSqlSource(config, "some select statement"), SqlCommandType.SELECT).build();
 
-    Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
+        Author parameterObject = new Author(-1, "cbegin", "******", "cbegin@nowhere.com", "N/A", Section.NEWS);
 
-    BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
-      {
-        add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
-        add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
-        add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-      }
-    }, parameterObject);
+        BoundSql boundSql = new BoundSql(config, "some select statement", new ArrayList<ParameterMapping>() {
+            {
+                add(new ParameterMapping.Builder(config, "id", registry.getTypeHandler(int.class)).build());
+                add(new ParameterMapping.Builder(config, "username", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder(config, "password", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder(config, "email", registry.getTypeHandler(String.class)).build());
+                add(new ParameterMapping.Builder(config, "bio", registry.getTypeHandler(String.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+                add(new ParameterMapping.Builder(config, "favouriteSection", registry.getTypeHandler(Section.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+            }
+        }, parameterObject);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
+        PreparedStatement ps = mock(PreparedStatement.class);
 
-    defaultParameterHandler.setParameters(ps);
+        defaultParameterHandler.setParameters(ps);
 
-    verify(ps, times(1)).setInt(1, parameterObject.getId());
-    verify(ps, times(1)).setString(2, parameterObject.getUsername());
-    verify(ps, times(1)).setString(3, parameterObject.getPassword());
-    verify(ps, times(1)).setString(4, parameterObject.getEmail());
-    verify(ps, times(1)).setString(5, parameterObject.getBio());
-    verify(ps, times(1)).setObject(6, parameterObject.getFavouriteSection().name(), JdbcType.VARCHAR.TYPE_CODE);
-  }
+        verify(ps, times(1)).setInt(1, parameterObject.getId());
+        verify(ps, times(1)).setString(2, parameterObject.getUsername());
+        verify(ps, times(1)).setString(3, parameterObject.getPassword());
+        verify(ps, times(1)).setString(4, parameterObject.getEmail());
+        verify(ps, times(1)).setString(5, parameterObject.getBio());
+        verify(ps, times(1)).setObject(6, parameterObject.getFavouriteSection().name(), JdbcType.VARCHAR.TYPE_CODE);
+    }
 
-  @Test
-  void testParameterObjectGetPropertyValueWithMetaObjectAndCreateOnce() {
-    Author parameterObject = mock(Author.class);
+    @Test
+    void testParameterObjectGetPropertyValueWithMetaObjectAndCreateOnce() {
+        Author parameterObject = mock(Author.class);
 
-    Configuration mockConfig = mock(Configuration.class);
+        Configuration mockConfig = mock(Configuration.class);
 
-    final ObjectFactory objectFactory = new DefaultObjectFactory();
-    final ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
-    final ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
+        final ObjectFactory objectFactory = new DefaultObjectFactory();
+        final ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
+        final ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
 
-    when(mockConfig.getTypeHandlerRegistry()).thenReturn(new TypeHandlerRegistry(mockConfig));
-    when(mockConfig.getDefaultScriptingLanguageInstance()).thenReturn(new XMLLanguageDriver());
-    when(mockConfig.newMetaObject(parameterObject))
-        .thenReturn(MetaObject.forObject(parameterObject, objectFactory, objectWrapperFactory, reflectorFactory));
+        when(mockConfig.getTypeHandlerRegistry()).thenReturn(new TypeHandlerRegistry(mockConfig));
+        when(mockConfig.getDefaultScriptingLanguageInstance()).thenReturn(new XMLLanguageDriver());
+        when(mockConfig.newMetaObject(parameterObject))
+            .thenReturn(MetaObject.forObject(parameterObject, objectFactory, objectWrapperFactory, reflectorFactory));
 
-    TypeHandlerRegistry registry = mockConfig.getTypeHandlerRegistry();
+        TypeHandlerRegistry registry = mockConfig.getTypeHandlerRegistry();
 
-    MappedStatement mappedStatement = new MappedStatement.Builder(mockConfig, "testSelect",
-        new StaticSqlSource(mockConfig, "some select statement"), SqlCommandType.SELECT).build();
+        MappedStatement mappedStatement = new MappedStatement.Builder(mockConfig, "testSelect",
+            new StaticSqlSource(mockConfig, "some select statement"), SqlCommandType.SELECT).build();
 
-    BoundSql boundSql = new BoundSql(mockConfig, "some select statement", new ArrayList<ParameterMapping>() {
-      {
-        add(new ParameterMapping.Builder(mockConfig, "id", registry.getTypeHandler(int.class))
-            .jdbcType(JdbcType.INTEGER).build());
-        add(new ParameterMapping.Builder(mockConfig, "username", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "password", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "email", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "bio", registry.getTypeHandler(String.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-        add(new ParameterMapping.Builder(mockConfig, "favouriteSection", registry.getTypeHandler(Section.class))
-            .jdbcType(JdbcType.VARCHAR).build());
-      }
-    }, parameterObject);
+        BoundSql boundSql = new BoundSql(mockConfig, "some select statement", new ArrayList<ParameterMapping>() {
+            {
+                add(new ParameterMapping.Builder(mockConfig, "id", registry.getTypeHandler(int.class))
+                    .jdbcType(JdbcType.INTEGER).build());
+                add(new ParameterMapping.Builder(mockConfig, "username", registry.getTypeHandler(String.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+                add(new ParameterMapping.Builder(mockConfig, "password", registry.getTypeHandler(String.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+                add(new ParameterMapping.Builder(mockConfig, "email", registry.getTypeHandler(String.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+                add(new ParameterMapping.Builder(mockConfig, "bio", registry.getTypeHandler(String.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+                add(new ParameterMapping.Builder(mockConfig, "favouriteSection", registry.getTypeHandler(Section.class))
+                    .jdbcType(JdbcType.VARCHAR).build());
+            }
+        }, parameterObject);
 
-    DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
-        boundSql);
+        DefaultParameterHandler defaultParameterHandler = new DefaultParameterHandler(mappedStatement, parameterObject,
+            boundSql);
 
-    PreparedStatement ps = mock(PreparedStatement.class);
+        PreparedStatement ps = mock(PreparedStatement.class);
 
-    defaultParameterHandler.setParameters(ps);
+        defaultParameterHandler.setParameters(ps);
 
-    verify(parameterObject, times(1)).getId();
-    verify(parameterObject, times(1)).getUsername();
-    verify(parameterObject, times(1)).getPassword();
-    verify(parameterObject, times(1)).getEmail();
-    verify(parameterObject, times(1)).getBio();
-    verify(parameterObject, times(1)).getFavouriteSection();
+        verify(parameterObject, times(1)).getId();
+        verify(parameterObject, times(1)).getUsername();
+        verify(parameterObject, times(1)).getPassword();
+        verify(parameterObject, times(1)).getEmail();
+        verify(parameterObject, times(1)).getBio();
+        verify(parameterObject, times(1)).getFavouriteSection();
 
-    verify(mockConfig, times(1)).newMetaObject(parameterObject);
-  }
+        verify(mockConfig, times(1)).newMetaObject(parameterObject);
+    }
 }

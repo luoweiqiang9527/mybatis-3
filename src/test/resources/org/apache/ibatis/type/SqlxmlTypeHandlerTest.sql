@@ -18,9 +18,10 @@ DROP SCHEMA IF EXISTS mbtest CASCADE;
 
 CREATE SCHEMA mbtest;
 
-CREATE TABLE mbtest.test_sqlxml (
-  id serial PRIMARY KEY,
-  content XML
+CREATE TABLE mbtest.test_sqlxml
+(
+    id serial PRIMARY KEY,
+    content XML
 );
 
 INSERT INTO mbtest.test_sqlxml (id, content)

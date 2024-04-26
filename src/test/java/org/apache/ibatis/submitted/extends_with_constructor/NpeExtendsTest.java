@@ -40,70 +40,70 @@ import org.junit.jupiter.api.Test;
  */
 class NpeExtendsTest {
 
-  @BeforeAll
-  static void initDatabase() throws Exception {
-    SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
+    @BeforeAll
+    static void initDatabase() throws Exception {
+        SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/extends_with_constructor/CreateDB.sql");
-  }
-
-  @Test
-  void testNoConstructorConfiguration() {
-    Configuration configuration = new Configuration();
-    configuration.addMapper(StudentMapper.class);
-    configuration.addMapper(TeacherMapper.class);
-    configuration.getMappedStatementNames();
-  }
-
-  @Test
-  void testWithConstructorConfiguration() {
-    Configuration configuration = new Configuration();
-    configuration.addMapper(StudentConstructorMapper.class);
-    configuration.addMapper(TeacherMapper.class);
-    configuration.getMappedStatementNames();
-  }
-
-  private static SqlSessionFactory getSqlSessionFactoryWithConstructor() {
-    UnpooledDataSourceFactory unpooledDataSourceFactory = new UnpooledDataSourceFactory();
-    Properties properties = new Properties();
-    properties.setProperty("driver", "org.hsqldb.jdbcDriver");
-    properties.setProperty("url", "jdbc:hsqldb:mem:extends_with_constructor");
-    properties.setProperty("username", "sa");
-    unpooledDataSourceFactory.setProperties(properties);
-    Environment environment = new Environment("extends_with_constructor", new JdbcTransactionFactory(),
-        unpooledDataSourceFactory.getDataSource());
-
-    Configuration configuration = new Configuration();
-    configuration.setEnvironment(environment);
-    configuration.addMapper(StudentConstructorMapper.class);
-    configuration.addMapper(TeacherMapper.class);
-    configuration.getMappedStatementNames();
-    configuration.setAutoMappingBehavior(AutoMappingBehavior.NONE);
-
-    return new DefaultSqlSessionFactory(configuration);
-  }
-
-  @Test
-  void testSelectWithTeacher() {
-    SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      StudentConstructorMapper studentConstructorMapper = sqlSession.getMapper(StudentConstructorMapper.class);
-      StudentConstructor testStudent = studentConstructorMapper.selectWithTeacherById(1);
-      assertEquals(1, testStudent.getConstructors().size());
-      assertTrue(testStudent.getConstructors().contains(StudentConstructor.Constructor.ID_NAME));
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/extends_with_constructor/CreateDB.sql");
     }
-  }
 
-  @Test
-  void testSelectNoName() {
-    SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      StudentConstructorMapper studentConstructorMapper = sqlSession.getMapper(StudentConstructorMapper.class);
-      StudentConstructor testStudent = studentConstructorMapper.selectNoNameById(1);
-      assertEquals(1, testStudent.getConstructors().size());
-      assertTrue(testStudent.getConstructors().contains(StudentConstructor.Constructor.ID));
-      assertNull(testStudent.getName());
+    @Test
+    void testNoConstructorConfiguration() {
+        Configuration configuration = new Configuration();
+        configuration.addMapper(StudentMapper.class);
+        configuration.addMapper(TeacherMapper.class);
+        configuration.getMappedStatementNames();
     }
-  }
+
+    @Test
+    void testWithConstructorConfiguration() {
+        Configuration configuration = new Configuration();
+        configuration.addMapper(StudentConstructorMapper.class);
+        configuration.addMapper(TeacherMapper.class);
+        configuration.getMappedStatementNames();
+    }
+
+    private static SqlSessionFactory getSqlSessionFactoryWithConstructor() {
+        UnpooledDataSourceFactory unpooledDataSourceFactory = new UnpooledDataSourceFactory();
+        Properties properties = new Properties();
+        properties.setProperty("driver", "org.hsqldb.jdbcDriver");
+        properties.setProperty("url", "jdbc:hsqldb:mem:extends_with_constructor");
+        properties.setProperty("username", "sa");
+        unpooledDataSourceFactory.setProperties(properties);
+        Environment environment = new Environment("extends_with_constructor", new JdbcTransactionFactory(),
+            unpooledDataSourceFactory.getDataSource());
+
+        Configuration configuration = new Configuration();
+        configuration.setEnvironment(environment);
+        configuration.addMapper(StudentConstructorMapper.class);
+        configuration.addMapper(TeacherMapper.class);
+        configuration.getMappedStatementNames();
+        configuration.setAutoMappingBehavior(AutoMappingBehavior.NONE);
+
+        return new DefaultSqlSessionFactory(configuration);
+    }
+
+    @Test
+    void testSelectWithTeacher() {
+        SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            StudentConstructorMapper studentConstructorMapper = sqlSession.getMapper(StudentConstructorMapper.class);
+            StudentConstructor testStudent = studentConstructorMapper.selectWithTeacherById(1);
+            assertEquals(1, testStudent.getConstructors().size());
+            assertTrue(testStudent.getConstructors().contains(StudentConstructor.Constructor.ID_NAME));
+        }
+    }
+
+    @Test
+    void testSelectNoName() {
+        SqlSessionFactory sqlSessionFactory = getSqlSessionFactoryWithConstructor();
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            StudentConstructorMapper studentConstructorMapper = sqlSession.getMapper(StudentConstructorMapper.class);
+            StudentConstructor testStudent = studentConstructorMapper.selectNoNameById(1);
+            assertEquals(1, testStudent.getConstructors().size());
+            assertTrue(testStudent.getConstructors().contains(StudentConstructor.Constructor.ID));
+            assertNull(testStudent.getName());
+        }
+    }
 }

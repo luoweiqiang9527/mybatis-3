@@ -3,7 +3,8 @@ author: Clinton Begin
 
 ## Logging
 
-MyBatis provides logging information through the use of an internal log factory. The internal log factory will delegate logging information to one of the following log implementations:
+MyBatis provides logging information through the use of an internal log factory. The internal log factory will delegate
+logging information to one of the following log implementations:
 
 - SLF4J
 - Apache Commons Logging
@@ -11,9 +12,18 @@ MyBatis provides logging information through the use of an internal log factory.
 - Log4j (deprecated since 3.5.9)
 - JDK logging
 
-The logging solution chosen is based on runtime introspection by the internal MyBatis log factory. The MyBatis log factory will use the first logging implementation it finds (implementations are searched in the above order). If MyBatis finds none of the above implementations, then logging will be disabled.
+The logging solution chosen is based on runtime introspection by the internal MyBatis log factory. The MyBatis log
+factory will use the first logging implementation it finds (implementations are searched in the above order). If MyBatis
+finds none of the above implementations, then logging will be disabled.
 
-Many environments ship Commons Logging as a part of the application server classpath (good examples include Tomcat and WebSphere). It is important to know that in such environments, MyBatis will use Commons Logging as the logging implementation. In an environment like WebSphere this will mean that your Log4J configuration will be ignored because WebSphere supplies its own proprietary implementation of Commons Logging. This can be very frustrating because it will appear that MyBatis is ignoring your Log4J configuration (in fact, MyBatis is ignoring your Log4J configuration because MyBatis will use Commons Logging in such environments). If your application is running in an environment where Commons Logging is included in the classpath but you would rather use one of the other logging implementations you can select a different logging implementation by adding a setting in mybatis-config.xml file as follows:
+Many environments ship Commons Logging as a part of the application server classpath (good examples include Tomcat and
+WebSphere). It is important to know that in such environments, MyBatis will use Commons Logging as the logging
+implementation. In an environment like WebSphere this will mean that your Log4J configuration will be ignored because
+WebSphere supplies its own proprietary implementation of Commons Logging. This can be very frustrating because it will
+appear that MyBatis is ignoring your Log4J configuration (in fact, MyBatis is ignoring your Log4J configuration because
+MyBatis will use Commons Logging in such environments). If your application is running in an environment where Commons
+Logging is included in the classpath but you would rather use one of the other logging implementations you can select a
+different logging implementation by adding a setting in mybatis-config.xml file as follows:
 
 ```xml
 <configuration>
@@ -25,7 +35,8 @@ Many environments ship Commons Logging as a part of the application server class
 </configuration>
 ```
 
-Valid values are SLF4J, LOG4J, LOG4J2, JDK_LOGGING, COMMONS_LOGGING, STDOUT_LOGGING, NO_LOGGING or a full qualified class name that implements `org.apache.ibatis.logging.Log` and gets an string as a constructor parameter.
+Valid values are SLF4J, LOG4J, LOG4J2, JDK_LOGGING, COMMONS_LOGGING, STDOUT_LOGGING, NO_LOGGING or a full qualified
+class name that implements `org.apache.ibatis.logging.Log` and gets an string as a constructor parameter.
 
 You can also select the implementation by calling one of the following methods:
 
@@ -38,9 +49,14 @@ org.apache.ibatis.logging.LogFactory.useCommonsLogging();
 org.apache.ibatis.logging.LogFactory.useStdOutLogging();
 ```
 
-If you choose to call one of these methods, you should do so before calling any other MyBatis method. Also, these methods will only switch to the requested log implementation if that implementation is available on the runtime classpath. For example, if you try to select Log4J2 logging and Log4J2 is not available at runtime, then MyBatis will ignore the request to use Log4J2 and will use it's normal algorithm for discovering logging implementations.
+If you choose to call one of these methods, you should do so before calling any other MyBatis method. Also, these
+methods will only switch to the requested log implementation if that implementation is available on the runtime
+classpath. For example, if you try to select Log4J2 logging and Log4J2 is not available at runtime, then MyBatis will
+ignore the request to use Log4J2 and will use it's normal algorithm for discovering logging implementations.
 
-The specifics of SLF4J, Apache Commons Logging, Apache Log4J and the JDK Logging API are beyond the scope of this document. However the example configuration below should get you started. If you would like to know more about these frameworks, you can get more information from the following locations:
+The specifics of SLF4J, Apache Commons Logging, Apache Log4J and the JDK Logging API are beyond the scope of this
+document. However the example configuration below should get you started. If you would like to know more about these
+frameworks, you can get more information from the following locations:
 
 - [SLF4J](https://www.slf4j.org/)
 - [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/)
@@ -49,15 +65,22 @@ The specifics of SLF4J, Apache Commons Logging, Apache Log4J and the JDK Logging
 
 ### Logging Configuration
 
-To see MyBatis logging statements you may enable logging on a package, a mapper fully qualified class name, a namespace o a fully qualified statement name.
+To see MyBatis logging statements you may enable logging on a package, a mapper fully qualified class name, a namespace
+o a fully qualified statement name.
 
-Again, how you do this is dependent on the logging implementation in use. We'll show how to do it with SLF4J(Logback). Configuring the logging services is simply a matter of including one or more extra configuration files (e.g. `logback.xml`) and sometimes a new JAR file. The following example configuration will configure full logging services using SLF4J(Logback) as a provider. There are 2 steps.
+Again, how you do this is dependent on the logging implementation in use. We'll show how to do it with SLF4J(Logback).
+Configuring the logging services is simply a matter of including one or more extra configuration files (
+e.g. `logback.xml`) and sometimes a new JAR file. The following example configuration will configure full logging
+services using SLF4J(Logback) as a provider. There are 2 steps.
 
 #### Step 1: Add the SLF4J + Logback JAR files
 
-Because we are using SLF4J(Logback), we will need to ensure its JAR file is available to our application. To use SLF4J(Logback), you need to add the JAR file to your application classpath.
+Because we are using SLF4J(Logback), we will need to ensure its JAR file is available to our application. To use SLF4J(
+Logback), you need to add the JAR file to your application classpath.
 
-For web or enterprise applications you can add the `logback-classic.jar` ,`logback-core.jar` and `slf4j-api.jar` to your `WEB-INF/lib` directory, or for a standalone application you can simply add it to the JVM `-classpath` startup parameter.
+For web or enterprise applications you can add the `logback-classic.jar` ,`logback-core.jar` and `slf4j-api.jar` to
+your `WEB-INF/lib` directory, or for a standalone application you can simply add it to the JVM `-classpath` startup
+parameter.
 
 If you use the maven, you can download jar files by adding following settings on your `pom.xml`.
 
@@ -104,9 +127,11 @@ Create a file called `logback.xml` as shown below and place it in your classpath
 </configuration>
 ```
 
-The above file will cause SLF4J(Logback) to report detailed logging for `org.mybatis.example.BlogMapper` and just errors for the rest of the classes of your application.
+The above file will cause SLF4J(Logback) to report detailed logging for `org.mybatis.example.BlogMapper` and just errors
+for the rest of the classes of your application.
 
-If you want to tune the logging at a finer level you can turn logging on for specific statements instead of the whole mapper file. The following line will enable logging just for the `selectBlog` statement:
+If you want to tune the logging at a finer level you can turn logging on for specific statements instead of the whole
+mapper file. The following line will enable logging just for the `selectBlog` statement:
 
 ```xml
 <logger name="org.mybatis.example.BlogMapper.selectBlog">
@@ -114,7 +139,8 @@ If you want to tune the logging at a finer level you can turn logging on for spe
 </logger>
 ```
 
-By the contrary you may want to enable logging for a group of mappers. In that case you should add as a logger the root package where your mappers reside:
+By the contrary you may want to enable logging for a group of mappers. In that case you should add as a logger the root
+package where your mappers reside:
 
 ```xml
 <logger name="org.mybatis.example">
@@ -122,7 +148,9 @@ By the contrary you may want to enable logging for a group of mappers. In that c
 </logger>
 ```
 
-There are queries that can return huge result sets. In that cases you may want to see the SQL statement but not the results. For that purpose SQL statements are logged at the DEBUG level (FINE in JDK logging) and results at the TRACE level (FINER in JDK logging), so in case you want to see the statement but not the result, set the level to DEBUG.
+There are queries that can return huge result sets. In that cases you may want to see the SQL statement but not the
+results. For that purpose SQL statements are logged at the DEBUG level (FINE in JDK logging) and results at the TRACE
+level (FINER in JDK logging), so in case you want to see the statement but not the result, set the level to DEBUG.
 
 ```xml
 <logger name="org.mybatis.example">
@@ -160,11 +188,15 @@ Or for an specific statement:
 </logger>
 ```
 
-Yes, as you may have noticed, there is no difference in configuring logging for mapper interfaces or for XML mapper files.
+Yes, as you may have noticed, there is no difference in configuring logging for mapper interfaces or for XML mapper
+files.
 
-<span class="label important">NOTE</span> If you are using SLF4J or Log4j 2 MyBatis will call it using the marker `MYBATIS`.
+<span class="label important">NOTE</span> If you are using SLF4J or Log4j 2 MyBatis will call it using the
+marker `MYBATIS`.
 
-The remaining configuration in the `logback.xml` file is used to configure the appenders, which is beyond the scope of this document. However, you can find more information at the [Logback](https://logback.qos.ch/) website. Or, you could simply experiment with it to see what effects the different configuration options have.
+The remaining configuration in the `logback.xml` file is used to configure the appenders, which is beyond the scope of
+this document. However, you can find more information at the [Logback](https://logback.qos.ch/) website. Or, you could
+simply experiment with it to see what effects the different configuration options have.
 
 #### Configuration example for Log4j 2
 

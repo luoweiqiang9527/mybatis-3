@@ -28,44 +28,44 @@ import org.junit.jupiter.api.Test;
 
 class UnpooledDataSourceTest {
 
-  @Test
-  void shouldNotRegisterTheSameDriverMultipleTimes() throws Exception {
-    // https://github.com/mybatis/old-google-code-issues/issues/430
-    UnpooledDataSource dataSource = new UnpooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:multipledrivers",
-        "sa", "");
-    dataSource.getConnection().close();
-    int before = countRegisteredDrivers();
-    dataSource = new UnpooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:multipledrivers", "sa", "");
-    dataSource.getConnection().close();
-    assertEquals(before, countRegisteredDrivers());
-  }
-
-  @Disabled("Requires MySQL server and a driver.")
-  @Test
-  void shouldRegisterDynamicallyLoadedDriver() throws Exception {
-    int before = countRegisteredDrivers();
-    ClassLoader driverClassLoader = new URLClassLoader(
-        new URL[] { new URL("jar:file:/PATH_TO/mysql-connector-java-5.1.25.jar!/") });
-    UnpooledDataSource dataSource = new UnpooledDataSource(driverClassLoader, "com.mysql.jdbc.Driver",
-        "jdbc:mysql://127.0.0.1/test", "root", "");
-    dataSource.getConnection().close();
-    assertEquals(before + 1, countRegisteredDrivers());
-    driverClassLoader = new URLClassLoader(
-        new URL[] { new URL("jar:file:/PATH_TO/mysql-connector-java-5.1.25.jar!/") });
-    dataSource = new UnpooledDataSource(driverClassLoader, "com.mysql.jdbc.Driver", "jdbc:mysql://127.0.0.1/test",
-        "root", "");
-    dataSource.getConnection().close();
-    assertEquals(before + 1, countRegisteredDrivers());
-  }
-
-  int countRegisteredDrivers() {
-    Enumeration<Driver> drivers = DriverManager.getDrivers();
-    int count = 0;
-    while (drivers.hasMoreElements()) {
-      drivers.nextElement();
-      count++;
+    @Test
+    void shouldNotRegisterTheSameDriverMultipleTimes() throws Exception {
+        // https://github.com/mybatis/old-google-code-issues/issues/430
+        UnpooledDataSource dataSource = new UnpooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:multipledrivers",
+            "sa", "");
+        dataSource.getConnection().close();
+        int before = countRegisteredDrivers();
+        dataSource = new UnpooledDataSource("org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:multipledrivers", "sa", "");
+        dataSource.getConnection().close();
+        assertEquals(before, countRegisteredDrivers());
     }
-    return count;
-  }
+
+    @Disabled("Requires MySQL server and a driver.")
+    @Test
+    void shouldRegisterDynamicallyLoadedDriver() throws Exception {
+        int before = countRegisteredDrivers();
+        ClassLoader driverClassLoader = new URLClassLoader(
+            new URL[]{new URL("jar:file:/PATH_TO/mysql-connector-java-5.1.25.jar!/")});
+        UnpooledDataSource dataSource = new UnpooledDataSource(driverClassLoader, "com.mysql.jdbc.Driver",
+            "jdbc:mysql://127.0.0.1/test", "root", "");
+        dataSource.getConnection().close();
+        assertEquals(before + 1, countRegisteredDrivers());
+        driverClassLoader = new URLClassLoader(
+            new URL[]{new URL("jar:file:/PATH_TO/mysql-connector-java-5.1.25.jar!/")});
+        dataSource = new UnpooledDataSource(driverClassLoader, "com.mysql.jdbc.Driver", "jdbc:mysql://127.0.0.1/test",
+            "root", "");
+        dataSource.getConnection().close();
+        assertEquals(before + 1, countRegisteredDrivers());
+    }
+
+    int countRegisteredDrivers() {
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        int count = 0;
+        while (drivers.hasMoreElements()) {
+            drivers.nextElement();
+            count++;
+        }
+        return count;
+    }
 
 }

@@ -20,8 +20,8 @@ package org.apache.ibatis.mapping;
  */
 public enum ResultFlag {
 
-  ID,
+    ID,
 
-  CONSTRUCTOR
+    CONSTRUCTOR
 
 }

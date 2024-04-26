@@ -20,7 +20,7 @@ import org.apache.ibatis.annotations.Select;
 
 public interface Mapper {
 
-  @Select("select name from users where id = #{id}")
-  String selectNameById(Integer id);
+    @Select("select name from users where id = #{id}")
+    String selectNameById(Integer id);
 
 }

@@ -25,12 +25,12 @@ import org.apache.ibatis.annotations.Select;
  * @author lvyang
  */
 public interface RoleDao {
-  @Select("select * from role")
-  // @formatter:off
+    @Select("select * from role")
+    // @formatter:off
   @Results(id = "roleMap1", value = {
       @Result(id = true, column = "role_id", property = "id"),
       @Result(column = "role_name", property = "roleName")
     })
   // @formatter:on
-  List<Role> findAll();
+    List<Role> findAll();
 }

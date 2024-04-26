@@ -30,33 +30,33 @@ import org.junit.jupiter.api.Test;
 
 class ConstructorAutomappingTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/constructor_automapping/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/constructor_automapping/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/constructor_automapping/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/constructor_automapping/CreateDB.sql");
-  }
-
-  @Test
-  void shouldHandleColumnPrefixCorrectly() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      List<Article> articles = mapper.nestedConstructorAutomapping();
-      assertEquals(2, articles.size());
-      Article article1 = articles.get(0);
-      assertEquals("Article1", article1.getTitle());
-      Author author1 = article1.getAuthor();
-      assertEquals(Integer.valueOf(100), author1.getId());
-      assertEquals("Author1", author1.getName());
+    @Test
+    void shouldHandleColumnPrefixCorrectly() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            List<Article> articles = mapper.nestedConstructorAutomapping();
+            assertEquals(2, articles.size());
+            Article article1 = articles.get(0);
+            assertEquals("Article1", article1.getTitle());
+            Author author1 = article1.getAuthor();
+            assertEquals(Integer.valueOf(100), author1.getId());
+            assertEquals("Author1", author1.getName());
+        }
     }
-  }
 
 }

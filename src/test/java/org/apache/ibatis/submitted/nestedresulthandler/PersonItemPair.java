@@ -19,28 +19,28 @@ package org.apache.ibatis.submitted.nestedresulthandler;
  * Created by eyal on 12/9/2015.
  */
 public class PersonItemPair {
-  private Person person;
-  private Item item;
+    private Person person;
+    private Item item;
 
-  @Override
-  public String toString() {
-    return new StringBuilder().append("PersonItemPair(").append(person).append(", ").append(item).append(" )")
-        .toString();
-  }
+    @Override
+    public String toString() {
+        return new StringBuilder().append("PersonItemPair(").append(person).append(", ").append(item).append(" )")
+            .toString();
+    }
 
-  public Person getPerson() {
-    return person;
-  }
+    public Person getPerson() {
+        return person;
+    }
 
-  public void setPerson(Person person) {
-    this.person = person;
-  }
+    public void setPerson(Person person) {
+        this.person = person;
+    }
 
-  public Item getItem() {
-    return item;
-  }
+    public Item getItem() {
+        return item;
+    }
 
-  public void setItem(Item item) {
-    this.item = item;
-  }
+    public void setItem(Item item) {
+        this.item = item;
+    }
 }

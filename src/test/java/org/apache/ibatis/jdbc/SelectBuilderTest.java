@@ -30,56 +30,56 @@ import org.junit.jupiter.api.Test;
 
 class SelectBuilderTest {
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatement() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatement() {
+        // @formatter:off
     String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.ID like #id# AND P.FIRST_NAME like #firstName# AND P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2("a", "b", "c"));
-  }
+        assertEquals(expected, example2("a", "b", "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingFirstParam() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingFirstParam() {
+        // @formatter:off
     String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.FIRST_NAME like #firstName# AND P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, "b", "c"));
-  }
+        assertEquals(expected, example2(null, "b", "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingFirstTwoParams() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingFirstTwoParams() {
+        // @formatter:off
     String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "WHERE (P.LAST_NAME like #lastName#)\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, null, "c"));
-  }
+        assertEquals(expected, example2(null, null, "c"));
+    }
 
-  @Test
-  void shouldProduceExpectedSimpleSelectStatementMissingAllParams() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedSimpleSelectStatementMissingAllParams() {
+        // @formatter:off
     String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME\n"
             + "FROM PERSON P\n"
             + "ORDER BY P.LAST_NAME";
     // @formatter:on
-    assertEquals(expected, example2(null, null, null));
-  }
+        assertEquals(expected, example2(null, null, null));
+    }
 
-  @Test
-  void shouldProduceExpectedComplexSelectStatement() {
-    // @formatter:off
+    @Test
+    void shouldProduceExpectedComplexSelectStatement() {
+        // @formatter:off
     String expected =
         "SELECT P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME, P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON\n"
             + "FROM PERSON P, ACCOUNT A\n"
@@ -92,43 +92,43 @@ class SelectBuilderTest {
             + "OR (P.FIRST_NAME like ?)\n"
             + "ORDER BY P.ID, P.FULL_NAME";
     // @formatter:on
-    assertEquals(expected, example1());
-  }
+        assertEquals(expected, example1());
+    }
 
-  private static String example1() {
-    SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME");
-    SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON");
-    FROM("PERSON P");
-    FROM("ACCOUNT A");
-    INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID");
-    INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID");
-    WHERE("P.ID = A.ID");
-    WHERE("P.FIRST_NAME like ?");
-    OR();
-    WHERE("P.LAST_NAME like ?");
-    GROUP_BY("P.ID");
-    HAVING("P.LAST_NAME like ?");
-    OR();
-    HAVING("P.FIRST_NAME like ?");
-    ORDER_BY("P.ID");
-    ORDER_BY("P.FULL_NAME");
-    return SQL();
-  }
+    private static String example1() {
+        SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FULL_NAME");
+        SELECT("P.LAST_NAME, P.CREATED_ON, P.UPDATED_ON");
+        FROM("PERSON P");
+        FROM("ACCOUNT A");
+        INNER_JOIN("DEPARTMENT D on D.ID = P.DEPARTMENT_ID");
+        INNER_JOIN("COMPANY C on D.COMPANY_ID = C.ID");
+        WHERE("P.ID = A.ID");
+        WHERE("P.FIRST_NAME like ?");
+        OR();
+        WHERE("P.LAST_NAME like ?");
+        GROUP_BY("P.ID");
+        HAVING("P.LAST_NAME like ?");
+        OR();
+        HAVING("P.FIRST_NAME like ?");
+        ORDER_BY("P.ID");
+        ORDER_BY("P.FULL_NAME");
+        return SQL();
+    }
 
-  private static String example2(String id, String firstName, String lastName) {
-    SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME");
-    FROM("PERSON P");
-    if (id != null) {
-      WHERE("P.ID like #id#");
+    private static String example2(String id, String firstName, String lastName) {
+        SELECT("P.ID, P.USERNAME, P.PASSWORD, P.FIRST_NAME, P.LAST_NAME");
+        FROM("PERSON P");
+        if (id != null) {
+            WHERE("P.ID like #id#");
+        }
+        if (firstName != null) {
+            WHERE("P.FIRST_NAME like #firstName#");
+        }
+        if (lastName != null) {
+            WHERE("P.LAST_NAME like #lastName#");
+        }
+        ORDER_BY("P.LAST_NAME");
+        return SQL();
     }
-    if (firstName != null) {
-      WHERE("P.FIRST_NAME like #firstName#");
-    }
-    if (lastName != null) {
-      WHERE("P.LAST_NAME like #lastName#");
-    }
-    ORDER_BY("P.LAST_NAME");
-    return SQL();
-  }
 
 }

@@ -38,90 +38,90 @@ import org.junit.jupiter.api.Test;
 
 class TimezoneEdgeCaseTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
-  private TimeZone timeZone;
+    private static SqlSessionFactory sqlSessionFactory;
+    private TimeZone timeZone;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/timezone_edge_case/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/timezone_edge_case/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/timezone_edge_case/CreateDB.sql");
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/timezone_edge_case/CreateDB.sql");
-  }
 
-  @BeforeEach
-  void saveTimeZone() {
-    timeZone = TimeZone.getDefault();
-  }
+    @BeforeEach
+    void saveTimeZone() {
+        timeZone = TimeZone.getDefault();
+    }
 
-  @AfterEach
-  void restoreTimeZone() {
-    TimeZone.setDefault(timeZone);
-  }
+    @AfterEach
+    void restoreTimeZone() {
+        TimeZone.setDefault(timeZone);
+    }
 
-  @Test
-  void shouldSelectNonExistentLocalTimestampAsIs() {
-    // Newer hsqldb requires we use a bogus timezone as timezone now works
-    TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = mapper.selectById(1);
-      assertEquals(LocalDateTime.of(LocalDate.of(2019, 3, 10), LocalTime.of(2, 30)), record.getTs());
+    @Test
+    void shouldSelectNonExistentLocalTimestampAsIs() {
+        // Newer hsqldb requires we use a bogus timezone as timezone now works
+        TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = mapper.selectById(1);
+            assertEquals(LocalDateTime.of(LocalDate.of(2019, 3, 10), LocalTime.of(2, 30)), record.getTs());
+        }
     }
-  }
 
-  @Test
-  void shouldInsertNonExistentLocalTimestampAsIs() throws Exception {
-    // Newer hsqldb requires we use a bogus timezone as timezone now works
-    TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
-    LocalDateTime localDateTime = LocalDateTime.of(LocalDate.of(2019, 3, 10), LocalTime.of(2, 30));
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = new Record();
-      record.setId(2);
-      record.setTs(localDateTime);
-      mapper.insert(record);
-      sqlSession.commit();
+    @Test
+    void shouldInsertNonExistentLocalTimestampAsIs() throws Exception {
+        // Newer hsqldb requires we use a bogus timezone as timezone now works
+        TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDate.of(2019, 3, 10), LocalTime.of(2, 30));
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = new Record();
+            record.setId(2);
+            record.setTs(localDateTime);
+            mapper.insert(record);
+            sqlSession.commit();
+        }
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(); Connection con = sqlSession.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("select count(*) from records where id = 2 and ts = '2019-03-10 02:30:00'")) {
+            rs.next();
+            assertEquals(1, rs.getInt(1));
+        }
     }
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(); Connection con = sqlSession.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select count(*) from records where id = 2 and ts = '2019-03-10 02:30:00'")) {
-      rs.next();
-      assertEquals(1, rs.getInt(1));
-    }
-  }
 
-  @Test
-  void shouldSelectNonExistentLocalDateAsIs() {
-    // Newer hsqldb requires we use a bogus timezone as timezone now works
-    TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = mapper.selectById(1);
-      assertEquals(LocalDate.of(2011, 12, 30), record.getD());
+    @Test
+    void shouldSelectNonExistentLocalDateAsIs() {
+        // Newer hsqldb requires we use a bogus timezone as timezone now works
+        TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = mapper.selectById(1);
+            assertEquals(LocalDate.of(2011, 12, 30), record.getD());
+        }
     }
-  }
 
-  @Test
-  void shouldInsertNonExistentLocalDateAsIs() throws Exception {
-    // Newer hsqldb requires we use a bogus timezone as timezone now works
-    TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
-    LocalDate localDate = LocalDate.of(2011, 12, 30);
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = new Record();
-      record.setId(3);
-      record.setD(localDate);
-      mapper.insert(record);
-      sqlSession.commit();
+    @Test
+    void shouldInsertNonExistentLocalDateAsIs() throws Exception {
+        // Newer hsqldb requires we use a bogus timezone as timezone now works
+        TimeZone.setDefault(TimeZone.getTimeZone("Bad/Zone"));
+        LocalDate localDate = LocalDate.of(2011, 12, 30);
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = new Record();
+            record.setId(3);
+            record.setD(localDate);
+            mapper.insert(record);
+            sqlSession.commit();
+        }
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(); Connection con = sqlSession.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("select count(*) from records where id = 3 and d = '2011-12-30'")) {
+            rs.next();
+            assertEquals(1, rs.getInt(1));
+        }
     }
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(); Connection con = sqlSession.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select count(*) from records where id = 3 and d = '2011-12-30'")) {
-      rs.next();
-      assertEquals(1, rs.getInt(1));
-    }
-  }
 }

@@ -22,10 +22,10 @@ import org.apache.ibatis.annotations.Select;
 
 public interface AnotherMapper {
 
-  @ResultMap("org.apache.ibatis.submitted.results_id.Mapper.userResult")
-  @Select("select * from users order by uid")
-  List<User> getUsers();
+    @ResultMap("org.apache.ibatis.submitted.results_id.Mapper.userResult")
+    @Select("select * from users order by uid")
+    List<User> getUsers();
 
-  User getUser(Integer id);
+    User getUser(Integer id);
 
 }

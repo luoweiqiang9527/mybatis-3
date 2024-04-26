@@ -18,12 +18,12 @@ package org.apache.ibatis.domain.blog;
 import java.io.Serializable;
 
 public enum Section implements Serializable {
-  NEWS,
+    NEWS,
 
-  VIDEOS,
+    VIDEOS,
 
-  IMAGES,
+    IMAGES,
 
-  PODCASTS
+    PODCASTS
 
 }

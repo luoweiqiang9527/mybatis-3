@@ -27,23 +27,23 @@ import org.junit.jupiter.api.Test;
 @Tag("TestcontainersTests")
 class NetworkTimeoutTest {
 
-  @Test
-  void testNetworkTimeout_UnpooledDataSource() throws Exception {
-    UnpooledDataSource dataSource = (UnpooledDataSource) PgContainer.getUnpooledDataSource();
-    dataSource.setDefaultNetworkTimeout(5000);
-    try (Connection connection = dataSource.getConnection()) {
-      assertEquals(5000, connection.getNetworkTimeout());
+    @Test
+    void testNetworkTimeout_UnpooledDataSource() throws Exception {
+        UnpooledDataSource dataSource = (UnpooledDataSource) PgContainer.getUnpooledDataSource();
+        dataSource.setDefaultNetworkTimeout(5000);
+        try (Connection connection = dataSource.getConnection()) {
+            assertEquals(5000, connection.getNetworkTimeout());
+        }
     }
-  }
 
-  @Test
-  void testNetworkTimeout_PooledDataSource() throws Exception {
-    UnpooledDataSource unpooledDataSource = (UnpooledDataSource) PgContainer.getUnpooledDataSource();
-    PooledDataSource dataSource = new PooledDataSource(unpooledDataSource);
-    dataSource.setDefaultNetworkTimeout(5000);
-    try (Connection connection = dataSource.getConnection()) {
-      assertEquals(5000, connection.getNetworkTimeout());
+    @Test
+    void testNetworkTimeout_PooledDataSource() throws Exception {
+        UnpooledDataSource unpooledDataSource = (UnpooledDataSource) PgContainer.getUnpooledDataSource();
+        PooledDataSource dataSource = new PooledDataSource(unpooledDataSource);
+        dataSource.setDefaultNetworkTimeout(5000);
+        try (Connection connection = dataSource.getConnection()) {
+            assertEquals(5000, connection.getNetworkTimeout());
+        }
     }
-  }
 
 }

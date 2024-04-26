@@ -19,9 +19,9 @@ import org.apache.ibatis.cursor.Cursor;
 
 public interface Mapper {
 
-  User getUser(Integer id);
+    User getUser(Integer id);
 
-  void insertUser(User user);
+    void insertUser(User user);
 
-  Cursor<User> fetchUsers();
+    Cursor<User> fetchUsers();
 }

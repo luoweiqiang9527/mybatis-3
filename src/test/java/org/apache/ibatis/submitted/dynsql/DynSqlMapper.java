@@ -20,26 +20,26 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 public interface DynSqlMapper {
-  String selectDescription(@Param("p") String p);
+    String selectDescription(@Param("p") String p);
 
-  List<String> selectDescriptionById(Integer id);
+    List<String> selectDescriptionById(Integer id);
 
-  List<String> selectDescriptionByConditions(Conditions conditions);
+    List<String> selectDescriptionByConditions(Conditions conditions);
 
-  List<String> selectDescriptionByConditions2(Conditions conditions);
+    List<String> selectDescriptionByConditions2(Conditions conditions);
 
-  List<String> selectDescriptionByConditions3(Conditions conditions);
+    List<String> selectDescriptionByConditions3(Conditions conditions);
 
-  class Conditions {
-    private Integer id;
+    class Conditions {
+        private Integer id;
 
-    public void setId(Integer id) {
-      this.id = id;
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public Integer getId() {
+            return id;
+        }
     }
-
-    public Integer getId() {
-      return id;
-    }
-  }
 
 }

@@ -23,9 +23,9 @@ import org.apache.ibatis.annotations.Select;
 
 public interface Mapper {
 
-  List<Article> getArticles();
+    List<Article> getArticles();
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
       @Arg(id = true, resultMap = "keyRM", columnPrefix = "key_", javaType = EntityKey.class),
       @Arg(column = "name", javaType = String.class),

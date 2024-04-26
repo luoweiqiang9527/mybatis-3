@@ -30,67 +30,67 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class DaoTest {
-  private Connection conn;
-  private Dao dao;
-  private SqlSession sqlSession;
+    private Connection conn;
+    private Dao dao;
+    private SqlSession sqlSession;
 
-  @BeforeEach
-  void setUp() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/emptycollection/mybatis-config.xml")) {
-      SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-      sqlSession = sqlSessionFactory.openSession();
+    @BeforeEach
+    void setUp() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/emptycollection/mybatis-config.xml")) {
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+            sqlSession = sqlSessionFactory.openSession();
+        }
+        conn = sqlSession.getConnection();
+        ScriptRunner runner = new ScriptRunner(conn);
+        runner.setLogWriter(null);
+        dao = sqlSession.getMapper(Dao.class);
     }
-    conn = sqlSession.getConnection();
-    ScriptRunner runner = new ScriptRunner(conn);
-    runner.setLogWriter(null);
-    dao = sqlSession.getMapper(Dao.class);
-  }
 
-  @AfterEach
-  void tearDown() throws Exception {
-    conn.close();
-    sqlSession.close();
-  }
+    @AfterEach
+    void tearDown() throws Exception {
+        conn.close();
+        sqlSession.close();
+    }
 
-  @Test
-  void testWithEmptyList() {
-    final List<TodoLists> actual = dao.selectWithEmptyList();
-    Assertions.assertEquals(1, actual.size());
-    final List<TodoItem> todoItems = actual.get(0).getTodoItems();
-    Assertions.assertEquals(0, todoItems.size(), "expect " + todoItems + " to be empty");
-  }
+    @Test
+    void testWithEmptyList() {
+        final List<TodoLists> actual = dao.selectWithEmptyList();
+        Assertions.assertEquals(1, actual.size());
+        final List<TodoItem> todoItems = actual.get(0).getTodoItems();
+        Assertions.assertEquals(0, todoItems.size(), "expect " + todoItems + " to be empty");
+    }
 
-  @Test
-  void testWithNonEmptyList() {
-    final List<TodoLists> actual = dao.selectWithNonEmptyList();
-    checkNonEmptyList(actual);
-  }
+    @Test
+    void testWithNonEmptyList() {
+        final List<TodoLists> actual = dao.selectWithNonEmptyList();
+        checkNonEmptyList(actual);
+    }
 
-  @Test
-  void testWithNonEmptyList_noCollectionId() {
-    final List<TodoLists> actual = dao.selectWithNonEmptyList_noCollectionId();
+    @Test
+    void testWithNonEmptyList_noCollectionId() {
+        final List<TodoLists> actual = dao.selectWithNonEmptyList_noCollectionId();
 
-    checkNonEmptyList(actual);
-  }
+        checkNonEmptyList(actual);
+    }
 
-  private void checkNonEmptyList(final List<TodoLists> actual) {
-    // Assertions.assertEquals("[List(1)=[a description(1), a 2nd description(2)], List(2)=[a description(1)]]",
-    // actual.toString());
-    Assertions.assertEquals(2, actual.size());
+    private void checkNonEmptyList(final List<TodoLists> actual) {
+        // Assertions.assertEquals("[List(1)=[a description(1), a 2nd description(2)], List(2)=[a description(1)]]",
+        // actual.toString());
+        Assertions.assertEquals(2, actual.size());
 
-    Assertions.assertEquals(2, actual.get(0).getTodoItems().size());
-    Assertions.assertEquals(1, actual.get(0).getTodoItems().get(0).getOrder());
-    Assertions.assertEquals("a description", actual.get(0).getTodoItems().get(0).getDescription().trim());
-    Assertions.assertEquals(2, actual.get(0).getTodoItems().get(1).getOrder());
-    Assertions.assertEquals("a 2nd description", actual.get(0).getTodoItems().get(1).getDescription().trim());
+        Assertions.assertEquals(2, actual.get(0).getTodoItems().size());
+        Assertions.assertEquals(1, actual.get(0).getTodoItems().get(0).getOrder());
+        Assertions.assertEquals("a description", actual.get(0).getTodoItems().get(0).getDescription().trim());
+        Assertions.assertEquals(2, actual.get(0).getTodoItems().get(1).getOrder());
+        Assertions.assertEquals("a 2nd description", actual.get(0).getTodoItems().get(1).getDescription().trim());
 
-    Assertions.assertEquals(1, actual.get(1).getTodoItems().size());
-    Assertions.assertEquals(1, actual.get(1).getTodoItems().get(0).getOrder());
-    Assertions.assertEquals("a description", actual.get(0).getTodoItems().get(0).getDescription().trim());
+        Assertions.assertEquals(1, actual.get(1).getTodoItems().size());
+        Assertions.assertEquals(1, actual.get(1).getTodoItems().get(0).getOrder());
+        Assertions.assertEquals("a description", actual.get(0).getTodoItems().get(0).getDescription().trim());
 
-    // We should have gotten three item objects. The first item from the first list and the first item from
-    // the second list have identical properties, but they should be distinct objects
-    Assertions.assertNotSame(actual.get(0).getTodoItems().get(0), actual.get(1).getTodoItems().get(0));
-  }
+        // We should have gotten three item objects. The first item from the first list and the first item from
+        // the second list have identical properties, but they should be distinct objects
+        Assertions.assertNotSame(actual.get(0).getTodoItems().get(0), actual.get(1).getTodoItems().get(0));
+    }
 }

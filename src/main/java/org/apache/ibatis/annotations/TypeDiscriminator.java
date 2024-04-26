@@ -55,38 +55,38 @@ import org.apache.ibatis.type.UnknownTypeHandler;
 @Target(ElementType.METHOD)
 public @interface TypeDiscriminator {
 
-  /**
-   * Returns the column name(column label) that hold conditional value.
-   *
-   * @return the column name(column label)
-   */
-  String column();
+    /**
+     * Returns the column name(column label) that hold conditional value.
+     *
+     * @return the column name(column label)
+     */
+    String column();
 
-  /**
-   * Return the java type for conditional value.
-   *
-   * @return the java type
-   */
-  Class<?> javaType() default void.class;
+    /**
+     * Return the java type for conditional value.
+     *
+     * @return the java type
+     */
+    Class<?> javaType() default void.class;
 
-  /**
-   * Return the jdbc type for column that hold conditional value.
-   *
-   * @return the jdbc type
-   */
-  JdbcType jdbcType() default JdbcType.UNDEFINED;
+    /**
+     * Return the jdbc type for column that hold conditional value.
+     *
+     * @return the jdbc type
+     */
+    JdbcType jdbcType() default JdbcType.UNDEFINED;
 
-  /**
-   * Returns the {@link TypeHandler} type for retrieving a column value from result set.
-   *
-   * @return the {@link TypeHandler} type
-   */
-  Class<? extends TypeHandler> typeHandler() default UnknownTypeHandler.class;
+    /**
+     * Returns the {@link TypeHandler} type for retrieving a column value from result set.
+     *
+     * @return the {@link TypeHandler} type
+     */
+    Class<? extends TypeHandler> typeHandler() default UnknownTypeHandler.class;
 
-  /**
-   * Returns conditional mapping definitions.
-   *
-   * @return conditional mapping definitions
-   */
-  Case[] cases();
+    /**
+     * Returns conditional mapping definitions.
+     *
+     * @return conditional mapping definitions
+     */
+    Case[] cases();
 }

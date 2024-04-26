@@ -25,25 +25,31 @@ Essentials
 Contributions
 -------------
 
-Mybatis-core is now being auto formatted.  Given nature of some code logic with mybatis, it is more appropriate to force a formatting structure manually for snippets such as sql statements.  To do so, add following blocks around code.
+Mybatis-core is now being auto formatted. Given nature of some code logic with mybatis, it is more appropriate to force
+a formatting structure manually for snippets such as sql statements. To do so, add following blocks around code.
 
 - ```// @formatter:off``` to start the block of unformatted code
 - ```// @formatter:on``` to end the block of unformatted code
 
-If comment sections need same behaviour such as javadocs, note that the entire block must be around entire comment as direct usage does not properly indicate that formatter treats it all as one comment block regardless.
+If comment sections need same behaviour such as javadocs, note that the entire block must be around entire comment as
+direct usage does not properly indicate that formatter treats it all as one comment block regardless.
 
 Tests
 -----
 
 Mybatis-3 code runs more expressive testing depending on jdk usage and platform.
 
-By default, we set ```<excludedGroups>TestcontainersTests</excludedGroups>``` which will exclude a subset of tests with @Tag('TestcontainersTests').  Further, if pre jdk 16, we will further exclude record classes from executions further reducing tests.
+By default, we set ```<excludedGroups>TestcontainersTests</excludedGroups>``` which will exclude a subset of tests with
+@Tag('TestcontainersTests'). Further, if pre jdk 16, we will further exclude record classes from executions further
+reducing tests.
 
-When using jdk 16+, we adjust the rule to ```<excludedGroups>TestcontainersTests,RequireIllegalAccess</excludedGroups>```.
+When using jdk 16+, we adjust the rule
+to ```<excludedGroups>TestcontainersTests,RequireIllegalAccess</excludedGroups>```.
 
-When we run on ci platform, we further make adjustments as needed.  See [here](.github/workflows/ci.yaml) for details.
+When we run on ci platform, we further make adjustments as needed. See [here](.github/workflows/ci.yaml) for details.
 
-As of 2/20/2023, using combined system + jdk will result in given number of tests ran.  This will change as tests are added or removed over time.
+As of 2/20/2023, using combined system + jdk will result in given number of tests ran. This will change as tests are
+added or removed over time.
 
 without adjusting settings (ie use as is, platform does not matter)
 

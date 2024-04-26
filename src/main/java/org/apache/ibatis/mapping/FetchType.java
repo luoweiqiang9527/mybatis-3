@@ -20,10 +20,10 @@ package org.apache.ibatis.mapping;
  */
 public enum FetchType {
 
-  LAZY,
+    LAZY,
 
-  EAGER,
+    EAGER,
 
-  DEFAULT
+    DEFAULT
 
 }

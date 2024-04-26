@@ -3,25 +3,27 @@ author: Clinton Begin
 
 ## Configuration
 
-The MyBatis configuration contains settings and properties that have a dramatic effect on how MyBatis behaves. The high level structure of the document is as follows:
+The MyBatis configuration contains settings and properties that have a dramatic effect on how MyBatis behaves. The high
+level structure of the document is as follows:
 
 - configuration
-  - [properties](#properties)
-  - [settings](#settings)
-  - [typeAliases](#typeAliases)
-  - [typeHandlers](#typeHandlers)
-  - [objectFactory](#objectFactory)
-  - [plugins](#plugins)
-  - [environments](#environments)
-    - environment
-      - transactionManager
-      - dataSource
-  - [databaseIdProvider](#databaseIdProvider)
-  - [mappers](#mappers)
+    - [properties](#properties)
+    - [settings](#settings)
+    - [typeAliases](#typeAliases)
+    - [typeHandlers](#typeHandlers)
+    - [objectFactory](#objectFactory)
+    - [plugins](#plugins)
+    - [environments](#environments)
+        - environment
+            - transactionManager
+            - dataSource
+    - [databaseIdProvider](#databaseIdProvider)
+    - [mappers](#mappers)
 
 ### properties
 
-These are externalizable, substitutable properties that can be configured in a typical Java Properties file instance, or passed in through sub-elements of the properties element. For example:
+These are externalizable, substitutable properties that can be configured in a typical Java Properties file instance, or
+passed in through sub-elements of the properties element. For example:
 
 ```xml
 <properties resource="org/mybatis/example/config.properties">
@@ -30,7 +32,8 @@ These are externalizable, substitutable properties that can be configured in a t
 </properties>
 ```
 
-The properties can then be used throughout the configuration files to substitute values that need to be dynamically configured. For example:
+The properties can then be used throughout the configuration files to substitute values that need to be dynamically
+configured. For example:
 
 ```xml
 <dataSource type="POOLED">
@@ -41,7 +44,9 @@ The properties can then be used throughout the configuration files to substitute
 </dataSource>
 ```
 
-The username and password in this example will be replaced by the values set in the properties elements. The driver and url properties would be replaced with values contained from the config.properties file. This provides a lot of options for configuration.
+The username and password in this example will be replaced by the values set in the properties elements. The driver and
+url properties would be replaced with values contained from the config.properties file. This provides a lot of options
+for configuration.
 
 Properties can also be passed into the SqlSessionFactoryBuilder.build() methods. For example:
 
@@ -58,10 +63,13 @@ SqlSessionFactory factory =
 If a property exists in more than one of these places, MyBatis loads them in the following order:
 
 - Properties specified in the body of the properties element are read first,
-- Properties loaded from the classpath resource or url attributes of the properties element are read second, and override any duplicate properties already specified,
-- Properties passed as a method parameter are read last, and override any duplicate properties that may have been loaded from the properties body and the resource/url attributes.
+- Properties loaded from the classpath resource or url attributes of the properties element are read second, and
+  override any duplicate properties already specified,
+- Properties passed as a method parameter are read last, and override any duplicate properties that may have been loaded
+  from the properties body and the resource/url attributes.
 
-Thus, the highest priority properties are those passed in as a method parameter, followed by resource/url attributes and finally the properties specified in the body of the properties element.
+Thus, the highest priority properties are those passed in as a method parameter, followed by resource/url attributes and
+finally the properties specified in the body of the properties element.
 
 Since the MyBatis 3.4.2, your can specify a default value into placeholder as follow:
 
@@ -72,7 +80,8 @@ Since the MyBatis 3.4.2, your can specify a default value into placeholder as fo
 </dataSource>
 ```
 
-This feature is disabled by default. If you specify a default value into placeholder, you should enable this feature by adding a special property as follow:
+This feature is disabled by default. If you specify a default value into placeholder, you should enable this feature by
+adding a special property as follow:
 
 ```xml
 <properties resource="org/mybatis/example/config.properties">
@@ -81,7 +90,10 @@ This feature is disabled by default. If you specify a default value into placeho
 </properties>
 ```
 
-<span class="label important">NOTE</span> This will conflict with the `":"` character in property keys (e.g. `db:username`) or the ternary operator of OGNL expressions (e.g. `${tableName != null ? tableName : 'global_constants'}`) on a SQL definition. If you use either and want default property values, you must change the default value separator by adding this special property:
+<span class="label important">NOTE</span> This will conflict with the `":"` character in property keys (
+e.g. `db:username`) or the ternary operator of OGNL expressions (
+e.g. `${tableName != null ? tableName : 'global_constants'}`) on a SQL definition. If you use either and want default
+property values, you must change the default value separator by adding this special property:
 
 ```xml
 <properties resource="org/mybatis/example/config.properties">
@@ -99,7 +111,8 @@ This feature is disabled by default. If you specify a default value into placeho
 
 ### settings
 
-These are extremely important tweaks that modify the way that MyBatis behaves at runtime. The following table describes the settings, their meanings and their default values.
+These are extremely important tweaks that modify the way that MyBatis behaves at runtime. The following table describes
+the settings, their meanings and their default values.
 
 | Setting                            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      | Valid Values                                                                                                                               | Default                                               |
 |------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|
@@ -172,7 +185,8 @@ An example of the settings element fully configured is as follows:
 
 ### typeAliases
 
-A type alias is simply a shorter name for a Java type. It's only relevant to the XML configuration and simply exists to reduce redundant typing of fully qualified classnames. For example:
+A type alias is simply a shorter name for a Java type. It's only relevant to the XML configuration and simply exists to
+reduce redundant typing of fully qualified classnames. For example:
 
 ```xml
 <typeAliases>
@@ -195,7 +209,9 @@ You can also specify a package where MyBatis will search for beans. For example:
 </typeAliases>
 ```
 
-Each bean found in `domain.blog` , if no annotation is found, will be registered as an alias using uncapitalized non-qualified class name of the bean. That is `domain.blog.Author` will be registered as `author`. If the `@Alias` annotation is found its value will be used as an alias. See the example below:
+Each bean found in `domain.blog` , if no annotation is found, will be registered as an alias using uncapitalized
+non-qualified class name of the bean. That is `domain.blog.Author` will be registered as `author`. If the `@Alias`
+annotation is found its value will be used as an alias. See the example below:
 
 ```java
 @Alias("author")
@@ -204,7 +220,8 @@ public class Author {
 }
 ```
 
-There are many built-in type aliases for common Java types. They are all case insensitive, note the special handling of primitives due to the overloaded names.
+There are many built-in type aliases for common Java types. They are all case insensitive, note the special handling of
+primitives due to the overloaded names.
 
 | Alias                     | Mapped Type  |
 |---------------------------|--------------|
@@ -246,10 +263,10 @@ There are many built-in type aliases for common Java types. They are all case in
 | collection                | Collection   |
 | iterator                  | Iterator     |
 
-
 ### typeHandlers
 
-Whenever MyBatis sets a parameter on a PreparedStatement or retrieves a value from a ResultSet, a TypeHandler is used to retrieve the value in a means appropriate to the Java type. The following table describes the default TypeHandlers.
+Whenever MyBatis sets a parameter on a PreparedStatement or retrieves a value from a ResultSet, a TypeHandler is used to
+retrieve the value in a means appropriate to the Java type. The following table describes the default TypeHandlers.
 
 <span class="label important">NOTE</span> Since version 3.4.5, MyBatis supports JSR-310 (Date and Time API) by default.
 
@@ -293,7 +310,9 @@ Whenever MyBatis sets a parameter on a PreparedStatement or retrieves a value fr
 | `YearMonthTypeHandler`       | `java.time.YearMonth`           | `VARCHAR` or `LONGVARCHAR`                                                             |
 | `JapaneseDateTypeHandler`    | `java.time.chrono.JapaneseDate` | `DATE`                                                                                 |
 
-You can override the type handlers or create your own to deal with unsupported or non-standard types. To do so, implement the interface `org.apache.ibatis.type.TypeHandler` or extend the convenience class `org.apache.ibatis.type.BaseTypeHandler` and optionally map it to a JDBC type. For example:
+You can override the type handlers or create your own to deal with unsupported or non-standard types. To do so,
+implement the interface `org.apache.ibatis.type.TypeHandler` or extend the convenience
+class `org.apache.ibatis.type.BaseTypeHandler` and optionally map it to a JDBC type. For example:
 
 ```java
 // ExampleTypeHandler.java
@@ -325,6 +344,7 @@ public class ExampleTypeHandler extends BaseTypeHandler<String> {
   }
 }
 ```
+
 ```xml
 <!-- mybatis-config.xml -->
 <typeHandlers>
@@ -332,19 +352,31 @@ public class ExampleTypeHandler extends BaseTypeHandler<String> {
 </typeHandlers>
 ```
 
-Using such a TypeHandler would override the existing type handler for Java String properties and VARCHAR parameters and results. Note that MyBatis does not introspect upon the database metadata to determine the type, so you must specify that it’s a VARCHAR field in the parameter and result mappings to hook in the correct type handler. This is due to the fact that MyBatis is unaware of the data type until the statement is executed.
+Using such a TypeHandler would override the existing type handler for Java String properties and VARCHAR parameters and
+results. Note that MyBatis does not introspect upon the database metadata to determine the type, so you must specify
+that it’s a VARCHAR field in the parameter and result mappings to hook in the correct type handler. This is due to the
+fact that MyBatis is unaware of the data type until the statement is executed.
 
-MyBatis will know the Java type that you want to handle with this TypeHandler by introspecting its generic type, but you can override this behavior by two means:
+MyBatis will know the Java type that you want to handle with this TypeHandler by introspecting its generic type, but you
+can override this behavior by two means:
 
 - Adding a `javaType` attribute to the typeHandler element (for example: `javaType="String"`)
-- Adding a `@MappedTypes` annotation to your TypeHandler class specifying the list of java types to associate it with. This annotation will be ignored if the `javaType` attribute as also been specified.
+- Adding a `@MappedTypes` annotation to your TypeHandler class specifying the list of java types to associate it with.
+  This annotation will be ignored if the `javaType` attribute as also been specified.
 
 The associated JDBC type can be specified by two means:
 
 - Adding a `jdbcType` attribute to the typeHandler element (for example: `jdbcType="VARCHAR"`).
-- Adding a `@MappedJdbcTypes` annotation to your TypeHandler class specifying the list of JDBC types to associate it with. This annotation will be ignored if the `jdbcType` attribute as also been specified.
+- Adding a `@MappedJdbcTypes` annotation to your TypeHandler class specifying the list of JDBC types to associate it
+  with. This annotation will be ignored if the `jdbcType` attribute as also been specified.
 
-When deciding which TypeHandler to use in a `ResultMap`, the Java type is known (from the result type), but the JDBC type is unknown. MyBatis therefore uses the combination `javaType=[TheJavaType], jdbcType=null` to choose a TypeHandler. This means that using a `@MappedJdbcTypes` annotation *restricts* the scope of a TypeHandler and makes it unavailable for use in `ResultMap`s unless explicity set. To make a TypeHandler available for use in a `ResultMap`, set `includeNullJdbcType=true` on the `@MappedJdbcTypes` annotation. Since Mybatis 3.4.0 however, if a **single** TypeHandler is registered to handle a Java type, it will be used by default in `ResultMap`s using this Java type (i.e. even without `includeNullJdbcType=true`).
+When deciding which TypeHandler to use in a `ResultMap`, the Java type is known (from the result type), but the JDBC
+type is unknown. MyBatis therefore uses the combination `javaType=[TheJavaType], jdbcType=null` to choose a TypeHandler.
+This means that using a `@MappedJdbcTypes` annotation *restricts* the scope of a TypeHandler and makes it unavailable
+for use in `ResultMap`s unless explicity set. To make a TypeHandler available for use in a `ResultMap`,
+set `includeNullJdbcType=true` on the `@MappedJdbcTypes` annotation. Since Mybatis 3.4.0 however, if a **single**
+TypeHandler is registered to handle a Java type, it will be used by default in `ResultMap`s using this Java type (i.e.
+even without `includeNullJdbcType=true`).
 
 And finally you can let MyBatis search for your TypeHandlers:
 
@@ -357,7 +389,8 @@ And finally you can let MyBatis search for your TypeHandlers:
 
 Note that when using the autodiscovery feature JDBC types can only be specified with annotations.
 
-You can create a generic TypeHandler that is able to handle more than one class. For that purpose add a constructor that receives the class as a parameter and MyBatis will pass the actual class when constructing the TypeHandler.
+You can create a generic TypeHandler that is able to handle more than one class. For that purpose add a constructor that
+receives the class as a parameter and MyBatis will pass the actual class when constructing the TypeHandler.
 
 ```java
 //GenericTypeHandler.java
@@ -372,17 +405,22 @@ public class GenericTypeHandler<E extends MyObject> extends BaseTypeHandler<E> {
   ...
 ```
 
-`EnumTypeHandler` and `EnumOrdinalTypeHandler` are generic TypeHandlers. We will learn about them in the following section.
+`EnumTypeHandler` and `EnumOrdinalTypeHandler` are generic TypeHandlers. We will learn about them in the following
+section.
 
 ### Handling Enums
 
 If you want to map an `Enum`, you'll need to use either `EnumTypeHandler` or `EnumOrdinalTypeHandler`.
 
-For example, let's say that we need to store the rounding mode that should be used with some number if it needs to be rounded. By default, MyBatis uses `EnumTypeHandler` to convert the `Enum` values to their names.
+For example, let's say that we need to store the rounding mode that should be used with some number if it needs to be
+rounded. By default, MyBatis uses `EnumTypeHandler` to convert the `Enum` values to their names.
 
-**Note `EnumTypeHandler` is special in the sense that unlike other handlers, it does not handle just one specific class, but any class that extends `Enum`**
+**Note `EnumTypeHandler` is special in the sense that unlike other handlers, it does not handle just one specific class,
+but any class that extends `Enum`**
 
-However, we may not want to store names. Our DBA may insist on an integer code instead. That's just as easy: add `EnumOrdinalTypeHandler` to the `typeHandlers` in your config file, and now each `RoundingMode` will be mapped to an integer using its ordinal value.
+However, we may not want to store names. Our DBA may insist on an integer code instead. That's just as easy:
+add `EnumOrdinalTypeHandler` to the `typeHandlers` in your config file, and now each `RoundingMode` will be mapped to an
+integer using its ordinal value.
 
 ```xml
 <!-- mybatis-config.xml -->
@@ -394,9 +432,11 @@ However, we may not want to store names. Our DBA may insist on an integer code i
 
 But what if you want to map the same `Enum` to a string in one place and to integer in another?
 
-The auto-mapper will automatically use `EnumOrdinalTypeHandler`, so if we want to go back to using plain old ordinary `EnumTypeHandler`, we have to tell it, by explicitly setting the type handler to use for those SQL statements.
+The auto-mapper will automatically use `EnumOrdinalTypeHandler`, so if we want to go back to using plain old
+ordinary `EnumTypeHandler`, we have to tell it, by explicitly setting the type handler to use for those SQL statements.
 
-(Mapper files aren't covered until the next section, so if this is your first time reading through the documentation, you may want to skip this for now and come back to it later.)
+(Mapper files aren't covered until the next section, so if this is your first time reading through the documentation,
+you may want to skip this for now and come back to it later.)
 
 ```xml
 <!DOCTYPE mapper
@@ -443,7 +483,10 @@ Note that this forces us to use a `resultMap` instead of a `resultType` in our s
 
 ### objectFactory
 
-Each time MyBatis creates a new instance of a result object, it uses an ObjectFactory instance to do so. The default ObjectFactory does little more than instantiate the target class with a default constructor, or a parameterized constructor if parameter mappings exist. If you want to override the default behaviour of the ObjectFactory, you can create your own. For example:
+Each time MyBatis creates a new instance of a result object, it uses an ObjectFactory instance to do so. The default
+ObjectFactory does little more than instantiate the target class with a default constructor, or a parameterized
+constructor if parameter mappings exist. If you want to override the default behaviour of the ObjectFactory, you can
+create your own. For example:
 
 ```java
 // ExampleObjectFactory.java
@@ -469,6 +512,7 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
   }
 }
 ```
+
 ```xml
 <!-- mybatis-config.xml -->
 <objectFactory type="org.mybatis.example.ExampleObjectFactory">
@@ -476,20 +520,29 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
 </objectFactory>
 ```
 
-The ObjectFactory interface is very simple. It contains two create methods, one to deal with the default constructor, and the other to deal with parameterized constructors. Finally, the setProperties method can be used to configure the ObjectFactory. Properties defined within the body of the objectFactory element will be passed to the setProperties method after initialization of your ObjectFactory instance.
+The ObjectFactory interface is very simple. It contains two create methods, one to deal with the default constructor,
+and the other to deal with parameterized constructors. Finally, the setProperties method can be used to configure the
+ObjectFactory. Properties defined within the body of the objectFactory element will be passed to the setProperties
+method after initialization of your ObjectFactory instance.
 
 ### plugins
 
-MyBatis allows you to intercept calls to at certain points within the execution of a mapped statement. By default, MyBatis allows plug-ins to intercept method calls of:
+MyBatis allows you to intercept calls to at certain points within the execution of a mapped statement. By default,
+MyBatis allows plug-ins to intercept method calls of:
 
 - Executor (update, query, flushStatements, commit, rollback, getTransaction, close, isClosed)
 - ParameterHandler (getParameterObject, setParameters)
 - ResultSetHandler (handleResultSets, handleOutputParameters)
 - StatementHandler (prepare, parameterize, batch, update, query)
 
-The details of these classes methods can be discovered by looking at the full method signature of each, and the source code which is available with each MyBatis release. You should understand the behaviour of the method you’re overriding, assuming you’re doing something more than just monitoring calls. If you attempt to modify or override the behaviour of a given method, you’re likely to break the core of MyBatis. These are low level classes and methods, so use plug-ins with caution.
+The details of these classes methods can be discovered by looking at the full method signature of each, and the source
+code which is available with each MyBatis release. You should understand the behaviour of the method you’re overriding,
+assuming you’re doing something more than just monitoring calls. If you attempt to modify or override the behaviour of a
+given method, you’re likely to break the core of MyBatis. These are low level classes and methods, so use plug-ins with
+caution.
 
-Using plug-ins is pretty simple given the power they provide. Simply implement the Interceptor interface, being sure to specify the signatures you want to intercept.
+Using plug-ins is pretty simple given the power they provide. Simply implement the Interceptor interface, being sure to
+specify the signatures you want to intercept.
 
 ```java
 // ExamplePlugin.java
@@ -514,6 +567,7 @@ public class ExamplePlugin implements Interceptor {
   }
 }
 ```
+
 ```xml
 <!-- mybatis-config.xml -->
 <plugins>
@@ -523,23 +577,33 @@ public class ExamplePlugin implements Interceptor {
 </plugins>
 ```
 
-The plug-in above will intercept all calls to the "update" method on the Executor instance, which is an internal object responsible for the low-level execution of mapped statements.
+The plug-in above will intercept all calls to the "update" method on the Executor instance, which is an internal object
+responsible for the low-level execution of mapped statements.
 
 <span class="label important">NOTE</span> **Overriding the Configuration Class**
 
-In addition to modifying core MyBatis behaviour with plugins, you can also override the `Configuration` class entirely. Simply extend it and override any methods inside, and pass it into the call to the `SqlSessionFactoryBuilder.build(myConfig)` method. Again though, this could have a severe impact on the behaviour of MyBatis, so use caution.
+In addition to modifying core MyBatis behaviour with plugins, you can also override the `Configuration` class entirely.
+Simply extend it and override any methods inside, and pass it into the call to
+the `SqlSessionFactoryBuilder.build(myConfig)` method. Again though, this could have a severe impact on the behaviour of
+MyBatis, so use caution.
 
 ### environments
 
-MyBatis can be configured with multiple environments. This helps you to apply your SQL Maps to multiple databases for any number of reasons. For example, you might have a different configuration for your Development, Test and Production environments. Or, you may have multiple production databases that share the same schema, and you’d like to use the same SQL maps for both. There are many use cases.
+MyBatis can be configured with multiple environments. This helps you to apply your SQL Maps to multiple databases for
+any number of reasons. For example, you might have a different configuration for your Development, Test and Production
+environments. Or, you may have multiple production databases that share the same schema, and you’d like to use the same
+SQL maps for both. There are many use cases.
 
-**One important thing to remember though: While you can configure multiple environments, you can only choose ONE per SqlSessionFactory instance.**
+**One important thing to remember though: While you can configure multiple environments, you can only choose ONE per
+SqlSessionFactory instance.**
 
-So if you want to connect to two databases, you need to create two instances of SqlSessionFactory, one for each. For three databases, you’d need three instances, and so on. It’s really easy to remember:
+So if you want to connect to two databases, you need to create two instances of SqlSessionFactory, one for each. For
+three databases, you’d need three instances, and so on. It’s really easy to remember:
 
 - **One SqlSessionFactory instance per database**
 
-To specify which environment to build, you simply pass it to the SqlSessionFactoryBuilder as an optional parameter. The two signatures that accept the environment are:
+To specify which environment to build, you simply pass it to the SqlSessionFactoryBuilder as an optional parameter. The
+two signatures that accept the environment are:
 
 ```java
 SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(reader, environment);
@@ -578,13 +642,18 @@ Notice the key sections here:
 - The TransactionManager configuration (e.g. type="JDBC")
 - The DataSource configuration (e.g. type="POOLED")
 
-The default environment and the environment IDs are self explanatory. Name them whatever you like, just make sure the default matches one of them.
+The default environment and the environment IDs are self explanatory. Name them whatever you like, just make sure the
+default matches one of them.
 
 **transactionManager**
 
 There are two TransactionManager types (i.e. type="[JDBC|MANAGED]") that are included with MyBatis:
 
-- JDBC – This configuration simply makes use of the JDBC commit and rollback facilities directly. It relies on the connection retrieved from the dataSource to manage the scope of the transaction. By default, it enables auto-commit when closing the connection for compatibility with some drivers. However, for some drivers, enabling auto-commit is not only unnecessary, but also is an expensive operation. So, since version 3.5.10, you can skip this step by setting the "skipSetAutoCommitOnClose" property to true. For example:
+- JDBC – This configuration simply makes use of the JDBC commit and rollback facilities directly. It relies on the
+  connection retrieved from the dataSource to manage the scope of the transaction. By default, it enables auto-commit
+  when closing the connection for compatibility with some drivers. However, for some drivers, enabling auto-commit is
+  not only unnecessary, but also is an expensive operation. So, since version 3.5.10, you can skip this step by setting
+  the "skipSetAutoCommitOnClose" property to true. For example:
 
   ```xml
   <transactionManager type="JDBC">
@@ -592,7 +661,10 @@ There are two TransactionManager types (i.e. type="[JDBC|MANAGED]") that are inc
   </transactionManager>
   ```
 
-- MANAGED – This configuration simply does almost nothing. It never commits, or rolls back a connection. Instead, it lets the container manage the full lifecycle of the transaction (e.g. a JEE Application Server context). By default it does close the connection. However, some containers don’t expect this, and thus if you need to stop it from closing the connection, set the "closeConnection" property to false. For example:
+- MANAGED – This configuration simply does almost nothing. It never commits, or rolls back a connection. Instead, it
+  lets the container manage the full lifecycle of the transaction (e.g. a JEE Application Server context). By default it
+  does close the connection. However, some containers don’t expect this, and thus if you need to stop it from closing
+  the connection, set the "closeConnection" property to false. For example:
 
   ```xml
   <transactionManager type="MANAGED">
@@ -600,9 +672,12 @@ There are two TransactionManager types (i.e. type="[JDBC|MANAGED]") that are inc
   </transactionManager>
   ```
 
-<span class="label important">NOTE</span> If you are planning to use MyBatis with Spring there is no need to configure any TransactionManager because the Spring module will set its own one overriding any previously set configuration.
+<span class="label important">NOTE</span> If you are planning to use MyBatis with Spring there is no need to configure
+any TransactionManager because the Spring module will set its own one overriding any previously set configuration.
 
-Neither of these TransactionManager types require any properties. However, they are both Type Aliases, so in other words, instead of using them, you could put your own fully qualified class name or Type Alias that refers to your own implementation of the TransactionFactory interface.
+Neither of these TransactionManager types require any properties. However, they are both Type Aliases, so in other
+words, instead of using them, you could put your own fully qualified class name or Type Alias that refers to your own
+implementation of the TransactionFactory interface.
 
 ```java
 public interface TransactionFactory {
@@ -614,7 +689,8 @@ public interface TransactionFactory {
 }
 ```
 
-Any properties configured in the XML will be passed to the setProperties() method after instantiation. Your implementation would also need to create a Transaction implementation, which is also a very simple interface:
+Any properties configured in the XML will be passed to the setProperties() method after instantiation. Your
+implementation would also need to create a Transaction implementation, which is also a very simple interface:
 
 ```java
 public interface Transaction {
@@ -632,48 +708,80 @@ Using these two interfaces, you can completely customize how MyBatis deals with 
 
 The dataSource element configures the source of JDBC Connection objects using the standard JDBC DataSource interface.
 
-Most MyBatis applications will configure a dataSource as in the example. However, it’s not required. Realize though, that to facilitate Lazy Loading, this dataSource is required.
+Most MyBatis applications will configure a dataSource as in the example. However, it’s not required. Realize though,
+that to facilitate Lazy Loading, this dataSource is required.
 
 There are three built-in dataSource types (i.e. type="[UNPOOLED|POOLED|JNDI]"):
 
-**UNPOOLED** – This implementation of DataSource simply opens and closes a connection each time it is requested. While it’s a bit slower, this is a good choice for simple applications that do not require the performance of immediately available connections. Different databases are also different in this performance area, so for some it may be less important to pool and this configuration will be ideal. The UNPOOLED DataSource has the following properties to configure:
+**UNPOOLED** – This implementation of DataSource simply opens and closes a connection each time it is requested. While
+it’s a bit slower, this is a good choice for simple applications that do not require the performance of immediately
+available connections. Different databases are also different in this performance area, so for some it may be less
+important to pool and this configuration will be ideal. The UNPOOLED DataSource has the following properties to
+configure:
 
-- `driver` – This is the fully qualified Java class of the JDBC driver (NOT of the DataSource class if your driver includes one).
+- `driver` – This is the fully qualified Java class of the JDBC driver (NOT of the DataSource class if your driver
+  includes one).
 - `url` – This is the JDBC URL for your database instance.
 - `username` – The database username to log in with.
 - `password` - The database password to log in with.
 - `defaultTransactionIsolationLevel` – The default transaction isolation level for connections.
-- `defaultNetworkTimeout` – The default network timeout value in milliseconds to wait for the database operation to complete. See the API documentation of `java.sql.Connection#setNetworkTimeout()` for details.
+- `defaultNetworkTimeout` – The default network timeout value in milliseconds to wait for the database operation to
+  complete. See the API documentation of `java.sql.Connection#setNetworkTimeout()` for details.
 
-Optionally, you can pass properties to the database driver as well. To do this, prefix the properties with `driver.`, for example:
+Optionally, you can pass properties to the database driver as well. To do this, prefix the properties with `driver.`,
+for example:
 
 - `driver.encoding=UTF8`
 
-This will pass the property `encoding`, with the value `UTF8`, to your database driver via the `DriverManager.getConnection(url, driverProperties)` method.
+This will pass the property `encoding`, with the value `UTF8`, to your database driver via
+the `DriverManager.getConnection(url, driverProperties)` method.
 
-**POOLED** – This implementation of DataSource pools JDBC Connection objects to avoid the initial connection and authentication time required to create a new Connection instance. This is a popular approach for concurrent web applications to achieve the fastest response.
+**POOLED** – This implementation of DataSource pools JDBC Connection objects to avoid the initial connection and
+authentication time required to create a new Connection instance. This is a popular approach for concurrent web
+applications to achieve the fastest response.
 
-In addition to the (UNPOOLED) properties above, there are many more properties that can be used to configure the POOLED datasource:
+In addition to the (UNPOOLED) properties above, there are many more properties that can be used to configure the POOLED
+datasource:
 
-- `poolMaximumActiveConnections` – This is the number of active (i.e. in use) connections that can exist at any given time. Default: 10
+- `poolMaximumActiveConnections` – This is the number of active (i.e. in use) connections that can exist at any given
+  time. Default: 10
 - `poolMaximumIdleConnections` – The number of idle connections that can exist at any given time.
-- `poolMaximumCheckoutTime` – This is the amount of time that a Connection can be "checked out" of the pool before it will be forcefully returned. Default: 20000ms (i.e. 20 seconds)
-- `poolTimeToWait` – This is a low level setting that gives the pool a chance to print a log status and re-attempt the acquisition of a connection in the case that it’s taking unusually long (to avoid failing silently forever if the pool is misconfigured). Default: 20000ms (i.e. 20 seconds)
-- `poolMaximumLocalBadConnectionTolerance` – This is a low level setting about tolerance of bad connections got for any thread. If a thread got a bad connection, it may still have another chance to re-attempt to get another connection which is valid. But the retrying times should not more than the sum of `poolMaximumIdleConnections` and `poolMaximumLocalBadConnectionTolerance`. Default: 3 (Since: 3.4.5)
-- `poolPingQuery` – The Ping Query is sent to the database to validate that a connection is in good working order and is ready to accept requests. The default is "NO PING QUERY SET", which will cause most database drivers to fail with a decent error message.
-- `poolPingEnabled` – This enables or disables the ping query. If enabled, you must also set the poolPingQuery property with a valid SQL statement (preferably a very fast one). Default: false.
-- `poolPingConnectionsNotUsedFor` – This configures how often the poolPingQuery will be used. This can be set to match the typical timeout for a database connection, to avoid unnecessary pings. Default: 0 (i.e. all connections are pinged every time – but only if poolPingEnabled is true of course).
+- `poolMaximumCheckoutTime` – This is the amount of time that a Connection can be "checked out" of the pool before it
+  will be forcefully returned. Default: 20000ms (i.e. 20 seconds)
+- `poolTimeToWait` – This is a low level setting that gives the pool a chance to print a log status and re-attempt the
+  acquisition of a connection in the case that it’s taking unusually long (to avoid failing silently forever if the pool
+  is misconfigured). Default: 20000ms (i.e. 20 seconds)
+- `poolMaximumLocalBadConnectionTolerance` – This is a low level setting about tolerance of bad connections got for any
+  thread. If a thread got a bad connection, it may still have another chance to re-attempt to get another connection
+  which is valid. But the retrying times should not more than the sum of `poolMaximumIdleConnections`
+  and `poolMaximumLocalBadConnectionTolerance`. Default: 3 (Since: 3.4.5)
+- `poolPingQuery` – The Ping Query is sent to the database to validate that a connection is in good working order and is
+  ready to accept requests. The default is "NO PING QUERY SET", which will cause most database drivers to fail with a
+  decent error message.
+- `poolPingEnabled` – This enables or disables the ping query. If enabled, you must also set the poolPingQuery property
+  with a valid SQL statement (preferably a very fast one). Default: false.
+- `poolPingConnectionsNotUsedFor` – This configures how often the poolPingQuery will be used. This can be set to match
+  the typical timeout for a database connection, to avoid unnecessary pings. Default: 0 (i.e. all connections are pinged
+  every time – but only if poolPingEnabled is true of course).
 
-**JNDI** – This implementation of DataSource is intended for use with containers such as EJB or Application Servers that may configure the DataSource centrally or externally and place a reference to it in a JNDI context. This DataSource configuration only requires two properties:
+**JNDI** – This implementation of DataSource is intended for use with containers such as EJB or Application Servers that
+may configure the DataSource centrally or externally and place a reference to it in a JNDI context. This DataSource
+configuration only requires two properties:
 
-- `initial_context` – This property is used for the Context lookup from the InitialContext (i.e. initialContext.lookup(initial_context)). This property is optional, and if omitted, then the data_source property will be looked up against the InitialContext directly.
-- `data_source` – This is the context path where the reference to the instance of the DataSource can be found. It will be looked up against the context returned by the initial_context lookup, or against the InitialContext directly if no initial_context is supplied.
+- `initial_context` – This property is used for the Context lookup from the InitialContext (i.e. initialContext.lookup(
+  initial_context)). This property is optional, and if omitted, then the data_source property will be looked up against
+  the InitialContext directly.
+- `data_source` – This is the context path where the reference to the instance of the DataSource can be found. It will
+  be looked up against the context returned by the initial_context lookup, or against the InitialContext directly if no
+  initial_context is supplied.
 
-Similar to the other DataSource configurations, it’s possible to send properties directly to the InitialContext by prefixing those properties with `env.`, for example:
+Similar to the other DataSource configurations, it’s possible to send properties directly to the InitialContext by
+prefixing those properties with `env.`, for example:
 
 - `env.encoding=UTF8`
 
-This would send the property `encoding` with the value of `UTF8` to the constructor of the InitialContext upon instantiation.
+This would send the property `encoding` with the value of `UTF8` to the constructor of the InitialContext upon
+instantiation.
 
 You can plug any 3rd party DataSource by implementing the interface `org.apache.ibatis.datasource.DataSourceFactory`:
 
@@ -684,7 +792,8 @@ public interface DataSourceFactory {
 }
 ```
 
-`org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory` can be used as super class to build new datasource adapters. For example this is the code needed to plug C3P0:
+`org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory` can be used as super class to build new datasource
+adapters. For example this is the code needed to plug C3P0:
 
 ```java
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
@@ -698,7 +807,8 @@ public class C3P0DataSourceFactory extends UnpooledDataSourceFactory {
 }
 ```
 
-To set it up, add a property for each setter method you want MyBatis to call. Follows below a sample configuration which connects to a PostgreSQL database:
+To set it up, add a property for each setter method you want MyBatis to call. Follows below a sample configuration which
+connects to a PostgreSQL database:
 
 ```xml
 <dataSource type="org.myproject.C3P0DataSourceFactory">
@@ -711,13 +821,20 @@ To set it up, add a property for each setter method you want MyBatis to call. Fo
 
 ### databaseIdProvider
 
-MyBatis is able to execute different statements depending on your database vendor. The multi-db vendor support is based on the mapped statements `databaseId` attribute. MyBatis will load all statements with no `databaseId` attribute or with a `databaseId` that matches the current one. In case the same statement is found with and without the `databaseId` the latter will be discarded. To enable the multi vendor support add a `databaseIdProvider` to mybatis-config.xml file as follows:
+MyBatis is able to execute different statements depending on your database vendor. The multi-db vendor support is based
+on the mapped statements `databaseId` attribute. MyBatis will load all statements with no `databaseId` attribute or with
+a `databaseId` that matches the current one. In case the same statement is found with and without the `databaseId` the
+latter will be discarded. To enable the multi vendor support add a `databaseIdProvider` to mybatis-config.xml file as
+follows:
 
 ```xml
 <databaseIdProvider type="DB_VENDOR" />
 ```
 
-The DB_VENDOR implementation databaseIdProvider sets as databaseId the String returned by `DatabaseMetaData#getDatabaseProductName()`. Given that usually that string is too long and that different versions of the same product may return different values, you may want to convert it to a shorter one by adding properties like follows:
+The DB_VENDOR implementation databaseIdProvider sets as databaseId the String returned
+by `DatabaseMetaData#getDatabaseProductName()`. Given that usually that string is too long and that different versions
+of the same product may return different values, you may want to convert it to a shorter one by adding properties like
+follows:
 
 ```xml
 <databaseIdProvider type="DB_VENDOR">
@@ -727,9 +844,12 @@ The DB_VENDOR implementation databaseIdProvider sets as databaseId the String re
 </databaseIdProvider>
 ```
 
-When properties are provided, the DB_VENDOR databaseIdProvider will search the property value corresponding to the first key found in the returned database product name or "null" if there is not a matching property. In this case, if `getDatabaseProductName()` returns "Oracle (DataDirect)" the databaseId will be set to "oracle".
+When properties are provided, the DB_VENDOR databaseIdProvider will search the property value corresponding to the first
+key found in the returned database product name or "null" if there is not a matching property. In this case,
+if `getDatabaseProductName()` returns "Oracle (DataDirect)" the databaseId will be set to "oracle".
 
-You can build your own DatabaseIdProvider by implementing the interface `org.apache.ibatis.mapping.DatabaseIdProvider` and registering it in mybatis-config.xml:
+You can build your own DatabaseIdProvider by implementing the interface `org.apache.ibatis.mapping.DatabaseIdProvider`
+and registering it in mybatis-config.xml:
 
 ```java
 public interface DatabaseIdProvider {
@@ -742,7 +862,11 @@ public interface DatabaseIdProvider {
 
 ### mappers
 
-Now that the behavior of MyBatis is configured with the above configuration elements, we’re ready to define our mapped SQL statements. But first, we need to tell MyBatis where to find them. Java doesn’t really provide any good means of auto-discovery in this regard, so the best way to do it is to simply tell MyBatis where to find the mapping files. You can use classpath relative resource references, fully qualified url references (including `file:///` URLs), class names or package names. For example:
+Now that the behavior of MyBatis is configured with the above configuration elements, we’re ready to define our mapped
+SQL statements. But first, we need to tell MyBatis where to find them. Java doesn’t really provide any good means of
+auto-discovery in this regard, so the best way to do it is to simply tell MyBatis where to find the mapping files. You
+can use classpath relative resource references, fully qualified url references (including `file:///` URLs), class names
+or package names. For example:
 
 ```xml
 <!-- Using classpath relative resources -->
@@ -752,6 +876,7 @@ Now that the behavior of MyBatis is configured with the above configuration elem
   <mapper resource="org/mybatis/builder/PostMapper.xml"/>
 </mappers>
 ```
+
 ```xml
 <!-- Using url fully qualified paths -->
 <mappers>
@@ -760,6 +885,7 @@ Now that the behavior of MyBatis is configured with the above configuration elem
   <mapper url="file:///var/mappers/PostMapper.xml"/>
 </mappers>
 ```
+
 ```xml
 <!-- Using mapper interface classes -->
 <mappers>
@@ -768,6 +894,7 @@ Now that the behavior of MyBatis is configured with the above configuration elem
   <mapper class="org.mybatis.builder.PostMapper"/>
 </mappers>
 ```
+
 ```xml
 <!-- Register all interfaces in a package as mappers -->
 <mappers>
@@ -775,4 +902,5 @@ Now that the behavior of MyBatis is configured with the above configuration elem
 </mappers>
 ```
 
-These statement simply tell MyBatis where to go from here. The rest of the details are in each of the SQL Mapping files, and that’s exactly what the next section will discuss.
+These statement simply tell MyBatis where to go from here. The rest of the details are in each of the SQL Mapping files,
+and that’s exactly what the next section will discuss.

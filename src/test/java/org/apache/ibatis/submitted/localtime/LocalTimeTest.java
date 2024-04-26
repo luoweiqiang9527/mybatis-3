@@ -31,44 +31,44 @@ import org.junit.jupiter.api.Test;
 
 class LocalTimeTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/localtime/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/localtime/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/localtime/CreateDB.sql");
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/localtime/CreateDB.sql");
-  }
 
-  @Test
-  void shouldSelectLocalTimeWithNanoseconds() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = mapper.selectById(1);
-      assertEquals(LocalTime.of(11, 22, 33, 123456789), record.getT());
+    @Test
+    void shouldSelectLocalTimeWithNanoseconds() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = mapper.selectById(1);
+            assertEquals(LocalTime.of(11, 22, 33, 123456789), record.getT());
+        }
     }
-  }
 
-  @Test
-  void shouldInsertLocalTimeWithNanoseconds() {
-    TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-    LocalTime t = LocalTime.of(11, 22, 33, 123456789);
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = new Record();
-      record.setId(2);
-      record.setT(t);
-      int result = mapper.insertLocalTime(record);
-      assertEquals(1, result);
-      sqlSession.commit();
+    @Test
+    void shouldInsertLocalTimeWithNanoseconds() {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+        LocalTime t = LocalTime.of(11, 22, 33, 123456789);
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = new Record();
+            record.setId(2);
+            record.setT(t);
+            int result = mapper.insertLocalTime(record);
+            assertEquals(1, result);
+            sqlSession.commit();
+        }
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            Record record = mapper.selectById(2);
+            assertEquals(t, record.getT());
+        }
     }
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      Record record = mapper.selectById(2);
-      assertEquals(t, record.getT());
-    }
-  }
 
 }

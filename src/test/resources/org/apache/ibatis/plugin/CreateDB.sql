@@ -16,20 +16,24 @@
 
 drop schema public if exists; -- empty public remains
 
-create table public.users (
-  id int,
-  name varchar(20)
+create table public.users
+(
+    id   int,
+    name varchar(20)
 );
 
-insert into public.users (id, name) values (1, 'Public user 1');
+insert into public.users (id, name)
+values (1, 'Public user 1');
 
 drop schema myschema if exists;
 create schema myschema;
 
-create table myschema.users (
-  id int,
-  name varchar(20)
+create table myschema.users
+(
+    id   int,
+    name varchar(20)
 );
 
-insert into myschema.users (id, name) values (1, 'Private user 1');
+insert into myschema.users (id, name)
+values (1, 'Private user 1');
 

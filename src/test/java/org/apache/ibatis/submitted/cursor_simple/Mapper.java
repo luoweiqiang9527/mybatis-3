@@ -22,9 +22,9 @@ import org.apache.ibatis.session.RowBounds;
 
 public interface Mapper {
 
-  Cursor<User> getAllUsers();
+    Cursor<User> getAllUsers();
 
-  // @formatter:off
+    // @formatter:off
   @Select({
       "select null id, null name from (values (0))",
       "union all",
@@ -37,7 +37,7 @@ public interface Mapper {
   // @formatter:on
   Cursor<User> getNullUsers(RowBounds rowBounds);
 
-  @Select("select * from users")
-  @Options(fetchSize = Integer.MIN_VALUE)
-  Cursor<User> getUsersMysqlStream();
+    @Select("select * from users")
+    @Options(fetchSize = Integer.MIN_VALUE)
+    Cursor<User> getUsersMysqlStream();
 }

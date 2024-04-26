@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 
 class NullTest {
 
-  @Test
-  void shouldGetTypeAndTypeHandlerForNullStringType() {
-    assertEquals(JdbcType.VARCHAR, Null.STRING.getJdbcType());
-    assertTrue(Null.STRING.getTypeHandler() instanceof StringTypeHandler);
-  }
+    @Test
+    void shouldGetTypeAndTypeHandlerForNullStringType() {
+        assertEquals(JdbcType.VARCHAR, Null.STRING.getJdbcType());
+        assertTrue(Null.STRING.getTypeHandler() instanceof StringTypeHandler);
+    }
 
 }

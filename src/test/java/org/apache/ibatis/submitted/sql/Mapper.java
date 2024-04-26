@@ -24,12 +24,12 @@ import org.apache.ibatis.jdbc.SQL;
 
 public interface Mapper {
 
-  @SelectProvider(type = SqlProvider.class)
-  List<User> findAll(@Param("offset") long offset, @Param("limit") int limit);
+    @SelectProvider(type = SqlProvider.class)
+    List<User> findAll(@Param("offset") long offset, @Param("limit") int limit);
 
-  class SqlProvider implements ProviderMethodResolver {
-    public String findAll() {
-      // @formatter:off
+    class SqlProvider implements ProviderMethodResolver {
+        public String findAll() {
+            // @formatter:off
       return new SQL()
           .SELECT("user_id", "name")
           .FROM("${schema}users")
@@ -38,7 +38,7 @@ public interface Mapper {
           .FETCH_FIRST_ROWS_ONLY("#{limit}")
           .toString();
       // @formatter:on
+        }
     }
-  }
 
 }

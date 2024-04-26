@@ -24,13 +24,13 @@ import org.apache.ibatis.annotations.Select;
 
 public interface PersonMapper {
 
-  Person getWithoutComplex(Long id);
+    Person getWithoutComplex(Long id);
 
-  Person getWithComplex(Long id);
+    Person getWithComplex(Long id);
 
-  Person getParentWithComplex(Person person);
+    Person getParentWithComplex(Person person);
 
-  // @formatter:off
+    // @formatter:off
   @Select({
       "SELECT id, firstName, lastName, parent_id, parent_firstName, parent_lastName",
       "FROM Person",
@@ -40,7 +40,7 @@ public interface PersonMapper {
   @ResultMap("personMapComplex")
   Person getWithComplex2(Long id);
 
-  // @formatter:off
+    // @formatter:off
   @Select({
       "SELECT id, firstName, lastName, parent_id, parent_firstName, parent_lastName",
       "FROM Person",
@@ -50,7 +50,7 @@ public interface PersonMapper {
   @ResultMap("org.apache.ibatis.submitted.complex_column.PersonMapper.personMapComplex")
   Person getWithComplex3(Long id);
 
-  // @formatter:off
+    // @formatter:off
   @Select({
       "SELECT id, firstName, lastName, parent_id, parent_firstName, parent_lastName",
       "FROM Person",
@@ -63,7 +63,7 @@ public interface PersonMapper {
   // @formatter:on
   Person getComplexWithParamAttributes(Long id);
 
-  // @formatter:off
+    // @formatter:off
   @Select("SELECT id, firstName, lastName, parent_id, parent_firstName, parent_lastName"
       + " FROM Person"
       + " WHERE firstName = #{firstName,jdbcType=VARCHAR}"

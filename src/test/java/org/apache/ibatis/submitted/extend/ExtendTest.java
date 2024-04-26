@@ -29,25 +29,25 @@ import org.junit.jupiter.api.Test;
 
 class ExtendTest {
 
-  protected static SqlSessionFactory sqlSessionFactory;
+    protected static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/extend/ExtendConfig.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/extend/ExtendConfig.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/extend/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/extend/CreateDB.sql");
-  }
-
-  @Test
-  void testExtend() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      ExtendMapper mapper = sqlSession.getMapper(ExtendMapper.class);
-      Child answer = mapper.selectChild();
-      assertEquals(answer.getMyProperty(), "last");
+    @Test
+    void testExtend() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            ExtendMapper mapper = sqlSession.getMapper(ExtendMapper.class);
+            Child answer = mapper.selectChild();
+            assertEquals(answer.getMyProperty(), "last");
+        }
     }
-  }
 
 }

@@ -46,11 +46,10 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * @author Tim Chen
- *
  * @since 3.4.3
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR })
+@Target({ElementType.CONSTRUCTOR})
 public @interface AutomapConstructor {
 }

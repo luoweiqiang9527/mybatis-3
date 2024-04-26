@@ -30,21 +30,21 @@ import org.junit.jupiter.api.Test;
 
 class DuplicateResourceTest extends BaseDataTest {
 
-  @BeforeEach
-  void setup() throws Exception {
-    BaseDataTest.createBlogDataSource();
-  }
-
-  @Test
-  void shouldDemonstrateDuplicateResourceIssue() throws Exception {
-    final String resource = "org/apache/ibatis/submitted/duplicate_resource_loaded/Config.xml";
-    final Reader reader = Resources.getResourceAsReader(resource);
-    final SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
-    final SqlSessionFactory factory = builder.build(reader);
-    try (SqlSession sqlSession = factory.openSession()) {
-      final Mapper mapper = sqlSession.getMapper(Mapper.class);
-      final List<Map<String, Object>> list = mapper.selectAllBlogs();
-      Assertions.assertEquals(2, list.size());
+    @BeforeEach
+    void setup() throws Exception {
+        BaseDataTest.createBlogDataSource();
     }
-  }
+
+    @Test
+    void shouldDemonstrateDuplicateResourceIssue() throws Exception {
+        final String resource = "org/apache/ibatis/submitted/duplicate_resource_loaded/Config.xml";
+        final Reader reader = Resources.getResourceAsReader(resource);
+        final SqlSessionFactoryBuilder builder = new SqlSessionFactoryBuilder();
+        final SqlSessionFactory factory = builder.build(reader);
+        try (SqlSession sqlSession = factory.openSession()) {
+            final Mapper mapper = sqlSession.getMapper(Mapper.class);
+            final List<Map<String, Object>> list = mapper.selectAllBlogs();
+            Assertions.assertEquals(2, list.size());
+        }
+    }
 }

@@ -20,5 +20,5 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 public interface ProductMapper {
-  List<ProductResp> selectAllInfo(@Param("code") String code);
+    List<ProductResp> selectAllInfo(@Param("code") String code);
 }

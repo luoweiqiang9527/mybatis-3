@@ -34,72 +34,72 @@ import org.junit.jupiter.api.Test;
 
 class ActualParamNameTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/param_name_resolve/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-      sqlSessionFactory.getConfiguration().addMapper(Mapper.class);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/param_name_resolve/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+            sqlSessionFactory.getConfiguration().addMapper(Mapper.class);
+        }
+
+        // populate in-memory database
+        try (Connection conn = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource().getConnection();
+             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/param_name_resolve/CreateDB.sql")) {
+            ScriptRunner runner = new ScriptRunner(conn);
+            runner.setLogWriter(null);
+            runner.runScript(reader);
+        }
     }
 
-    // populate in-memory database
-    try (Connection conn = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource().getConnection();
-        Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/param_name_resolve/CreateDB.sql")) {
-      ScriptRunner runner = new ScriptRunner(conn);
-      runner.setLogWriter(null);
-      runner.runScript(reader);
+    @Test
+    void testSingleListParameterWhenUseActualParamNameIsTrue() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            // use actual name
+            {
+                long count = mapper.getUserCountUsingList(Arrays.asList(1, 2));
+                assertEquals(2, count);
+            }
+            // use 'collection' as alias
+            {
+                long count = mapper.getUserCountUsingListWithAliasIsCollection(Arrays.asList(1, 2));
+                assertEquals(2, count);
+            }
+            // use 'list' as alias
+            {
+                long count = mapper.getUserCountUsingListWithAliasIsList(Arrays.asList(1, 2));
+                assertEquals(2, count);
+            }
+            // use actual name #2693
+            {
+                long count = mapper.getUserCountUsingList_RowBounds(new RowBounds(0, 5), Arrays.asList(1, 2));
+                assertEquals(2, count);
+            }
+        }
     }
-  }
 
-  @Test
-  void testSingleListParameterWhenUseActualParamNameIsTrue() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      // use actual name
-      {
-        long count = mapper.getUserCountUsingList(Arrays.asList(1, 2));
-        assertEquals(2, count);
-      }
-      // use 'collection' as alias
-      {
-        long count = mapper.getUserCountUsingListWithAliasIsCollection(Arrays.asList(1, 2));
-        assertEquals(2, count);
-      }
-      // use 'list' as alias
-      {
-        long count = mapper.getUserCountUsingListWithAliasIsList(Arrays.asList(1, 2));
-        assertEquals(2, count);
-      }
-      // use actual name #2693
-      {
-        long count = mapper.getUserCountUsingList_RowBounds(new RowBounds(0, 5), Arrays.asList(1, 2));
-        assertEquals(2, count);
-      }
+    @Test
+    void testSingleArrayParameterWhenUseActualParamNameIsTrue() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            // use actual name
+            {
+                long count = mapper.getUserCountUsingArray(1, 2);
+                assertEquals(2, count);
+            }
+            // use 'array' as alias
+            {
+                long count = mapper.getUserCountUsingArrayWithAliasArray(1, 2);
+                assertEquals(2, count);
+            }
+        }
     }
-  }
 
-  @Test
-  void testSingleArrayParameterWhenUseActualParamNameIsTrue() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      // use actual name
-      {
-        long count = mapper.getUserCountUsingArray(1, 2);
-        assertEquals(2, count);
-      }
-      // use 'array' as alias
-      {
-        long count = mapper.getUserCountUsingArrayWithAliasArray(1, 2);
-        assertEquals(2, count);
-      }
-    }
-  }
-
-  interface Mapper {
-    // @formatter:off
+    interface Mapper {
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -111,7 +111,7 @@ class ActualParamNameTest {
     // @formatter:on
     Long getUserCountUsingList(List<Integer> ids);
 
-    // @formatter:off
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -123,7 +123,7 @@ class ActualParamNameTest {
     // @formatter:on
     Long getUserCountUsingListWithAliasIsCollection(List<Integer> ids);
 
-    // @formatter:off
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -135,7 +135,7 @@ class ActualParamNameTest {
     // @formatter:on
     Long getUserCountUsingListWithAliasIsList(List<Integer> ids);
 
-    // @formatter:off
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -147,7 +147,7 @@ class ActualParamNameTest {
     // @formatter:on
     Long getUserCountUsingArray(Integer... ids);
 
-    // @formatter:off
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -159,7 +159,7 @@ class ActualParamNameTest {
     // @formatter:on
     Long getUserCountUsingArrayWithAliasArray(Integer... ids);
 
-    // @formatter:off
+        // @formatter:off
     @Select({
         "<script>",
         "  select count(*) from users u where u.id in",
@@ -170,6 +170,6 @@ class ActualParamNameTest {
       })
     // @formatter:on
     Long getUserCountUsingList_RowBounds(RowBounds rowBounds, List<Integer> ids);
-  }
+    }
 
 }

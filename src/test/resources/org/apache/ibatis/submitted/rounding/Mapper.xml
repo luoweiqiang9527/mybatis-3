@@ -17,8 +17,8 @@
 
 -->
 <!DOCTYPE mapper
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.apache.ibatis.submitted.rounding.Mapper">
     <resultMap type="org.apache.ibatis.submitted.rounding.User" id="usermap">
@@ -33,7 +33,7 @@
     </select>
     <insert id="insert" parameterType="org.apache.ibatis.submitted.rounding.User">
         insert into users (id, name, funkyNumber, roundingMode) values (
-            #{id}, #{name}, #{funkyNumber}, #{roundingMode}
+        #{id}, #{name}, #{funkyNumber}, #{roundingMode}
         )
     </insert>
 
@@ -48,7 +48,7 @@
     </select>
     <insert id="insert2" parameterType="org.apache.ibatis.submitted.rounding.User">
         insert into users2 (id, name, funkyNumber, roundingMode) values (
-            #{id}, #{name}, #{funkyNumber}, #{roundingMode, typeHandler=org.apache.ibatis.type.EnumTypeHandler}
+        #{id}, #{name}, #{funkyNumber}, #{roundingMode, typeHandler=org.apache.ibatis.type.EnumTypeHandler}
         )
     </insert>
 

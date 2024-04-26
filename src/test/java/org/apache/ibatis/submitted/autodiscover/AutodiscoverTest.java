@@ -32,29 +32,29 @@ import org.junit.jupiter.api.Test;
 
 class AutodiscoverTest {
 
-  protected static SqlSessionFactory sqlSessionFactory;
+    protected static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setup() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/autodiscover/MapperConfig.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setup() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/autodiscover/MapperConfig.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
     }
-  }
 
-  @Test
-  void testTypeAlias() {
-    TypeAliasRegistry typeAliasRegistry = sqlSessionFactory.getConfiguration().getTypeAliasRegistry();
-    assertNotNull(typeAliasRegistry.resolveAlias("testAlias"));
-  }
+    @Test
+    void testTypeAlias() {
+        TypeAliasRegistry typeAliasRegistry = sqlSessionFactory.getConfiguration().getTypeAliasRegistry();
+        assertNotNull(typeAliasRegistry.resolveAlias("testAlias"));
+    }
 
-  @Test
-  void testTypeHandler() {
-    TypeHandlerRegistry typeHandlerRegistry = sqlSessionFactory.getConfiguration().getTypeHandlerRegistry();
-    assertTrue(typeHandlerRegistry.hasTypeHandler(BigInteger.class));
-  }
+    @Test
+    void testTypeHandler() {
+        TypeHandlerRegistry typeHandlerRegistry = sqlSessionFactory.getConfiguration().getTypeHandlerRegistry();
+        assertTrue(typeHandlerRegistry.hasTypeHandler(BigInteger.class));
+    }
 
-  @Test
-  void testMapper() {
-    assertTrue(sqlSessionFactory.getConfiguration().hasMapper(DummyMapper.class));
-  }
+    @Test
+    void testMapper() {
+        assertTrue(sqlSessionFactory.getConfiguration().hasMapper(DummyMapper.class));
+    }
 }

@@ -28,25 +28,25 @@ import org.junit.jupiter.api.Test;
 
 class UnmatchedPropTypeTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/unmatched_prop_type/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/unmatched_prop_type/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/unmatched_prop_type/CreateDB.sql");
     }
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/unmatched_prop_type/CreateDB.sql");
-  }
 
-  @Test
-  void shouldGetAUser() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      UnmatchedPropTypeMapper mapper = sqlSession.getMapper(UnmatchedPropTypeMapper.class);
-      User user = mapper.getUser(1);
-      Assertions.assertEquals("User1", user.getName());
+    @Test
+    void shouldGetAUser() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            UnmatchedPropTypeMapper mapper = sqlSession.getMapper(UnmatchedPropTypeMapper.class);
+            User user = mapper.getUser(1);
+            Assertions.assertEquals("User1", user.getName());
+        }
     }
-  }
 
 }

@@ -29,29 +29,29 @@ import org.junit.jupiter.api.Test;
 
 class DeepResultMapTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/resolution/deepresultmap/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/resolution/deepresultmap/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/resolution/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/resolution/CreateDB.sql");
-  }
-
-  @Test
-  void shouldGetAUser() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      MapperA mapper = sqlSession.getMapper(MapperA.class);
-      User user = mapper.getUser(1);
-      Assertions.assertEquals(Integer.valueOf(1), user.getId());
-      Assertions.assertEquals("User1", user.getName());
+    @Test
+    void shouldGetAUser() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            MapperA mapper = sqlSession.getMapper(MapperA.class);
+            User user = mapper.getUser(1);
+            Assertions.assertEquals(Integer.valueOf(1), user.getId());
+            Assertions.assertEquals("User1", user.getName());
+        }
     }
-  }
 
 }

@@ -30,25 +30,25 @@ import org.junit.jupiter.api.Test;
 
 class CacheOrderTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create a SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/cacheorder/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create a SqlSessionFactory
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/cacheorder/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/cacheorder/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/cacheorder/CreateDB.sql");
-  }
-
-  @Test
-  void shouldResolveACacheRefNotYetRead() {
-    MappedStatement ms = sqlSessionFactory.getConfiguration().getMappedStatement("getUser");
-    Cache cache = ms.getCache();
-    assertEquals("org.apache.ibatis.submitted.cacheorder.Mapper2", cache.getId());
-  }
+    @Test
+    void shouldResolveACacheRefNotYetRead() {
+        MappedStatement ms = sqlSessionFactory.getConfiguration().getMappedStatement("getUser");
+        Cache cache = ms.getCache();
+        assertEquals("org.apache.ibatis.submitted.cacheorder.Mapper2", cache.getId());
+    }
 
 }

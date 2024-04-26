@@ -13,7 +13,11 @@ Mybatis 通过使用内置的日志工厂提供日志功能。内置日志工厂
 
 MyBatis 内置日志工厂基于运行时自省机制选择合适的日志工具。它会使用第一个查找得到的工具（按上文列举的顺序查找）。如果一个都未找到，日志功能就会被禁用。
 
-不少应用服务器（如 Tomcat 和 WebShpere）的类路径中已经包含 Commons Logging，所以在这种配置环境下的 MyBatis 会把它作为日志工具，记住这点非常重要。这将意味着，在诸如 WebSphere 的环境中，它提供了 Commons Logging 的私有实现，你的 Log4J 配置将被忽略。MyBatis 将你的 Log4J 配置忽略掉是相当令人郁闷的（事实上，正是因为在这种配置环境下，MyBatis 才会选择使用 Commons Logging 而不是 Log4J）。如果你的应用部署在一个类路径已经包含 Commons Logging 的环境中，而你又想使用其它日志工具，你可以通过在 MyBatis 配置文件 mybatis-config.xml 里面添加一项 setting 来选择别的日志工具。
+不少应用服务器（如 Tomcat 和 WebShpere）的类路径中已经包含 Commons Logging，所以在这种配置环境下的 MyBatis
+会把它作为日志工具，记住这点非常重要。这将意味着，在诸如 WebSphere 的环境中，它提供了 Commons Logging 的私有实现，你的 Log4J
+配置将被忽略。MyBatis 将你的 Log4J 配置忽略掉是相当令人郁闷的（事实上，正是因为在这种配置环境下，MyBatis 才会选择使用
+Commons Logging 而不是 Log4J）。如果你的应用部署在一个类路径已经包含 Commons Logging 的环境中，而你又想使用其它日志工具，你可以通过在
+MyBatis 配置文件 mybatis-config.xml 里面添加一项 setting 来选择别的日志工具。
 
 ```xml
 <configuration>
@@ -25,7 +29,9 @@ MyBatis 内置日志工厂基于运行时自省机制选择合适的日志工具
 </configuration>
 ```
 
-logImpl 可选的值有：SLF4J、LOG4J、LOG4J2、JDK_LOGGING、COMMONS_LOGGING、STDOUT_LOGGING、NO_LOGGING，或者是实现了接口 `org.apache.ibatis.logging.Log` 的，且构造方法是以字符串为参数的类的完全限定名。（译者注：可以参考org.apache.ibatis.logging.slf4j.Slf4jImpl.java的实现）
+logImpl
+可选的值有：SLF4J、LOG4J、LOG4J2、JDK_LOGGING、COMMONS_LOGGING、STDOUT_LOGGING、NO_LOGGING，或者是实现了接口 `org.apache.ibatis.logging.Log`
+的，且构造方法是以字符串为参数的类的完全限定名。（译者注：可以参考org.apache.ibatis.logging.slf4j.Slf4jImpl.java的实现）
 
 你也可以调用如下任一方法来使用日志工具：
 
@@ -38,9 +44,11 @@ org.apache.ibatis.logging.LogFactory.useCommonsLogging();
 org.apache.ibatis.logging.LogFactory.useStdOutLogging();
 ```
 
-如果你决定要调用以上某个方法，请在调用其它 MyBatis 方法之前调用它。另外，仅当运行时类路径中存在该日志工具时，调用与该日志工具对应的方法才会生效，否则 MyBatis 一概忽略。如你环境中并不存在 Log4J2，你却调用了相应的方法，MyBatis 就会忽略这一调用，转而以默认的查找顺序查找日志工具。
+如果你决定要调用以上某个方法，请在调用其它 MyBatis 方法之前调用它。另外，仅当运行时类路径中存在该日志工具时，调用与该日志工具对应的方法才会生效，否则
+MyBatis 一概忽略。如你环境中并不存在 Log4J2，你却调用了相应的方法，MyBatis 就会忽略这一调用，转而以默认的查找顺序查找日志工具。
 
-关于 SLF4J、Apache Commons Logging、Apache Log4J 和 JDK Logging 的 API 介绍不在本文档介绍范围内。不过，下面的例子可以作为一个快速入门。关于这些日志框架的更多信息，可以参考以下链接：
+关于 SLF4J、Apache Commons Logging、Apache Log4J 和 JDK Logging 的 API
+介绍不在本文档介绍范围内。不过，下面的例子可以作为一个快速入门。关于这些日志框架的更多信息，可以参考以下链接：
 
 - [SLF4J](https://www.slf4j.org/)
 - [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/)
@@ -51,13 +59,17 @@ org.apache.ibatis.logging.LogFactory.useStdOutLogging();
 
 你可以对包、映射类的全限定名、命名空间或全限定语句名开启日志功能来查看 MyBatis 的日志语句。
 
-再次说明下，具体怎么做，由使用的日志工具决定，这里以 SLF4J(Logback) 为例。配置日志功能非常简单：添加一个或多个配置文件（如 `logback.xml`），有时需要添加 jar 包。下面的例子将使用 SLF4J(Logback) 来配置完整的日志服务，共两个步骤：
+再次说明下，具体怎么做，由使用的日志工具决定，这里以 SLF4J(Logback)
+为例。配置日志功能非常简单：添加一个或多个配置文件（如 `logback.xml`），有时需要添加 jar 包。下面的例子将使用 SLF4J(Logback)
+来配置完整的日志服务，共两个步骤：
 
 #### 步骤 1：添加 SLF4J + Logback 的 jar 包
 
-因为我们使用的是 SLF4J(Logback)，就要确保它的 jar 包在应用中是可用的。要启用 SLF4J(Logback)，只要将 jar 包添加到应用的类路径中即可。SLF4J(Logback) 的 jar 包可以在上面的链接中下载。
+因为我们使用的是 SLF4J(Logback)，就要确保它的 jar 包在应用中是可用的。要启用 SLF4J(Logback)，只要将 jar
+包添加到应用的类路径中即可。SLF4J(Logback) 的 jar 包可以在上面的链接中下载。
 
-对于 web 应用或企业级应用，则需要将 `logback-classic.jar`, `logback-core.jar` and `slf4j-api.jar` 添加到 `WEB-INF/lib` 目录下；对于独立应用，可以将它添加到JVM 的 `-classpath` 启动参数中。
+对于 web 应用或企业级应用，则需要将 `logback-classic.jar`, `logback-core.jar` and `slf4j-api.jar` 添加到 `WEB-INF/lib`
+目录下；对于独立应用，可以将它添加到JVM 的 `-classpath` 启动参数中。
 
 如果你使用 maven, 你可以通过在 `pom.xml` 中添加下面的依赖来下载 jar 文件。
 
@@ -122,7 +134,9 @@ public interface BlogMapper {
 </logger>
 ```
 
-某些查询可能会返回庞大的结果集，此时只想记录其执行的 SQL 语句而不想记录结果该怎么办？为此，Mybatis 中 SQL 语句的日志级别被设为DEBUG（JDK 日志设为 FINE），结果的日志级别为 TRACE（JDK 日志设为 FINER)。所以，只要将日志级别调整为 DEBUG 即可达到目的：
+某些查询可能会返回庞大的结果集，此时只想记录其执行的 SQL 语句而不想记录结果该怎么办？为此，Mybatis 中 SQL
+语句的日志级别被设为DEBUG（JDK 日志设为 FINE），结果的日志级别为 TRACE（JDK 日志设为 FINER)。所以，只要将日志级别调整为 DEBUG
+即可达到目的：
 
 ```xml
 <logger name="org.mybatis.example">
@@ -164,7 +178,8 @@ public interface BlogMapper {
 
 <span class="label important">注意</span> 如果你使用的是 SLF4J 或 Log4j 2，MyBatis 将以 `MYBATIS` 这个值进行调用。
 
-配置文件 `log4j.properties` 的余下内容是针对日志输出源的，这一内容已经超出本文档范围。关于 Logback 的更多内容，可以参考[Logback](https://logback.qos.ch/) 的网站。不过，你也可以简单地做做实验，看看不同的配置会产生怎样的效果。
+配置文件 `log4j.properties` 的余下内容是针对日志输出源的，这一内容已经超出本文档范围。关于 Logback
+的更多内容，可以参考[Logback](https://logback.qos.ch/) 的网站。不过，你也可以简单地做做实验，看看不同的配置会产生怎样的效果。
 
 #### Log4j 2 配置示例
 

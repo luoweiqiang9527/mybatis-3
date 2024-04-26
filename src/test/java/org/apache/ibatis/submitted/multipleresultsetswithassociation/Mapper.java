@@ -24,11 +24,11 @@ import org.apache.ibatis.mapping.StatementType;
 
 public interface Mapper {
 
-  List<OrderDetail> getOrderDetailsWithHeaders();
+    List<OrderDetail> getOrderDetailsWithHeaders();
 
-  @Select(value = "{ call GetOrderDetailsAndHeaders() }")
-  @ResultMap("orderDetailResultMap")
-  @Options(statementType = StatementType.CALLABLE, resultSets = "orderDetailResultSet,orderHeaderResultSet")
-  List<OrderDetail> getOrderDetailsWithHeadersAnnotationBased();
+    @Select(value = "{ call GetOrderDetailsAndHeaders() }")
+    @ResultMap("orderDetailResultMap")
+    @Options(statementType = StatementType.CALLABLE, resultSets = "orderDetailResultSet,orderHeaderResultSet")
+    List<OrderDetail> getOrderDetailsWithHeadersAnnotationBased();
 
 }

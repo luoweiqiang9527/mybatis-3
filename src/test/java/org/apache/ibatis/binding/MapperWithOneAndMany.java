@@ -26,7 +26,7 @@ import org.apache.ibatis.domain.blog.Blog;
 
 public interface MapperWithOneAndMany {
 
-  // @formatter:off
+    // @formatter:off
   @Select({
     "SELECT *",
     "FROM blog"

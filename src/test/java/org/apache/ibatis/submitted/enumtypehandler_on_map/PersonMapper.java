@@ -21,14 +21,14 @@ import org.apache.ibatis.annotations.Param;
 
 public interface PersonMapper {
 
-  interface TypeName {
-    Person.Type getType();
+    interface TypeName {
+        Person.Type getType();
 
-    String getName();
-  }
+        String getName();
+    }
 
-  List<Person> getByType(@Param("type") Person.Type type, @Param("name") String name);
+    List<Person> getByType(@Param("type") Person.Type type, @Param("name") String name);
 
-  List<Person> getByTypeNoParam(TypeName typeName);
+    List<Person> getByTypeNoParam(TypeName typeName);
 
 }

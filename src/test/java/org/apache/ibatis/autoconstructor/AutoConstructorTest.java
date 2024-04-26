@@ -34,73 +34,73 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class AutoConstructorTest {
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create a SqlSessionFactory
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create a SqlSessionFactory
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/autoconstructor/CreateDB.sql");
     }
 
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/autoconstructor/CreateDB.sql");
-  }
-
-  @Test
-  void fullyPopulatedSubject() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      final Object subject = mapper.getSubject(1);
-      assertNotNull(subject);
+    @Test
+    void fullyPopulatedSubject() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            final Object subject = mapper.getSubject(1);
+            assertNotNull(subject);
+        }
     }
-  }
 
-  @Test
-  void primitiveSubjects() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      assertThrows(PersistenceException.class, mapper::getSubjects);
+    @Test
+    void primitiveSubjects() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            assertThrows(PersistenceException.class, mapper::getSubjects);
+        }
     }
-  }
 
-  @Test
-  void annotatedSubject() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      verifySubjects(mapper.getAnnotatedSubjects());
+    @Test
+    void annotatedSubject() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            verifySubjects(mapper.getAnnotatedSubjects());
+        }
     }
-  }
 
-  @Test
-  void badMultipleAnnotatedSubject() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      final PersistenceException ex = assertThrows(PersistenceException.class, mapper::getBadAnnotatedSubjects);
-      final ExecutorException cause = (ExecutorException) ex.getCause();
-      assertEquals("@AutomapConstructor should be used in only one constructor.", cause.getMessage());
+    @Test
+    void badMultipleAnnotatedSubject() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            final PersistenceException ex = assertThrows(PersistenceException.class, mapper::getBadAnnotatedSubjects);
+            final ExecutorException cause = (ExecutorException) ex.getCause();
+            assertEquals("@AutomapConstructor should be used in only one constructor.", cause.getMessage());
+        }
     }
-  }
 
-  @Test
-  void badSubject() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      assertThrows(PersistenceException.class, mapper::getBadSubjects);
+    @Test
+    void badSubject() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            assertThrows(PersistenceException.class, mapper::getBadSubjects);
+        }
     }
-  }
 
-  @Test
-  void extensiveSubject() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
-      verifySubjects(mapper.getExtensiveSubjects());
+    @Test
+    void extensiveSubject() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            verifySubjects(mapper.getExtensiveSubjects());
+        }
     }
-  }
 
-  private void verifySubjects(final List<?> subjects) {
-    assertNotNull(subjects);
-    Assertions.assertThat(subjects.size()).isEqualTo(3);
-  }
+    private void verifySubjects(final List<?> subjects) {
+        assertNotNull(subjects);
+        Assertions.assertThat(subjects.size()).isEqualTo(3);
+    }
 }

@@ -11,9 +11,15 @@ MyBatis は、内部の Log Factory を通してログ情報を出力します�
 - Log4j (3.5.9以降非推奨)
 - JDK logging
 
-実際に使用されるのは、MyBatis 内部の Log Factory が検出した実装になります。MyBatis の Log Factory は上に挙げた順番でロギング実装を検索し、最初に見つけた実装を使用します。上記の実装が検出できなかった場合、ログは出力されません。
+実際に使用されるのは、MyBatis 内部の Log Factory が検出した実装になります。MyBatis の Log Factory
+は上に挙げた順番でロギング実装を検索し、最初に見つけた実装を使用します。上記の実装が検出できなかった場合、ログは出力されません。
 
-アプリケーションサーバーでは、出荷時のクラスパスに Commons Logging が含まれていることがよくあります（Tomcat や WebSphere は良い例でしょう）。重要なのは、このような環境では MyBatis は Commons Logging を使用するということです。これはつまり、独自の Commons Logging 実装を使う WebSphere のような環境では、あなたが追加した Log4J の設定は無視されるということを意味しています。この現象が厄介なのは、MyBatis が Log4J の設定を無視しているように見えるということです（実は、このような環境では MyBatis が Commons Loggin を使用するため、Log4J の設定が無視されているのです）。クラスパスに Commons Logging を含む環境で動作するアプリケーションでも、mybatis-config.xml に設定を追加することで別のロギング実装を使用することができます。
+アプリケーションサーバーでは、出荷時のクラスパスに Commons Logging が含まれていることがよくあります（Tomcat や WebSphere
+は良い例でしょう）。重要なのは、このような環境では MyBatis は Commons Logging を使用するということです。これはつまり、独自の
+Commons Logging 実装を使う WebSphere のような環境では、あなたが追加した Log4J の設定は無視されるということを意味しています。この現象が厄介なのは、MyBatis
+が Log4J の設定を無視しているように見えるということです（実は、このような環境では MyBatis が Commons Loggin を使用するため、Log4J
+の設定が無視されているのです）。クラスパスに Commons Logging を含む環境で動作するアプリケーションでも、mybatis-config.xml
+に設定を追加することで別のロギング実装を使用することができます。
 
 ```xml
 <configuration>
@@ -25,7 +31,9 @@ MyBatis は、内部の Log Factory を通してログ情報を出力します�
 </configuration>
 ```
 
-指定可能な値は SLF4J, LOG4J, LOG4J2, JDK\_LOGGING, COMMONS\_LOGGING, STDOUT\_LOGGING, NO\_LOGGING ですが、`org.apache.ibatis.logging.Log` インターフェイスを実装し、コンストラクター引数として String を受け取る独自に実装したクラスの完全修飾クラス名を指定することもできます。
+指定可能な値は SLF4J, LOG4J, LOG4J2, JDK\_LOGGING, COMMONS\_LOGGING, STDOUT\_LOGGING, NO\_LOGGING
+ですが、`org.apache.ibatis.logging.Log` インターフェイスを実装し、コンストラクター引数として String
+を受け取る独自に実装したクラスの完全修飾クラス名を指定することもできます。
 
 下記のメソッドを呼び出すことでロギング実装を指定することも可能です。
 
@@ -38,9 +46,11 @@ org.apache.ibatis.logging.LogFactory.useCommonsLogging();
 org.apache.ibatis.logging.LogFactory.useStdOutLogging();
 ```
 
-これらのメソッドは、他の MyBatis のメソッドより前に呼び出す必要があります。また、要求された実装が実行時のクラスパスに含まれている場合にのみ切り替えることが可能です。例えば、Log4J2 に切り替えようとして、実行時に Log4J2 が見つからない場合、MyBatis は切り替えの要求を無視して通常のアルゴリズムでロギング実装を検索します。
+これらのメソッドは、他の MyBatis のメソッドより前に呼び出す必要があります。また、要求された実装が実行時のクラスパスに含まれている場合にのみ切り替えることが可能です。例えば、Log4J2
+に切り替えようとして、実行時に Log4J2 が見つからない場合、MyBatis は切り替えの要求を無視して通常のアルゴリズムでロギング実装を検索します。
 
-SLF4J, Apache Commons Logging, Apache Log4J, JDK Logging API についての詳細はこのドキュメントの範囲外となりますが、後述の設定例は参考になると思います。これらのフレームワークについての詳しい情報は、以下の各サイトを参照してください。
+SLF4J, Apache Commons Logging, Apache Log4J, JDK Logging API
+についての詳細はこのドキュメントの範囲外となりますが、後述の設定例は参考になると思います。これらのフレームワークについての詳しい情報は、以下の各サイトを参照してください。
 
 - [SLF4J](https://www.slf4j.org/)
 - [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/)
@@ -51,13 +61,20 @@ SLF4J, Apache Commons Logging, Apache Log4J, JDK Logging API についての詳�
 
 実行されるステートメントのログを出力するためには、パッケージ、Mapper の完全修飾名、ネームスペース、あるいはステートメントの完全修飾名に対してログ出力を有効にしてください。
 
-具体的な設定方法は使用するロギング実装によります。以下は SLF4J(Logback) での設定例です。ロギングサービスの設定は、単純にいくつかの設定ファイル（例えば `logback.xml`）と、場合によっては新しい JARを追加するだけのことです。以下は、SLF4J(Logback) をプロバイダーとして完全なロギングサービスを設定する手順です。
+具体的な設定方法は使用するロギング実装によります。以下は SLF4J(Logback)
+での設定例です。ロギングサービスの設定は、単純にいくつかの設定ファイル（例えば `logback.xml`）と、場合によっては新しい
+JARを追加するだけのことです。以下は、SLF4J(Logback) をプロバイダーとして完全なロギングサービスを設定する手順です。
 
 #### ステップ１: SLF4J + Logback の JAR ファイルを追加する。
 
-SLF4J(Logback) を使うので、SLF4J(Logback) の JAR ファイルがアプリケーションから利用できるようにしておく必要があります。SLF4J(Logback) の JAR ファイルをダウンロードしてあなたのアプリケーションのクラスパスに追加してください。
+SLF4J(Logback) を使うので、SLF4J(Logback) の JAR
+ファイルがアプリケーションから利用できるようにしておく必要があります。SLF4J(Logback) の JAR
+ファイルをダウンロードしてあなたのアプリケーションのクラスパスに追加してください。
 
-Web あるいはエンタープライズアプリケーションの場合は、ダウンロードした `logback-classic.jar` ,`logback-core.jar`, `slf4j-api.jar` を `WEB-INF/lib` ディレクトリに追加します。スタンドアローンアプリケーションの場合は起動時の JVM 引数 `-classpath` に追加するだけです。
+Web
+あるいはエンタープライズアプリケーションの場合は、ダウンロードした `logback-classic.jar` ,`logback-core.jar`, `slf4j-api.jar`
+を `WEB-INF/lib` ディレクトリに追加します。スタンドアローンアプリケーションの場合は起動時の JVM 引数 `-classpath`
+に追加するだけです。
 
 Mavenを利用している場合は、`pom.xml`に以下のような設定を追加することでJARファイルをダウンロードすることができます。
 
@@ -122,7 +139,9 @@ public interface BlogMapper {
 </logger>
 ```
 
-クエリが大量の結果セットを返すようなケースでSQLステートメントのみを出力したい場合に対応できるよう、SQLステートメントは DEBUG（JDK logging では FINE）レベル、結果は TRACE（JDK logging では FINER）レベルで出力されるようになっています。SQLステートメントのみを出力したい場合、ログレベルに DEBUG を設定します。
+クエリが大量の結果セットを返すようなケースでSQLステートメントのみを出力したい場合に対応できるよう、SQLステートメントは
+DEBUG（JDK logging では FINE）レベル、結果は TRACE（JDK logging では FINER）レベルで出力されるようになっています。SQLステートメントのみを出力したい場合、ログレベルに
+DEBUG を設定します。
 
 ```xml
 <logger name="org.mybatis.example">
@@ -164,7 +183,9 @@ Mapper インターフェイスを使っていない場合、例えば次のよ�
 
 <span class="label important">NOTE</span> SLF4J or Log4j 2 をお使いの場合、MyBatis のログは `MYBATIS` というマーカーで出力されます。
 
-上記の `logback.xml` の残りの部分はアペンダーの設定になっていますが、このドキュメントでは説明しません。[Logback](https://logback.qos.ch/) のサイトを参照してください。あるいは、設定値を変更してみてどのような結果になるか試してみるのも良いでしょう。
+上記の `logback.xml`
+の残りの部分はアペンダーの設定になっていますが、このドキュメントでは説明しません。[Logback](https://logback.qos.ch/)
+のサイトを参照してください。あるいは、設定値を変更してみてどのような結果になるか試してみるのも良いでしょう。
 
 #### Log4j 2の設定例
 

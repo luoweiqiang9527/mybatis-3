@@ -34,27 +34,27 @@ import org.apache.ibatis.session.RowBounds;
 @CacheNamespace(readWrite = false)
 public interface BoundAuthorMapper {
 
-  // ======================================================
+    // ======================================================
 
-  List<Post> findPostsInArray(Integer[] ids);
+    List<Post> findPostsInArray(Integer[] ids);
 
-  // ======================================================
+    // ======================================================
 
-  List<Post> findPostsInList(List<Integer> ids);
+    List<Post> findPostsInList(List<Integer> ids);
 
-  // ======================================================
+    // ======================================================
 
-  int insertAuthor(Author author);
+    int insertAuthor(Author author);
 
-  int insertAuthorInvalidSelectKey(Author author);
+    int insertAuthorInvalidSelectKey(Author author);
 
-  int insertAuthorInvalidInsert(Author author);
+    int insertAuthorInvalidInsert(Author author);
 
-  int insertAuthorDynamic(Author author);
+    int insertAuthorDynamic(Author author);
 
-  // ======================================================
+    // ======================================================
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
       @Arg(column = "AUTHOR_ID", javaType = int.class)
   })
@@ -75,14 +75,14 @@ public interface BoundAuthorMapper {
   // @formatter:on
   Author selectAuthor(int id);
 
-  // ======================================================
+    // ======================================================
 
-  @Result(property = "id", column = "AUTHOR_ID", id = true)
-  @Result(property = "username", column = "AUTHOR_USERNAME")
-  @Result(property = "password", column = "AUTHOR_PASSWORD")
-  @Result(property = "email", column = "AUTHOR_EMAIL")
-  @Result(property = "bio", column = "AUTHOR_BIO")
-  // @formatter:off
+    @Result(property = "id", column = "AUTHOR_ID", id = true)
+    @Result(property = "username", column = "AUTHOR_USERNAME")
+    @Result(property = "password", column = "AUTHOR_PASSWORD")
+    @Result(property = "email", column = "AUTHOR_EMAIL")
+    @Result(property = "bio", column = "AUTHOR_BIO")
+    // @formatter:off
   @Select({
     "SELECT ",
     "  ID as AUTHOR_ID,",
@@ -92,11 +92,11 @@ public interface BoundAuthorMapper {
     "  BIO as AUTHOR_BIO",
     "FROM AUTHOR WHERE ID = #{id}"})
   // @formatter:on
-  Author selectAuthorMapToPropertiesUsingRepeatable(int id);
+    Author selectAuthorMapToPropertiesUsingRepeatable(int id);
 
-  // ======================================================
+    // ======================================================
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
       @Arg(column = "AUTHOR_ID", javaType = Integer.class),
       @Arg(column = "AUTHOR_USERNAME", javaType = String.class),
@@ -117,15 +117,15 @@ public interface BoundAuthorMapper {
   // @formatter:on
   Author selectAuthorConstructor(int id);
 
-  // ======================================================
+    // ======================================================
 
-  @Arg(column = "AUTHOR_ID", javaType = Integer.class, id = true)
-  @Arg(column = "AUTHOR_USERNAME", javaType = String.class)
-  @Arg(column = "AUTHOR_PASSWORD", javaType = String.class)
-  @Arg(column = "AUTHOR_EMAIL", javaType = String.class)
-  @Arg(column = "AUTHOR_BIO", javaType = String.class)
-  @Arg(column = "AUTHOR_SECTION", javaType = Section.class)
-  // @formatter:off
+    @Arg(column = "AUTHOR_ID", javaType = Integer.class, id = true)
+    @Arg(column = "AUTHOR_USERNAME", javaType = String.class)
+    @Arg(column = "AUTHOR_PASSWORD", javaType = String.class)
+    @Arg(column = "AUTHOR_EMAIL", javaType = String.class)
+    @Arg(column = "AUTHOR_BIO", javaType = String.class)
+    @Arg(column = "AUTHOR_SECTION", javaType = Section.class)
+    // @formatter:off
   @Select({
     "SELECT ",
     "  ID as AUTHOR_ID,",
@@ -136,13 +136,13 @@ public interface BoundAuthorMapper {
       + "  FAVOURITE_SECTION as AUTHOR_SECTION",
     "FROM AUTHOR WHERE ID = #{id}"})
   // @formatter:on
-  Author selectAuthorMapToConstructorUsingRepeatable(int id);
+    Author selectAuthorMapToConstructorUsingRepeatable(int id);
 
-  // ======================================================
+    // ======================================================
 
-  @Arg(column = "AUTHOR_ID", javaType = int.class)
-  @Result(property = "username", column = "AUTHOR_USERNAME")
-  // @formatter:off
+    @Arg(column = "AUTHOR_ID", javaType = int.class)
+    @Result(property = "username", column = "AUTHOR_USERNAME")
+    // @formatter:off
   @Select({
     "SELECT ",
     "  ID as AUTHOR_ID,",
@@ -152,11 +152,11 @@ public interface BoundAuthorMapper {
     "  BIO as AUTHOR_BIO",
     "FROM AUTHOR WHERE ID = #{id}"})
   // @formatter:on
-  Author selectAuthorUsingSingleRepeatable(int id);
+    Author selectAuthorUsingSingleRepeatable(int id);
 
-  // ======================================================
+    // ======================================================
 
-  // @formatter:off
+    // @formatter:off
   @ConstructorArgs({
     @Arg(column = "AUTHOR_ID", javaType = Integer.class),
     @Arg(column = "AUTHOR_USERNAME", javaType = String.class),
@@ -177,9 +177,9 @@ public interface BoundAuthorMapper {
   // @formatter:on
   Author selectAuthorUsingBothArgAndConstructorArgs(int id);
 
-  // ======================================================
+    // ======================================================
 
-  // @formatter:off
+    // @formatter:off
   @Results(
     @Result(property = "id", column = "AUTHOR_ID")
   )
@@ -192,11 +192,11 @@ public interface BoundAuthorMapper {
   // @formatter:on
   Author selectAuthorUsingBothResultAndResults(int id);
 
-  // ======================================================
+    // ======================================================
 
-  List<Post> findThreeSpecificPosts(@Param("one") int one, RowBounds rowBounds, @Param("two") int two, int three);
+    List<Post> findThreeSpecificPosts(@Param("one") int one, RowBounds rowBounds, @Param("two") int two, int three);
 
-  @Flush
-  List<BatchResult> flush();
+    @Flush
+    List<BatchResult> flush();
 
 }

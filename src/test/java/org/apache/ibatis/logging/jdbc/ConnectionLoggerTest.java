@@ -35,40 +35,40 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConnectionLoggerTest {
 
-  @Mock
-  Connection connection;
+    @Mock
+    Connection connection;
 
-  @Mock
-  PreparedStatement preparedStatement;
+    @Mock
+    PreparedStatement preparedStatement;
 
-  @Mock
-  Log log;
+    @Mock
+    Log log;
 
-  private Connection conn;
+    private Connection conn;
 
-  @BeforeEach
-  void setUp() throws SQLException {
-    conn = ConnectionLogger.newInstance(connection, log, 1);
-  }
+    @BeforeEach
+    void setUp() throws SQLException {
+        conn = ConnectionLogger.newInstance(connection, log, 1);
+    }
 
-  @Test
-  void shouldPrintPrepareStatement() throws SQLException {
-    when(log.isDebugEnabled()).thenReturn(true);
-    conn.prepareStatement("select 1");
-    verify(log).debug(contains("Preparing: select 1"));
-  }
+    @Test
+    void shouldPrintPrepareStatement() throws SQLException {
+        when(log.isDebugEnabled()).thenReturn(true);
+        conn.prepareStatement("select 1");
+        verify(log).debug(contains("Preparing: select 1"));
+    }
 
-  @Test
-  void shouldPrintPrepareCall() throws SQLException {
-    when(log.isDebugEnabled()).thenReturn(true);
-    conn.prepareCall("{ call test() }");
-    verify(log).debug(contains("Preparing: { call test() }"));
-  }
+    @Test
+    void shouldPrintPrepareCall() throws SQLException {
+        when(log.isDebugEnabled()).thenReturn(true);
+        conn.prepareCall("{ call test() }");
+        verify(log).debug(contains("Preparing: { call test() }"));
+    }
 
-  @Test
-  void shouldNotPrintCreateStatement() throws SQLException {
-    conn.createStatement();
-    conn.close();
-    verify(log, times(0)).debug(anyString());
-  }
+    @Test
+    void shouldNotPrintCreateStatement() throws SQLException {
+        conn.createStatement();
+        conn.close();
+        verify(log, times(0)).debug(anyString());
+    }
 }

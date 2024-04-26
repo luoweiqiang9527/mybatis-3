@@ -24,9 +24,9 @@ import org.apache.ibatis.annotations.Select;
 @CacheNamespace(blocking = true)
 public interface PersonMapper {
 
-  @Select("select id, firstname, lastname from person")
-  List<Person> findAll();
+    @Select("select id, firstname, lastname from person")
+    List<Person> findAll();
 
-  @Delete("delete from person where id = #{id}")
-  int delete(int id);
+    @Delete("delete from person where id = #{id}")
+    int delete(int id);
 }

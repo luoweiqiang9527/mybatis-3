@@ -30,23 +30,23 @@ import org.junit.jupiter.api.Test;
 
 class ManyAnnoTest extends BaseDataTest {
 
-  @Test
-  void testGetMessageForEmptyDatabase() throws Exception {
-    final Environment environment = new Environment("test", new JdbcTransactionFactory(),
-        BaseDataTest.createBlogDataSource());
-    final Configuration config = new Configuration(environment);
-    config.addMapper(PostMapper.class);
-    final SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(config);
-    try (SqlSession session = factory.openSession()) {
+    @Test
+    void testGetMessageForEmptyDatabase() throws Exception {
+        final Environment environment = new Environment("test", new JdbcTransactionFactory(),
+            BaseDataTest.createBlogDataSource());
+        final Configuration config = new Configuration(environment);
+        config.addMapper(PostMapper.class);
+        final SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(config);
+        try (SqlSession session = factory.openSession()) {
 
-      PostMapper mapper = session.getMapper(PostMapper.class);
-      List<AnnoPost> posts = mapper.getPosts(101);
+            PostMapper mapper = session.getMapper(PostMapper.class);
+            List<AnnoPost> posts = mapper.getPosts(101);
 
-      assertEquals(3, posts.size());
-      assertEquals(3, posts.get(0).getTags().size());
-      assertEquals(1, posts.get(1).getTags().size());
-      assertEquals(0, posts.get(2).getTags().size());
+            assertEquals(3, posts.size());
+            assertEquals(3, posts.get(0).getTags().size());
+            assertEquals(1, posts.get(1).getTags().size());
+            assertEquals(0, posts.get(2).getTags().size());
+        }
     }
-  }
 
 }

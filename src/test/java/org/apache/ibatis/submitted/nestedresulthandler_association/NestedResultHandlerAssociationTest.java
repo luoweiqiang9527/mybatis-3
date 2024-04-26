@@ -34,54 +34,54 @@ import org.junit.jupiter.api.Test;
 
 class NestedResultHandlerAssociationTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/nestedresulthandler_association/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
-    }
-
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/nestedresulthandler_association/CreateDB.sql");
-  }
-
-  @Test
-  void shouldHandleRowBounds() throws Exception {
-    final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-    Date targetMonth = fmt.parse("2014-01-01");
-    final List<Account> accounts = new ArrayList<>();
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      sqlSession.select("collectPageByBirthMonth", targetMonth, new RowBounds(1, 2), context -> {
-        Account account = (Account) context.getResultObject();
-        accounts.add(account);
-      });
-    }
-    assertEquals(2, accounts.size());
-    assertEquals("Bob2", accounts.get(0).getAccountName());
-    assertEquals("Bob3", accounts.get(1).getAccountName());
-  }
-
-  @Test
-  void shouldHandleStop() throws Exception {
-    final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-    final List<Account> accounts = new ArrayList<>();
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Date targetMonth = fmt.parse("2014-01-01");
-      sqlSession.select("collectPageByBirthMonth", targetMonth, context -> {
-        Account account = (Account) context.getResultObject();
-        accounts.add(account);
-        if (accounts.size() > 1) {
-          context.stop();
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/nestedresulthandler_association/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
         }
-      });
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/nestedresulthandler_association/CreateDB.sql");
     }
-    assertEquals(2, accounts.size());
-    assertEquals("Bob1", accounts.get(0).getAccountName());
-    assertEquals("Bob2", accounts.get(1).getAccountName());
-  }
+
+    @Test
+    void shouldHandleRowBounds() throws Exception {
+        final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        Date targetMonth = fmt.parse("2014-01-01");
+        final List<Account> accounts = new ArrayList<>();
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            sqlSession.select("collectPageByBirthMonth", targetMonth, new RowBounds(1, 2), context -> {
+                Account account = (Account) context.getResultObject();
+                accounts.add(account);
+            });
+        }
+        assertEquals(2, accounts.size());
+        assertEquals("Bob2", accounts.get(0).getAccountName());
+        assertEquals("Bob3", accounts.get(1).getAccountName());
+    }
+
+    @Test
+    void shouldHandleStop() throws Exception {
+        final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        final List<Account> accounts = new ArrayList<>();
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Date targetMonth = fmt.parse("2014-01-01");
+            sqlSession.select("collectPageByBirthMonth", targetMonth, context -> {
+                Account account = (Account) context.getResultObject();
+                accounts.add(account);
+                if (accounts.size() > 1) {
+                    context.stop();
+                }
+            });
+        }
+        assertEquals(2, accounts.size());
+        assertEquals("Bob1", accounts.get(0).getAccountName());
+        assertEquals("Bob2", accounts.get(1).getAccountName());
+    }
 
 }

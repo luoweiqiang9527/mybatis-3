@@ -40,68 +40,68 @@ import org.junit.jupiter.api.Test;
 @Tag("TestcontainersTests")
 class InsertTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    Configuration configuration = new Configuration();
-    Environment environment = new Environment("development", new JdbcTransactionFactory(),
-        PgContainer.getUnpooledDataSource());
-    configuration.setEnvironment(environment);
-    configuration.addMapper(InsertMapper.class);
-    sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+    @BeforeAll
+    static void setUp() throws Exception {
+        Configuration configuration = new Configuration();
+        Environment environment = new Environment("development", new JdbcTransactionFactory(),
+            PgContainer.getUnpooledDataSource());
+        configuration.setEnvironment(environment);
+        configuration.addMapper(InsertMapper.class);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/keycolumn/CreateDB.sql");
-  }
-
-  @Test
-  void testInsertAnnotated() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
-      Name name = new Name();
-      name.setFirstName("Fred");
-      name.setLastName("Flintstone");
-
-      int rows = mapper.insertNameAnnotated(name);
-
-      assertNotNull(name.getId());
-      assertEquals(1, rows);
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/keycolumn/CreateDB.sql");
     }
-  }
 
-  @Test
-  void testInsertMapped() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
-      Name name = new Name();
-      name.setFirstName("Fred");
-      name.setLastName("Flintstone");
+    @Test
+    void testInsertAnnotated() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
+            Name name = new Name();
+            name.setFirstName("Fred");
+            name.setLastName("Flintstone");
 
-      int rows = mapper.insertNameMapped(name);
+            int rows = mapper.insertNameAnnotated(name);
 
-      assertNotNull(name.getId());
-      assertEquals(1, rows);
+            assertNotNull(name.getId());
+            assertEquals(1, rows);
+        }
     }
-  }
 
-  @Test
-  void testInsertMappedBatch() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-      InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
-      Name name = new Name();
-      name.setFirstName("Fred");
-      name.setLastName("Flintstone");
-      mapper.insertNameMapped(name);
-      Name name2 = new Name();
-      name2.setFirstName("Wilma");
-      name2.setLastName("Flintstone");
-      mapper.insertNameMapped(name2);
-      List<BatchResult> batchResults = sqlSession.flushStatements();
-      assertNotNull(name.getId());
-      assertNotNull(name2.getId());
-      assertEquals(1, batchResults.size());
+    @Test
+    void testInsertMapped() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
+            Name name = new Name();
+            name.setFirstName("Fred");
+            name.setLastName("Flintstone");
+
+            int rows = mapper.insertNameMapped(name);
+
+            assertNotNull(name.getId());
+            assertEquals(1, rows);
+        }
     }
-  }
+
+    @Test
+    void testInsertMappedBatch() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+            InsertMapper mapper = sqlSession.getMapper(InsertMapper.class);
+            Name name = new Name();
+            name.setFirstName("Fred");
+            name.setLastName("Flintstone");
+            mapper.insertNameMapped(name);
+            Name name2 = new Name();
+            name2.setFirstName("Wilma");
+            name2.setLastName("Flintstone");
+            mapper.insertNameMapped(name2);
+            List<BatchResult> batchResults = sqlSession.flushStatements();
+            assertNotNull(name.getId());
+            assertNotNull(name2.getId());
+            assertEquals(1, batchResults.size());
+        }
+    }
 
 }

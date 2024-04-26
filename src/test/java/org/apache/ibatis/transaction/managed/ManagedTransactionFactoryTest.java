@@ -33,34 +33,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ManagedTransactionFactoryTest extends BaseDataTest {
 
-  @Mock
-  private Connection conn;
+    @Mock
+    private Connection conn;
 
-  @Test
-  void shouldEnsureThatCallsToManagedTransactionAPIDoNotForwardToManagedConnections() throws Exception {
-    TransactionFactory tf = new ManagedTransactionFactory();
-    tf.setProperties(new Properties());
-    Transaction tx = tf.newTransaction(conn);
-    assertEquals(conn, tx.getConnection());
-    tx.commit();
-    tx.rollback();
-    tx.close();
-    verify(conn).close();
-  }
+    @Test
+    void shouldEnsureThatCallsToManagedTransactionAPIDoNotForwardToManagedConnections() throws Exception {
+        TransactionFactory tf = new ManagedTransactionFactory();
+        tf.setProperties(new Properties());
+        Transaction tx = tf.newTransaction(conn);
+        assertEquals(conn, tx.getConnection());
+        tx.commit();
+        tx.rollback();
+        tx.close();
+        verify(conn).close();
+    }
 
-  @Test
-  void shouldEnsureThatCallsToManagedTransactionAPIDoNotForwardToManagedConnectionsAndDoesNotCloseConnection()
-      throws Exception {
-    TransactionFactory tf = new ManagedTransactionFactory();
-    Properties props = new Properties();
-    props.setProperty("closeConnection", "false");
-    tf.setProperties(props);
-    Transaction tx = tf.newTransaction(conn);
-    assertEquals(conn, tx.getConnection());
-    tx.commit();
-    tx.rollback();
-    tx.close();
-    verifyNoMoreInteractions(conn);
-  }
+    @Test
+    void shouldEnsureThatCallsToManagedTransactionAPIDoNotForwardToManagedConnectionsAndDoesNotCloseConnection()
+        throws Exception {
+        TransactionFactory tf = new ManagedTransactionFactory();
+        Properties props = new Properties();
+        props.setProperty("closeConnection", "false");
+        tf.setProperties(props);
+        Transaction tx = tf.newTransaction(conn);
+        assertEquals(conn, tx.getConnection());
+        tx.commit();
+        tx.rollback();
+        tx.close();
+        verifyNoMoreInteractions(conn);
+    }
 
 }

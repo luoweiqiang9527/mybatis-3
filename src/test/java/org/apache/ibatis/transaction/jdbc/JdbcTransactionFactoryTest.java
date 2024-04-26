@@ -30,31 +30,31 @@ import org.junit.jupiter.api.Test;
 
 class JdbcTransactionFactoryTest {
 
-  @Test
-  void testNullProperties() throws Exception {
-    TestConnection connection = new TestConnection(false);
-    JdbcTransactionFactory factory = new JdbcTransactionFactory();
-    factory.setProperties(null);
-    Transaction transaction = factory.newTransaction(connection);
-    transaction.getConnection();
-    transaction.close();
-    assertTrue(connection.getAutoCommit());
-  }
+    @Test
+    void testNullProperties() throws Exception {
+        TestConnection connection = new TestConnection(false);
+        JdbcTransactionFactory factory = new JdbcTransactionFactory();
+        factory.setProperties(null);
+        Transaction transaction = factory.newTransaction(connection);
+        transaction.getConnection();
+        transaction.close();
+        assertTrue(connection.getAutoCommit());
+    }
 
-  @Test
-  void testSkipSetAutoCommitOnClose() throws Exception {
-    TestConnection connection = new TestConnection(false);
-    DataSource ds = mock(DataSource.class);
-    when(ds.getConnection()).thenReturn(connection);
+    @Test
+    void testSkipSetAutoCommitOnClose() throws Exception {
+        TestConnection connection = new TestConnection(false);
+        DataSource ds = mock(DataSource.class);
+        when(ds.getConnection()).thenReturn(connection);
 
-    JdbcTransactionFactory factory = new JdbcTransactionFactory();
-    Properties properties = new Properties();
-    properties.setProperty("skipSetAutoCommitOnClose", "true");
-    factory.setProperties(properties);
-    Transaction transaction = factory.newTransaction(ds, TransactionIsolationLevel.NONE, false);
-    transaction.getConnection();
-    transaction.close();
-    assertFalse(connection.getAutoCommit());
-  }
+        JdbcTransactionFactory factory = new JdbcTransactionFactory();
+        Properties properties = new Properties();
+        properties.setProperty("skipSetAutoCommitOnClose", "true");
+        factory.setProperties(properties);
+        Transaction transaction = factory.newTransaction(ds, TransactionIsolationLevel.NONE, false);
+        transaction.getConnection();
+        transaction.close();
+        assertFalse(connection.getAutoCommit());
+    }
 
 }

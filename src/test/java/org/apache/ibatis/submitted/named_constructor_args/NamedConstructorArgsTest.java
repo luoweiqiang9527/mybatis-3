@@ -30,45 +30,45 @@ import org.junit.jupiter.api.Test;
 
 class NamedConstructorArgsTest {
 
-  private static SqlSessionFactory sqlSessionFactory;
+    private static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    // create an SqlSessionFactory
-    try (Reader reader = Resources
-        .getResourceAsReader("org/apache/ibatis/submitted/named_constructor_args/mybatis-config.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        // create an SqlSessionFactory
+        try (Reader reader = Resources
+            .getResourceAsReader("org/apache/ibatis/submitted/named_constructor_args/mybatis-config.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        Configuration configuration = sqlSessionFactory.getConfiguration();
+        configuration.setUseActualParamName(false);
+        configuration.addMapper(Mapper.class);
+
+        // populate in-memory database
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/named_constructor_args/CreateDB.sql");
     }
 
-    Configuration configuration = sqlSessionFactory.getConfiguration();
-    configuration.setUseActualParamName(false);
-    configuration.addMapper(Mapper.class);
-
-    // populate in-memory database
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/named_constructor_args/CreateDB.sql");
-  }
-
-  @Test
-  void argsWithParamAnnos() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      User user = mapper.mapConstructorWithParamAnnos(1);
-      assertEquals(Integer.valueOf(1), user.getId());
-      assertEquals("User1", user.getName());
-      assertEquals(Long.valueOf(99L), user.getTeam());
+    @Test
+    void argsWithParamAnnos() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            User user = mapper.mapConstructorWithParamAnnos(1);
+            assertEquals(Integer.valueOf(1), user.getId());
+            assertEquals("User1", user.getName());
+            assertEquals(Long.valueOf(99L), user.getTeam());
+        }
     }
-  }
 
-  @Test
-  void argsWithParamAnnosXml() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Mapper mapper = sqlSession.getMapper(Mapper.class);
-      User user = mapper.mapConstructorWithParamAnnosXml(1);
-      assertEquals(Integer.valueOf(1), user.getId());
-      assertEquals("User1", user.getName());
-      assertEquals(Long.valueOf(99L), user.getTeam());
+    @Test
+    void argsWithParamAnnosXml() {
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            Mapper mapper = sqlSession.getMapper(Mapper.class);
+            User user = mapper.mapConstructorWithParamAnnosXml(1);
+            assertEquals(Integer.valueOf(1), user.getId());
+            assertEquals("User1", user.getName());
+            assertEquals(Long.valueOf(99L), user.getTeam());
+        }
     }
-  }
 
 }

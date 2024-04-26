@@ -27,7 +27,7 @@ import org.apache.ibatis.annotations.Select;
  * @author lvyang
  */
 public interface UserDao {
-  // @formatter:off
+    // @formatter:off
   @Select({"select",
       "     u.id, u.username, r.id role_id, r.role_name",
       "    from user u",
@@ -41,7 +41,7 @@ public interface UserDao {
   // @formatter:on
   List<User> findAll();
 
-  // @formatter:off
+    // @formatter:off
   @Select({"select",
       "     u.id, u.username, r.id role_id, r.role_name",
       "    from user u",
@@ -55,7 +55,7 @@ public interface UserDao {
   // @formatter:on
   List<User> findAll2();
 
-  // @formatter:off
+    // @formatter:off
   @Select({"select",
       "     u.id, u.username, r.id role_id, r.role_name",
       "    from user u",
@@ -69,7 +69,7 @@ public interface UserDao {
   // @formatter:on
   List<User> findAll3();
 
-  // @formatter:off
+    // @formatter:off
   @Select("select id teacher_id, username teacher_name from user")
   @Results(id = "userMap", value = {
       @Result(id = true, column = "teacher_id", property = "id"),
@@ -78,7 +78,7 @@ public interface UserDao {
   // @formatter:on
   List<User> justUseResult();
 
-  // @formatter:off
+    // @formatter:off
   @Select({"select",
       "u.id, u.username, r.id role_id, r.role_name, ut.id teacher_id, ut.username teacher_name",
       "from user u",

@@ -32,69 +32,69 @@ import org.junit.jupiter.api.Test;
 
 class VendorDatabaseIdProviderTest {
 
-  private static final String PRODUCT_NAME = "Chewbacca DB";
+    private static final String PRODUCT_NAME = "Chewbacca DB";
 
-  @Test
-  void shouldNpeBeThrownIfDataSourceIsNull() {
-    VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    try {
-      provider.getDatabaseId(null);
-      fail("Should NullPointerException be thrown.");
-    } catch (NullPointerException e) {
-      // pass
+    @Test
+    void shouldNpeBeThrownIfDataSourceIsNull() {
+        VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
+        try {
+            provider.getDatabaseId(null);
+            fail("Should NullPointerException be thrown.");
+        } catch (NullPointerException e) {
+            // pass
+        }
     }
-  }
 
-  @Test
-  void shouldProductNameBeReturnedIfPropertiesIsNull() throws Exception {
-    VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    assertEquals(PRODUCT_NAME, provider.getDatabaseId(mockDataSource()));
-  }
-
-  @Test
-  void shouldProductNameBeTranslated() throws Exception {
-    VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    Properties properties = new Properties();
-    String partialProductName = "Chewbacca";
-    String id = "chewie";
-    properties.put(partialProductName, id);
-    provider.setProperties(properties);
-    assertEquals(id, provider.getDatabaseId(mockDataSource()));
-  }
-
-  @Test
-  void shouldNullBeReturnedIfNoMatch() throws Exception {
-    VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    Properties properties = new Properties();
-    properties.put("Ewok DB", "ewok");
-    provider.setProperties(properties);
-    assertNull(provider.getDatabaseId(mockDataSource()));
-  }
-
-  @Test
-  void shouldNullBeReturnedOnDbError() throws Exception {
-    DataSource dataSource = mock(DataSource.class);
-    when(dataSource.getConnection()).thenThrow(SQLException.class);
-
-    VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
-    Properties properties = new Properties();
-    properties.put("Ewok DB", "ewok");
-    try {
-      provider.getDatabaseId(dataSource);
-      fail("Should BuilderException be thrown.");
-    } catch (BuilderException e) {
-      // pass
+    @Test
+    void shouldProductNameBeReturnedIfPropertiesIsNull() throws Exception {
+        VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
+        assertEquals(PRODUCT_NAME, provider.getDatabaseId(mockDataSource()));
     }
-  }
 
-  private DataSource mockDataSource() throws SQLException {
-    DatabaseMetaData metaData = mock(DatabaseMetaData.class);
-    when(metaData.getDatabaseProductName()).thenReturn(PRODUCT_NAME);
-    Connection connection = mock(Connection.class);
-    when(connection.getMetaData()).thenReturn(metaData);
-    DataSource dataSource = mock(DataSource.class);
-    when(dataSource.getConnection()).thenReturn(connection);
-    return dataSource;
-  }
+    @Test
+    void shouldProductNameBeTranslated() throws Exception {
+        VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
+        Properties properties = new Properties();
+        String partialProductName = "Chewbacca";
+        String id = "chewie";
+        properties.put(partialProductName, id);
+        provider.setProperties(properties);
+        assertEquals(id, provider.getDatabaseId(mockDataSource()));
+    }
+
+    @Test
+    void shouldNullBeReturnedIfNoMatch() throws Exception {
+        VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
+        Properties properties = new Properties();
+        properties.put("Ewok DB", "ewok");
+        provider.setProperties(properties);
+        assertNull(provider.getDatabaseId(mockDataSource()));
+    }
+
+    @Test
+    void shouldNullBeReturnedOnDbError() throws Exception {
+        DataSource dataSource = mock(DataSource.class);
+        when(dataSource.getConnection()).thenThrow(SQLException.class);
+
+        VendorDatabaseIdProvider provider = new VendorDatabaseIdProvider();
+        Properties properties = new Properties();
+        properties.put("Ewok DB", "ewok");
+        try {
+            provider.getDatabaseId(dataSource);
+            fail("Should BuilderException be thrown.");
+        } catch (BuilderException e) {
+            // pass
+        }
+    }
+
+    private DataSource mockDataSource() throws SQLException {
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+        when(metaData.getDatabaseProductName()).thenReturn(PRODUCT_NAME);
+        Connection connection = mock(Connection.class);
+        when(connection.getMetaData()).thenReturn(metaData);
+        DataSource dataSource = mock(DataSource.class);
+        when(dataSource.getConnection()).thenReturn(connection);
+        return dataSource;
+    }
 
 }

@@ -16,10 +16,11 @@
 
 drop table users if exists;
 
-create table users (
-  id int,
-  name varchar(20),
-  dob varchar(10)
+create table users
+(
+    id   int,
+    name varchar(20),
+    dob  varchar(10)
 );
 
 insert into users (id, name, dob)

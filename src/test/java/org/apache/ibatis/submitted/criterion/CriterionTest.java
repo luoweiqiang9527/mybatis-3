@@ -31,31 +31,38 @@ import org.junit.jupiter.api.Test;
 
 class CriterionTest {
 
-  protected static SqlSessionFactory sqlSessionFactory;
+    protected static SqlSessionFactory sqlSessionFactory;
 
-  @BeforeAll
-  static void setUp() throws Exception {
-    try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/criterion/MapperConfig.xml")) {
-      sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+    @BeforeAll
+    static void setUp() throws Exception {
+        try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/criterion/MapperConfig.xml")) {
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+        }
+
+        BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
+            "org/apache/ibatis/submitted/criterion/CreateDB.sql");
     }
 
-    BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/submitted/criterion/CreateDB.sql");
-  }
+    @Test
+    void testSimpleSelect() {
+        // 使用try-with-resources语句自动关闭SqlSession
+        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            // 创建Criterion实例，并设置查询条件
+            Criterion criterion = new Criterion();
+            criterion.setTest("firstName =");
+            criterion.setValue("Fred");
 
-  @Test
-  void testSimpleSelect() {
-    try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-      Criterion criterion = new Criterion();
-      criterion.setTest("firstName =");
-      criterion.setValue("Fred");
-      Parameter parameter = new Parameter();
-      parameter.setCriterion(criterion);
+            // 创建Parameter实例，并将上面的Criterion实例设置为其条件
+            Parameter parameter = new Parameter();
+            parameter.setCriterion(criterion);
 
-      List<Map<String, Object>> answer = sqlSession.selectList("org.apache.ibatis.submitted.criterion.simpleSelect",
-          parameter);
+            // 执行查询，传入SQL映射文件中定义的selectList语句和参数
+            List<Map<String, Object>> answer = sqlSession.selectList("org.apache.ibatis.submitted.criterion.simpleSelect",
+                parameter);
 
-      assertEquals(1, answer.size());
+            // 验证查询结果是否符合预期，即只返回一个结果
+            assertEquals(1, answer.size());
+        }
+
     }
-  }
 }

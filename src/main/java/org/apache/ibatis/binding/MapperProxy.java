@@ -31,6 +31,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 代理模式
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

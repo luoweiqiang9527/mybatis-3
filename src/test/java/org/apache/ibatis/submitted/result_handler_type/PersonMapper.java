@@ -22,9 +22,9 @@ import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Select;
 
 public interface PersonMapper {
-  List<Person> doSelect();
+    List<Person> doSelect();
 
-  @Select("select * from person")
-  @MapKey("id")
-  Map<Integer, Person> selectAsMap();
+    @Select("select * from person")
+    @MapKey("id")
+    Map<Integer, Person> selectAsMap();
 }

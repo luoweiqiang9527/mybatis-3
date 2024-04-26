@@ -22,19 +22,19 @@ import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 public class UserResultHandler implements ResultHandler {
-  private final List<User> users;
+    private final List<User> users;
 
-  public UserResultHandler() {
-    users = new ArrayList<>();
-  }
+    public UserResultHandler() {
+        users = new ArrayList<>();
+    }
 
-  @Override
-  public void handleResult(ResultContext context) {
-    User user = (User) context.getResultObject();
-    users.add(user);
-  }
+    @Override
+    public void handleResult(ResultContext context) {
+        User user = (User) context.getResultObject();
+        users.add(user);
+    }
 
-  public List<User> getUsers() {
-    return users;
-  }
+    public List<User> getUsers() {
+        return users;
+    }
 }

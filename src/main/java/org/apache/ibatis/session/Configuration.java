@@ -99,26 +99,55 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * mybatis 核心配置类
+ *
  * @author Clinton Begin
  */
 public class Configuration {
 
     protected Environment environment;
 
+    // 是否启用安全的行边界处理。当处理大量数据时，启用此选项可以防止内存溢出。
     protected boolean safeRowBoundsEnabled;
+
+    // 是否启用安全的结果处理器。当处理复杂的结果集时，启用此选项可以防止数据处理异常。
     protected boolean safeResultHandlerEnabled = true;
+
+    // 是否启用下划线到驼峰命名的映射。当数据库字段使用下划线分隔时，启用此选项可以方便地映射到JavaBean的属性。
     protected boolean mapUnderscoreToCamelCase;
+
+    // 是否启用积极的延迟加载。当关联的对象未显式加载时，启用此选项可以在访问它们时自动加载。
     protected boolean aggressiveLazyLoading;
+
+    // 是否启用多个结果集。当一个SQL语句返回多个结果集时，启用此选项可以正确处理这些结果集。
     protected boolean multipleResultSetsEnabled = true;
+
+    // 是否使用生成的键。当插入记录时，数据库可能生成一个唯一的键值，启用此选项可以获取这个键值。
     protected boolean useGeneratedKeys;
+
+    // 是否使用列标签。启用此选项可以使用列标签代替列索引，提高SQL语句的可读性和健壮性。
     protected boolean useColumnLabel = true;
+
+    // 是否启用缓存。启用缓存可以提高查询效率，但可能不适用于经常更新的数据。
     protected boolean cacheEnabled = true;
+
+    // 是否在空行时调用设置器。当结果集中某行为空时，启用此选项可以调用对象的设置器方法，设置为null值。
     protected boolean callSettersOnNulls;
+
+    // 是否使用实际参数名称。启用此选项可以使用实际的参数名称，方便调试和日志记录。
     protected boolean useActualParamName = true;
+
+    // 是否为空行返回实例。当结果集中某行为空时，启用此选项可以返回一个实例，而不是null值。
     protected boolean returnInstanceForEmptyRow;
+
+    // 是否缩小SQL语句中的空白字符。启用此选项可以去除SQL语句中不必要的空白字符，减小其大小。
     protected boolean shrinkWhitespacesInSql;
+
+    // 是否在forEach标签中允许参数为可空。启用此选项可以在foreach标签中处理可空的参数。
     protected boolean nullableOnForEach;
+
+    // 是否基于参数名称自动映射到构造函数。启用此选项可以自动将参数名称映射到匹配的构造函数参数。
     protected boolean argNameBasedConstructorAutoMapping;
+
 
     protected String logPrefix;
     protected Class<? extends Log> logImpl;

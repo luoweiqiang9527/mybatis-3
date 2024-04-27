@@ -110,14 +110,23 @@ public class TypeAliasRegistry {
 
     @SuppressWarnings("unchecked")
     // throws class cast exception as well if types cannot be assigned
+    /**
+     * 解析类型别名字符串到对应的Class类型。
+     *
+     * @param string 表示类型别名的字符串。如果为null，则返回null。
+     * @return 解析后的Class类型。如果给定的字符串无法解析，则抛出TypeException异常。
+     * @param <T> 解析后Class类型的目标类型。
+     * @throws TypeException 如果给定的类型别名无法找到对应的Class类型，则抛出此异常。
+     */
     public <T> Class<T> resolveAlias(String string) {
         try {
             if (string == null) {
                 return null;
             }
-            // issue #748
+            // 将输入字符串转换为小写，以支持不区分大小写的类型别名查找
             String key = string.toLowerCase(Locale.ENGLISH);
             Class<T> value;
+            // 检查类型别名是否存在，如果存在则使用别名对应的Class类型，否则尝试加载指定名称的Class
             if (typeAliases.containsKey(key)) {
                 value = (Class<T>) typeAliases.get(key);
             } else {
@@ -125,6 +134,7 @@ public class TypeAliasRegistry {
             }
             return value;
         } catch (ClassNotFoundException e) {
+            // 当类无法找到时，抛出类型异常
             throw new TypeException("Could not resolve type alias '" + string + "'.  Cause: " + e, e);
         }
     }
@@ -155,18 +165,28 @@ public class TypeAliasRegistry {
         registerAlias(alias, type);
     }
 
+    /**
+     * 注册一个别名到对应的类。
+     *
+     * @param alias 别名，不能为null。此参数将被转换为小写形式存储。
+     * @param value 类型，对应别名的类。不能为null。
+     * @throws TypeException 如果别名已经存在且映射到了不同的类，抛出此异常。
+     */
     public void registerAlias(String alias, Class<?> value) {
         if (alias == null) {
             throw new TypeException("The parameter alias cannot be null");
         }
-        // issue #748
+        // 将别名转换为小写，以支持大小写不敏感的查找。
         String key = alias.toLowerCase(Locale.ENGLISH);
+        // 检查别名是否已经被注册且映射到了不同的类。
         if (typeAliases.containsKey(key) && typeAliases.get(key) != null && !typeAliases.get(key).equals(value)) {
             throw new TypeException(
                 "The alias '" + alias + "' is already mapped to the value '" + typeAliases.get(key).getName() + "'.");
         }
+        // 注册别名和对应的类。
         typeAliases.put(key, value);
     }
+
 
     public void registerAlias(String alias, String value) {
         try {

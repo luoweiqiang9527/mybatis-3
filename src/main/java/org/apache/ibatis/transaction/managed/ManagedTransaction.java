@@ -26,9 +26,9 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
- * {@link Transaction} that lets the container manage the full lifecycle of the transaction. Delays connection retrieval
- * until getConnection() is called. Ignores all commit or rollback requests. By default, it closes the connection but
- * can be configured not to do it.
+* {@link Transaction}，允许容器管理事务的整个生命周期。延迟连接检索
+ * 直到调用 getConnection（）。忽略所有提交或回滚请求。默认情况下，它会关闭连接，但
+ * 可以配置为不这样做。
  *
  * @author Clinton Begin
  * @see ManagedTransactionFactory

@@ -75,15 +75,9 @@ class ReflectorTest {
     }
 
     static class Section extends AbstractEntity implements Entity<Long> {
-        private void privateMethod(String id,String name) {
-
-        }
-
         public Long getId() {
             return super.getId();
         }
-
-        ;
     }
 
     @Test

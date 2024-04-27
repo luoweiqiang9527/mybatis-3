@@ -27,9 +27,9 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionException;
 
 /**
- * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly. It relies on the connection
- * retrieved from the dataSource to manage the scope of the transaction. Delays connection retrieval until
- * getConnection() is called. Ignores commit or rollback requests when autocommit is on.
+* {@link Transaction}，直接使用 JDBC 提交和回滚工具。它依赖于连接
+ * 从 dataSource 中检索以管理事务范围。延迟连接检索，直到
+ * getConnection（） 被调用。当自动提交处于打开状态时，忽略提交或回滚请求。
  *
  * @author Clinton Begin
  * @see JdbcTransactionFactory
@@ -99,23 +99,34 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 设置JDBC连接的自动提交模式。
+     * 如果当前自动提交模式与期望的模式不一致，则尝试更改连接的自动提交状态。
+     * 如果更改过程中出现SQLException，则抛出TransactionException异常。
+     *
+     * @param desiredAutoCommit 期望的自动提交模式。true表示开启自动提交，false表示关闭自动提交。
+     */
     protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
         try {
+            // 检查当前自动提交模式是否与期望模式一致，不一致则进行设置
             if (connection.getAutoCommit() != desiredAutoCommit) {
+                // 当日志级别为DEBUG时，记录设置自动提交模式的日志信息
                 if (log.isDebugEnabled()) {
                     log.debug("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
                 }
+                // 设置自动提交模式
                 connection.setAutoCommit(desiredAutoCommit);
             }
         } catch (SQLException e) {
-            // Only a very poorly implemented driver would fail here,
-            // and there's not much we can do about that.
+            // 处理设置自动提交模式时可能发生的SQLException
+            // 抛出TransactionException异常，封装SQLException信息
             throw new TransactionException(
                 "Error configuring AutoCommit.  " + "Your driver may not support getAutoCommit() or setAutoCommit(). "
                     + "Requested setting: " + desiredAutoCommit + ".  Cause: " + e,
                 e);
         }
     }
+
 
     protected void resetAutoCommit() {
         try {
@@ -137,16 +148,27 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 打开数据库连接。
+     * 此方法会根据当前的事务级别设置连接的事务隔离级别，并设置自动提交模式为期望的自动提交状态。
+     * 如果日志级别为DEBUG，会记录打开连接的日志信息。
+     *
+     * @throws SQLException 如果在获取数据库连接或设置事务隔离级别时发生错误
+     */
     protected void openConnection() throws SQLException {
+        // 当日志级别为DEBUG时，记录打开JDBC连接的信息
         if (log.isDebugEnabled()) {
             log.debug("Opening JDBC Connection");
         }
-        connection = dataSource.getConnection();
+        connection = dataSource.getConnection(); // 从数据源获取数据库连接
         if (level != null) {
+            // 如果存在事务级别，则设置连接的事务隔离级别
             connection.setTransactionIsolation(level.getLevel());
         }
+        // 设置连接的自动提交模式为期望的自动提交状态
         setDesiredAutoCommit(autoCommit);
     }
+
 
     @Override
     public Integer getTimeout() throws SQLException {

@@ -49,21 +49,42 @@ class AutoConstructorTest {
     }
 
     @Test
+    /**
+     * 此方法用于测试从数据库中完全填充一个主题对象。
+     * 方法不接受参数，也不返回任何值。
+     * 它会尝试打开一个SQL会话，使用AutoConstructorMapper来获取主题对象，并确保该对象不为空。
+     */
     void fullyPopulatedSubject() {
+        // 使用try-with-resources语句自动关闭SqlSession
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            // 获取AutoConstructorMapper的实例
             final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            // 通过mapper实例获取id为1的主题对象
             final Object subject = mapper.getSubject(1);
+            // 断言确保subject对象不为空
             assertNotNull(subject);
         }
     }
 
+
     @Test
+    /**
+     * 尝试从数据库中获取主题信息的示例方法。
+     * 这个方法尝试打开一个SQL会话，映射到AutoConstructorMapper接口，然后使用这个映射器来获取主题信息。
+     * 如果获取过程中发生持久化异常（PersistenceException），则断言会抛出该异常。
+     *
+     * 注意：此方法不接受参数，也不返回任何值。
+     */
     void primitiveSubjects() {
+        // 尝试使用SqlSessionFactory打开一个SqlSession，并在使用后自动关闭
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
+            // 获取AutoConstructorMapper接口的实例，用于执行数据库操作
             final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+            // 断言执行mapper的getSubjects方法时，会抛出PersistenceException异常
             assertThrows(PersistenceException.class, mapper::getSubjects);
         }
     }
+
 
     @Test
     void annotatedSubject() {

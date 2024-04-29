@@ -42,6 +42,9 @@ public class ParameterMapping {
     private ParameterMapping() {
     }
 
+    /**
+     * 构建者模式，用于构建ParameterMapping
+     */
     public static class Builder {
         private final ParameterMapping parameterMapping = new ParameterMapping();
 
@@ -105,27 +108,50 @@ public class ParameterMapping {
             return parameterMapping;
         }
 
+        /**
+         * 校验参数映射是否有效。
+         * 该方法不接受任何参数，也不返回任何结果。
+         * 主要校验逻辑包括：
+         * 1. 如果参数映射的javaType为ResultSet类，则必须存在对应的resultMapId；
+         * 2. 如果参数映射的javaType不是ResultSet类，但typeHandler为空，则抛出异常。
+         * 抛出的异常为IllegalStateException，包含具体的错误信息。
+         */
         private void validate() {
+            // 当参数映射的javaType为ResultSet时的校验逻辑
             if (ResultSet.class.equals(parameterMapping.javaType)) {
+                // 如果resultMapId为空，则抛出异常
                 if (parameterMapping.resultMapId == null) {
-                    throw new IllegalStateException("Missing resultmap in property '" + parameterMapping.property + "'.  "
+                    throw new IllegalStateException("Missing resultmap in property '" + parameterMapping.property + "'. "
                         + "Parameters of type java.sql.ResultSet require a resultmap.");
                 }
-            } else if (parameterMapping.typeHandler == null) {
-                throw new IllegalStateException("Type handler was null on parameter mapping for property '"
-                    + parameterMapping.property + "'. It was either not specified and/or could not be found for the javaType ("
-                    + parameterMapping.javaType.getName() + ") : jdbcType (" + parameterMapping.jdbcType + ") combination.");
+            } else { // 当参数映射的javaType不是ResultSet时的校验逻辑
+                // 如果typeHandler为空，则抛出异常
+                if (parameterMapping.typeHandler == null) {
+                    throw new IllegalStateException("Type handler was null on parameter mapping for property '"
+                        + parameterMapping.property + "'. It was either not specified and/or could not be found for the javaType ("
+                        + parameterMapping.javaType.getName() + ") : jdbcType (" + parameterMapping.jdbcType + ") combination.");
+                }
             }
         }
 
+
+        /**
+         * 解析类型处理器。该方法用于根据参数映射的javaType来查找并设置相应的类型处理器。
+         * 如果参数映射中未指定类型处理器（typeHandler为null），但指定了Java类型（javaType不为null），
+         * 则会尝试从配置中获取对应的类型处理器。
+         */
         private void resolveTypeHandler() {
+            // 当参数映射的类型处理器为空且Java类型不为空时，尝试从配置中获取类型处理器
             if (parameterMapping.typeHandler == null && parameterMapping.javaType != null) {
+                // 获取配置对象和类型处理器注册表
                 Configuration configuration = parameterMapping.configuration;
                 TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+                // 根据Java类型和JDBC类型获取对应的类型处理器，并设置到参数映射中
                 parameterMapping.typeHandler = typeHandlerRegistry.getTypeHandler(parameterMapping.javaType,
                     parameterMapping.jdbcType);
             }
         }
+
 
     }
 
@@ -134,7 +160,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used for handling output of callable statements.
+     * 用于处理可调用语句的输出。
      *
      * @return the mode
      */
@@ -143,7 +169,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used for handling output of callable statements.
+     * 用于处理可调用语句的输出。
      *
      * @return the java type
      */
@@ -152,7 +178,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used in the UnknownTypeHandler in case there is no handler for the property type.
+     * 在 UnknownTypeHandler 中用于，以防属性类型没有处理程序。
      *
      * @return the jdbc type
      */
@@ -161,7 +187,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used for handling output of callable statements.
+     * 用于处理可调用语句的输出。
      *
      * @return the numeric scale
      */
@@ -170,7 +196,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used when setting parameters to the PreparedStatement.
+     * 在为 PreparedStatement 设置参数时使用。
      *
      * @return the type handler
      */
@@ -179,7 +205,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used for handling output of callable statements.
+     * 用于处理可调用语句的输出。
      *
      * @return the result map id
      */
@@ -188,7 +214,7 @@ public class ParameterMapping {
     }
 
     /**
-     * Used for handling output of callable statements.
+     * 用于处理可调用语句的输出。
      *
      * @return the jdbc type name
      */

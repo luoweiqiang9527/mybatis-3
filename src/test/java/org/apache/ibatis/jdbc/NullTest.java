@@ -25,9 +25,18 @@ import org.junit.jupiter.api.Test;
 class NullTest {
 
     @Test
+    /**
+     * 测试获取空字符串类型的JDBC类型和类型处理器。
+     * 该函数不接受任何参数，也不返回任何值。
+     * 主要验证 Null.STRING 常量的 JdbcType 是否为 VARCHAR，
+     * 以及其类型处理器是否是 StringTypeHandler 的实例。
+     */
     void shouldGetTypeAndTypeHandlerForNullStringType() {
+        // 验证 Null.STRING 常量的 JDBC 类型是否为 VARCHAR
         assertEquals(JdbcType.VARCHAR, Null.STRING.getJdbcType());
+        // 验证 Null.STRING 常量的类型处理器是否是 StringTypeHandler 的实例
         assertTrue(Null.STRING.getTypeHandler() instanceof StringTypeHandler);
     }
+
 
 }

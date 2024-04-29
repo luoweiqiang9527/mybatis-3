@@ -50,16 +50,21 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 public abstract class BaseExecutor implements Executor {
 
     private static final Log log = LogFactory.getLog(BaseExecutor.class);
-
+    // 事务处理对象，用于管理数据库操作的事务。
     protected Transaction transaction;
+    // 执行器对象，用于异步任务的执行。
     protected Executor wrapper;
-
+    // 延迟加载队列，存放需要延迟加载的数据。
     protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+    // 本地缓存，用于存储经常访问的数据，提高访问效率。
     protected PerpetualCache localCache;
+    // 本地输出参数缓存，用于存储函数或存储过程的输出参数。
     protected PerpetualCache localOutputParameterCache;
+    // 配置对象，用于访问应用程序的配置信息。
     protected Configuration configuration;
-
+    // 查询堆栈计数器，用于追踪当前执行的查询深度。
     protected int queryStack;
+    // 标记当前对象是否已关闭，用于控制对象的生命周期。
     private boolean closed;
 
     protected BaseExecutor(Configuration configuration, Transaction transaction) {
@@ -73,27 +78,47 @@ public abstract class BaseExecutor implements Executor {
     }
 
     @Override
+    /**
+     * 获取当前的事务对象。
+     *
+     * @return Transaction 返回当前的事务对象。
+     * @throws ExecutorException 如果执行器已关闭，则抛出执行器关闭异常。
+     */
     public Transaction getTransaction() {
+        // 检查执行器是否已关闭，若已关闭，则抛出异常
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
-        return transaction;
+        return transaction; // 返回当前事务对象
     }
 
+
     @Override
+    /**
+     * 关闭事务及其相关资源。
+     * 如果指定强制回滚，将尝试进行回滚操作。
+     * 不论回滚操作是否成功，都会尝试关闭事务对象。
+     * 在关闭过程中捕获的任何SQLException都将被记录警告，不会对外抛出。
+     * 最后，清理相关资源并标记此对象为已关闭。
+     *
+     * @param forceRollback 如果为true，则强制进行回滚操作。
+     */
     public void close(boolean forceRollback) {
         try {
             try {
+                // 尝试进行回滚操作，根据参数决定是否强制回滚。
                 rollback(forceRollback);
             } finally {
+                // 无论回滚操作成功与否，都尝试关闭事务对象。
                 if (transaction != null) {
                     transaction.close();
                 }
             }
         } catch (SQLException e) {
-            // Ignore. There's nothing that can be done at this point.
+            // 捕获并记录SQL异常，此时已关闭状态，不再进行处理。
             log.warn("Unexpected exception on closing transaction.  Cause: " + e);
         } finally {
+            // 清理资源并标记关闭状态。
             transaction = null;
             deferredLoads = null;
             localCache = null;
@@ -102,20 +127,37 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+
     @Override
     public boolean isClosed() {
         return closed;
     }
 
     @Override
+    /**
+     * 更新操作的执行方法。
+     *
+     * @param ms MappedStatement对象，代表一个SQL语句的映射配置。
+     * @param parameter 执行更新操作时需要的参数。
+     * @return 更新操作影响的行数。
+     * @throws SQLException 如果执行更新操作时发生SQL错误。
+     */
     public int update(MappedStatement ms, Object parameter) throws SQLException {
+        // 初始化错误上下文，记录执行更新操作的资源、活动和对象标识符
         ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());
+
+        // 检查执行器是否已关闭，如果已关闭，则抛出异常
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
+        // 清除本地缓存
         clearLocalCache();
+
+        // 执行更新操作，并返回影响的行数
         return doUpdate(ms, parameter);
     }
+
 
     @Override
     public List<BatchResult> flushStatements() throws SQLException {
@@ -139,40 +181,67 @@ public abstract class BaseExecutor implements Executor {
 
     @SuppressWarnings("unchecked")
     @Override
+    /**
+     * 执行查询操作。
+     *
+     * @param ms MappedStatement，代表一个映射语句，用于定义如何从数据库获取数据。
+     * @param parameter 参数对象，用于查询时传递的参数。
+     * @param rowBounds 行限制，用于指定查询结果的起始位置和返回行数。
+     * @param resultHandler 结果处理器，用于自定义结果集的处理方式。
+     * @param key 缓存键，用于标识查询结果在缓存中的位置。
+     * @param boundSql 绑定的SQL对象，包含实际执行的SQL语句及其参数。
+     * @return 返回查询结果列表。
+     * @throws SQLException 如果执行查询时发生SQL错误。
+     */
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler,
                              CacheKey key, BoundSql boundSql) throws SQLException {
+        // 初始化错误上下文
         ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
+
+        // 检查执行器是否已关闭
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
+        // 如果当前没有查询在执行并且要求刷新缓存，则清除本地缓存
         if (queryStack == 0 && ms.isFlushCacheRequired()) {
             clearLocalCache();
         }
+
         List<E> list;
         try {
+            // 查询计数加一，用于缓存和事务性上下文的管理
             queryStack++;
+            // 尝试从缓存中获取查询结果
             list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
             if (list != null) {
+                // 处理本地缓存中存储的输出参数
                 handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
             } else {
+                // 从数据库中执行查询
                 list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
             }
         } finally {
+            // 查询计数减一，确保查询计数器正确恢复
             queryStack--;
         }
+
+        // 如果当前没有查询在执行，进行后续清理和缓存更新
         if (queryStack == 0) {
+            // 处理延迟加载
             for (DeferredLoad deferredLoad : deferredLoads) {
                 deferredLoad.load();
             }
-            // issue #601
-            deferredLoads.clear();
+            deferredLoads.clear(); // 清空延迟加载列表
+            // 根据配置，可能需要清除本地缓存
             if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
-                // issue #482
                 clearLocalCache();
             }
         }
-        return list;
+
+        return list; // 返回查询结果
     }
+
 
     @Override
     public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {

@@ -15,10 +15,12 @@
  */
 package org.apache.ibatis.plugin;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;

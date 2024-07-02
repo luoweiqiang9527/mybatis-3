@@ -25,7 +25,7 @@ import org.apache.ibatis.executor.BatchResult;
 
 /**
  * 用于处理 MyBatis 的主要 Java 接口。
- * 通过这个接口，你可以执行命令，获取映射器和管理交易。
+ * 通过这个接口，你可以执行命令，获取映射器和管理事务。
  *
  * @author Clinton Begin
  */

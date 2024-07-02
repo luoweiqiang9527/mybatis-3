@@ -42,8 +42,17 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         this.configuration = configuration;
     }
 
+    /**
+     * 打开一个新的SqlSession。
+     *
+     * 此方法用于根据当前配置打开一个新的SqlSession。它不接受任何参数，直接调用
+     * openSessionFromDataSource 方法来实现具体的会话打开逻辑。
+     *
+     * @return SqlSession 一个新的SqlSession实例，用于执行SQL操作。
+     */
     @Override
     public SqlSession openSession() {
+        // 使用默认的执行器类型、不指定事务隔离级别、不自动提交事务来打开会话
         return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
     }
 

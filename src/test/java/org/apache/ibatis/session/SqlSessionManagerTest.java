@@ -58,20 +58,34 @@ class SqlSessionManagerTest extends BaseDataTest {
         }
     }
 
+    /**
+     * 测试插入作者并提交事务的功能。
+     * 该测试方法验证了通过AuthorMapper插入一个作者对象后，是否能成功提交事务，
+     * 并且能从数据库中查询到刚刚插入的作者信息。
+     */
     @Test
     void shouldCommitInsertedAuthor() {
         try {
+            // 开始一个管理的会话，这个会话将在方法结束时自动提交或回滚
             manager.startManagedSession();
+            // 获取AuthorMapper实例，用于数据库操作
             AuthorMapper mapper = manager.getMapper(AuthorMapper.class);
+            // 创建一个预期要插入的作者对象
             Author expected = new Author(500, "cbegin", "******", "cbegin@somewhere.com", "Something...", null);
+            // 插入作者对象到数据库
             mapper.insertAuthor(expected);
+            // 提交事务，确保插入操作被持久化
             manager.commit();
+            // 从数据库中根据ID查询刚刚插入的作者对象
             Author actual = mapper.selectAuthor(500);
+            // 断言查询结果不为空，确认插入操作成功
             assertNotNull(actual);
         } finally {
+            // 无论测试成功还是失败，都关闭会话管理器
             manager.close();
         }
     }
+
 
     @Test
     void shouldRollbackInsertedAuthor() {

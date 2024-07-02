@@ -73,6 +73,13 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         return new SqlSessionManager(sqlSessionFactory);
     }
 
+    /**
+     * 开始一个受管理的会话。
+     * <p>
+     * 本方法通过调用openSession()方法来创建一个新的会话，并将其设置到本地SqlSession对象中。
+     * 这样做的目的是为了在受管理的环境中启动并维护一个数据库会话，确保会话的正确创建和使用。
+     * 对于在如Spring等依赖注入框架中使用JDBC的场景，这种管理会话的方式特别有用，因为它可以帮助简化会话的生命周期管理。
+     */
     public void startManagedSession() {
         this.localSqlSession.set(openSession());
     }
@@ -109,11 +116,16 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         return this.localSqlSession.get() != null;
     }
 
+    /**
+     * 打开一个SqlSession。
+     *
+     * @return 返回一个SqlSession实例，用于执行SQL操作。
+     */
     @Override
     public SqlSession openSession() {
+        // 调用SqlSessionFactory的openSession方法来创建并返回一个新的SqlSession实例。
         return sqlSessionFactory.openSession();
     }
-
     @Override
     public SqlSession openSession(boolean autoCommit) {
         return sqlSessionFactory.openSession(autoCommit);

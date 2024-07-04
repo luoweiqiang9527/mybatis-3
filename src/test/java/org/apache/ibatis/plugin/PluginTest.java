@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +46,10 @@ class PluginTest {
             "org/apache/ibatis/plugin/CreateDB.sql");
     }
 
+    /**
+     * 有两个schema，都有users表。 默认是public 语句查询出是Public user 1，MYSCHEMA语句查询出是Private user 1
+     * 插件可以做到切换schema
+     */
     @Test
     void shouldPluginSwitchSchema() {
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -74,6 +77,10 @@ class PluginTest {
         }
     }
 
+    /**
+     * 一个可以对语句处理器进行拦截的插件，在invocation.proceed()前面，属于预处理
+     * 插件可以做到切换schema
+     */
     @Intercepts(@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class}))
     public static class SwitchCatalogInterceptor implements Interceptor {
         @Override
@@ -85,6 +92,10 @@ class PluginTest {
         }
     }
 
+    /**
+     * 插件并不是可以调用任意方法，否则会抛出异常。
+     * 1. 抽象方法不可以作为插件目标。
+     */
     @Test
     void shouldPluginNotInvokeArbitraryMethod() {
         Map<?, ?> map = new HashMap<>();
@@ -101,6 +112,9 @@ class PluginTest {
         }
     }
 
+    /**
+     * 一个可以对Map获取值进行拦截的插件。
+     */
     @Intercepts({@Signature(type = Map.class, method = "get", args = {Object.class})})
     public static class AlwaysMapPlugin implements Interceptor {
         @Override

@@ -23,9 +23,9 @@ import java.lang.annotation.Target;
 
 // @formatter:off
 /**
- * The annotation that specify target methods to intercept.
+ * 指定要截获的目标方法的注释。
  * <p>
- * <b>How to use:</b>
+ * <b>用法:</b>
  *
  * <pre>
  * &#064;Intercepts({ &#064;Signature(
@@ -51,7 +51,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Intercepts {
     /**
-     * Returns method signatures to intercept.
+     * 返回要截获的方法签名。
      *
      * @return method signatures
      */

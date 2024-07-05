@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.plugin;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -66,7 +65,7 @@ class PluginTest {
     }
 
     static class SchemaHolder {
-        private static ThreadLocal<String> value = ThreadLocal.withInitial(() -> "PUBLIC");
+        private static final ThreadLocal<String> value = ThreadLocal.withInitial(() -> "PUBLIC");
 
         public static void set(String tenantName) {
             value.set(tenantName);

@@ -19,8 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * 包装数据库连接。处理连接生命周期，包括：其创建、准备、
- * 提交/回滚并关闭。
+ * 包装数据库连接。处理连接生命周期，包括：其创建、准备、提交/回滚并关闭。
  *
  * @author Clinton Begin
  */

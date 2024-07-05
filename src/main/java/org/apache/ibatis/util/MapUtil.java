@@ -22,8 +22,8 @@ import java.util.function.Function;
 
 public class MapUtil {
     /**
-     * A temporary workaround for Java 8 specific performance issue JDK-8161372 .<br>
-     * This class should be removed once we drop Java 8 support.
+     * Java 8 特定性能问题的临时解决方法 JDK-8161372 .<br>
+     * 一旦我们放弃对 Java 8 的支持，就应该删除这个类。
      *
      * @see <a href=
      * "https://bugs.openjdk.java.net/browse/JDK-8161372">https://bugs.openjdk.java.net/browse/JDK-8161372</a>

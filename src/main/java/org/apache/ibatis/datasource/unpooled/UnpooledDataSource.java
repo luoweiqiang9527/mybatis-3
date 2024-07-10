@@ -34,13 +34,17 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 没有池化的数据库连接，不使用连接池。
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class UnpooledDataSource implements DataSource {
-
+    // JDBC driver
     private ClassLoader driverClassLoader;
+    // JDBC driver properties
     private Properties driverProperties;
+    // 注册的JDBC driver驱动列表，key是driver的类名
     private static final Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
 
     private String driver;
@@ -52,13 +56,23 @@ public class UnpooledDataSource implements DataSource {
     private Integer defaultTransactionIsolationLevel;
     private Integer defaultNetworkTimeout;
 
+    /**
+     * 静态初始化块，用于注册所有可用的JDBC驱动。
+     * 这段代码在类加载时执行，通过遍历DriverManager获取所有已注册的驱动，
+     * 并将它们存储在一个Map中，以便后续使用。
+     * 这个做法的目的是为了在不明确知道有哪些驱动的情况下，能够遍历所有驱动，
+     * 并提供一个统一的访问方式。
+     */
     static {
+        // 获取所有已注册的JDBC驱动
         Enumeration<Driver> drivers = DriverManager.getDrivers();
+        // 遍历所有驱动，将它们按类名存储在registeredDrivers中
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
             registeredDrivers.put(driver.getClass().getName(), driver);
         }
     }
+
 
     public UnpooledDataSource() {
     }
@@ -221,34 +235,67 @@ public class UnpooledDataSource implements DataSource {
         return doGetConnection(props);
     }
 
+    /**
+     * 获取数据库连接。
+     * <p>
+     * 此方法负责初始化驱动程序，然后使用给定的属性获取数据库连接，
+     * 并对连接进行配置，最后返回配置后的连接。
+     *
+     * @param properties 连接数据库所需的属性，包括用户名和密码等。
+     * @return 已配置好的数据库连接。
+     * @throws SQLException 如果获取或配置连接过程中发生错误。
+     */
     private Connection doGetConnection(Properties properties) throws SQLException {
+        // 初始化驱动程序，确保能够与数据库建立连接。
         initializeDriver();
+        // 使用驱动程序和属性获取数据库连接。
         Connection connection = DriverManager.getConnection(url, properties);
+        // 对获取的连接进行配置，例如设置自动提交等。
         configureConnection(connection);
+        // 返回配置后的连接。
         return connection;
     }
 
+
+    /**
+     * 初始化驱动程序。
+     * 此方法用于根据配置的驱动类名和可选的驱动类加载器来实例化和注册JDBC驱动程序。
+     * 如果已注册的驱动程序列表中不存在当前驱动，则会尝试通过类加载器加载驱动类，
+     * 创建驱动实例，并将其注册到DriverManager中。
+     *
+     * @throws SQLException 如果在初始化或注册驱动程序时出现错误。
+     */
     private void initializeDriver() throws SQLException {
         try {
+            // 使用computeIfAbsent方法检查已注册的驱动程序列表中是否已存在当前驱动。
+            // 如果不存在，则进行实例化和注册。
             MapUtil.computeIfAbsent(registeredDrivers, driver, x -> {
                 Class<?> driverType;
                 try {
+                    // 根据driverClassLoader是否为空，选择不同的方式加载驱动类。
                     if (driverClassLoader != null) {
+                        // 使用提供的驱动类加载器加载驱动类。
                         driverType = Class.forName(x, true, driverClassLoader);
                     } else {
+                        // 使用Resources的类加载器加载驱动类。
                         driverType = Resources.classForName(x);
                     }
+                    // 通过反射创建驱动实例。
                     Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();
+                    // 注册驱动实例，使用DriverProxy封装以提供额外的功能或控制。
                     DriverManager.registerDriver(new DriverProxy(driverInstance));
                     return driverInstance;
                 } catch (Exception e) {
+                    // 在实例化或注册驱动时发生异常，抛出运行时异常。
                     throw new RuntimeException("Error setting driver on UnpooledDataSource.", e);
                 }
             });
         } catch (RuntimeException re) {
+            // 捕获运行时异常，并转换为SQLException抛出，以便调用者能更直接地处理JDBC相关的错误。
             throw new SQLException("Error setting driver on UnpooledDataSource.", re.getCause());
         }
     }
+
 
     private void configureConnection(Connection conn) throws SQLException {
         if (defaultNetworkTimeout != null) {

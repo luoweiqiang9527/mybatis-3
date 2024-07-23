@@ -55,35 +55,50 @@ public class XMLStatementBuilder extends BaseBuilder {
         this.requiredDatabaseId = databaseId;
     }
 
+    /**
+     * 解析语句节点。
+     * 此方法负责根据当前上下文解析XML配置文件中的一个语句节点，并生成相应的MappedStatement对象。
+     * 它处理了各种细节，如判断数据库ID是否匹配、处理缓存策略、解析参数和结果映射等。
+     * 最终，它使用BuilderAssistant添加这个MappedStatement到配置中。
+     */
     public void parseStatementNode() {
+        // 从上下文中获取语句节点的ID和所属数据库ID
         String id = context.getStringAttribute("id");
         String databaseId = context.getStringAttribute("databaseId");
 
+        // 检查当前数据库ID是否匹配，如果不匹配则直接返回
         if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) {
             return;
         }
 
+        // 从节点中获取名称，并根据名称确定SQL命令类型
         String nodeName = context.getNode().getNodeName();
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+
+        // 根据SQL命令类型确定缓存策略
         boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
         boolean useCache = context.getBooleanAttribute("useCache", isSelect);
         boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
+        // 处理XML包含（<include>）的逻辑
         // Include Fragments before parsing
         XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
         includeParser.applyIncludes(context.getNode());
 
+        // 解析参数类型
         String parameterType = context.getStringAttribute("parameterType");
         Class<?> parameterTypeClass = resolveClass(parameterType);
 
+        // 解析语言驱动
         String lang = context.getStringAttribute("lang");
         LanguageDriver langDriver = getLanguageDriver(lang);
 
+        // 处理<selectKey>节点
         // Parse selectKey after includes and remove them.
         processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
-        // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+        // 根据配置和SQL命令类型决定是否使用自动生成的键
         KeyGenerator keyGenerator;
         String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
@@ -91,19 +106,23 @@ public class XMLStatementBuilder extends BaseBuilder {
             keyGenerator = configuration.getKeyGenerator(keyStatementId);
         } else {
             keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
-                configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
-                ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+                    configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
+                    ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
         }
 
+        // 使用语言驱动创建SQL源
         SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+
+        // 解析并设置statementType、fetchSize、timeout等属性
         StatementType statementType = StatementType
-            .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+                .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
         Integer fetchSize = context.getIntAttribute("fetchSize");
         Integer timeout = context.getIntAttribute("timeout");
         String parameterMap = context.getStringAttribute("parameterMap");
         String resultType = context.getStringAttribute("resultType");
         Class<?> resultTypeClass = resolveClass(resultType);
         String resultMap = context.getStringAttribute("resultMap");
+        // 如果没有明确指定结果类型或结果映射，尝试从注解中获取
         if (resultTypeClass == null && resultMap == null) {
             resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
         }
@@ -117,9 +136,10 @@ public class XMLStatementBuilder extends BaseBuilder {
         String resultSets = context.getStringAttribute("resultSets");
         boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
 
+        // 最终，使用BuilderAssistant添加MappedStatement到配置中
         builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
-            parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
-            keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect);
+                parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
+                keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect);
     }
 
     private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {

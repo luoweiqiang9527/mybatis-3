@@ -424,19 +424,35 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 处理mappers元素，根据子元素的不同类型（package、resource、url、class），进行不同的处理。
+     * - 对于package元素，将其包含的映射器包添加到配置中。
+     * - 对于resource、url元素，加载并解析对应的映射器配置文件。
+     * - 对于class元素，将指定的映射器接口类添加到配置中。
+     *
+     * @param context mappers元素的XNode对象，用于遍历解析子元素。
+     * @throws Exception 如果解析过程中发生错误。
+     */
     private void mappersElement(XNode context) throws Exception {
+        // 如果context为空，则直接返回，不进行处理。
         if (context == null) {
             return;
         }
+        // 遍历context的子元素。
         for (XNode child : context.getChildren()) {
+            // 如果子元素名称为"package"，则处理映射器包。
             if ("package".equals(child.getName())) {
+                // 获取并添加映射器包名。
                 String mapperPackage = child.getStringAttribute("name");
                 configuration.addMappers(mapperPackage);
             } else {
+                // 处理resource、url、class元素。
                 String resource = child.getStringAttribute("resource");
                 String url = child.getStringAttribute("url");
                 String mapperClass = child.getStringAttribute("class");
+                // 根据resource、url、mapperClass是否为空，确定处理方式。
                 if (resource != null && url == null && mapperClass == null) {
+                    // 处理resource元素。
                     ErrorContext.instance().resource(resource);
                     try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
@@ -444,6 +460,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                         mapperParser.parse();
                     }
                 } else if (resource == null && url != null && mapperClass == null) {
+                    // 处理url元素。
                     ErrorContext.instance().resource(url);
                     try (InputStream inputStream = Resources.getUrlAsStream(url)) {
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url,
@@ -451,15 +468,18 @@ public class XMLConfigBuilder extends BaseBuilder {
                         mapperParser.parse();
                     }
                 } else if (resource == null && url == null && mapperClass != null) {
+                    // 处理class元素。
                     Class<?> mapperInterface = Resources.classForName(mapperClass);
                     configuration.addMapper(mapperInterface);
                 } else {
+                    // 如果元素同时指定了多个属性，则抛出异常。
                     throw new BuilderException(
                         "A mapper element may only specify a url, resource or class, but not more than one.");
                 }
             }
         }
     }
+
 
     private boolean isSpecifiedEnvironment(String id) {
         if (environment == null) {

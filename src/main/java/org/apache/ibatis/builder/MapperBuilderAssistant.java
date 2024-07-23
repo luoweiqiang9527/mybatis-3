@@ -195,18 +195,50 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
     }
 
+    /**
+     * 添加一个MappedStatement对象到配置中。
+     * MappedStatement用于封装一个SQL映射语句的所有配置信息，包括SQL源、参数映射、结果映射等。
+     * 此方法用于构建一个新的MappedStatement对象并将其添加到配置中，以便在执行SQL时使用。
+     *
+     * @param id 映射语句的唯一标识符，用于在配置中唯一标识这个映射语句。
+     * @param sqlSource SQL源，用于提供动态或静态的SQL语句。
+     * @param statementType 映射语句的类型，比如SELECT、INSERT、UPDATE或DELETE。
+     * @param sqlCommandType SQL命令的类型，具体到MyBatis的SQL命令，比如SELECT_LIST、INSERT_IGNORE等。
+     * @param fetchSize 用于指定结果集的默认获取大小。
+     * @param timeout 设置这个映射语句的超时时间。
+     * @param parameterMap 参数映射的标识符，用于指定如何映射输入参数。
+     * @param parameterType 输入参数的类型。
+     * @param resultMap 结果映射的标识符，用于指定如何映射查询结果。
+     * @param resultType 查询结果的类型。
+     * @param resultSetType 结果集的类型，比如FORWARD_ONLY、SCROLL_SENSITIVE等。
+     * @param flushCache 是否在执行这个映射语句时刷新缓存。
+     * @param useCache 是否使用缓存来存储这个映射语句的结果。
+     * @param resultOrdered 是否要求结果集按照它们被返回的顺序进行处理。
+     * @param keyGenerator 键值生成器，用于生成主键或唯一键。
+     * @param keyProperty 指定生成的键值应该被设置到哪个属性上。
+     * @param keyColumn 用于生成键值的数据库列。
+     * @param databaseId 特定数据库的标识符，用于数据库特定的映射。
+     * @param lang 用于语言特定的逻辑，比如条件表达式的解析。
+     * @param resultSets 映射多个结果集时使用的标识符。
+     * @param dirtySelect 标记是否为"脏"选择，影响缓存行为。
+     * @return 返回构建完成的MappedStatement对象。
+     * @throws IncompleteElementException 如果缓存引用未解析完成，则抛出此异常。
+     */
     public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
                                               SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
                                               String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
                                               boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
                                               LanguageDriver lang, String resultSets, boolean dirtySelect) {
 
+        // 检查是否有未解析的缓存引用，如果有则抛出异常
         if (unresolvedCacheRef) {
             throw new IncompleteElementException("Cache-ref not yet resolved");
         }
 
+        // 应用当前命名空间到id上，确保id的全局唯一性
         id = applyCurrentNamespace(id, false);
 
+        // 使用Builder模式构建MappedStatement对象
         MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
             .resource(resource).fetchSize(fetchSize).timeout(timeout).statementType(statementType)
             .keyGenerator(keyGenerator).keyProperty(keyProperty).keyColumn(keyColumn).databaseId(databaseId).lang(lang)
@@ -214,15 +246,20 @@ public class MapperBuilderAssistant extends BaseBuilder {
             .resultMaps(getStatementResultMaps(resultMap, resultType, id)).resultSetType(resultSetType)
             .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect);
 
+        // 根据参数映射标识符构建ParameterMap对象，并将其应用到MappedStatement上
         ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
         if (statementParameterMap != null) {
             statementBuilder.parameterMap(statementParameterMap);
         }
 
+        // 构建MappedStatement对象
         MappedStatement statement = statementBuilder.build();
+        // 将MappedStatement添加到配置中
         configuration.addMappedStatement(statement);
+        // 返回构建完成的MappedStatement对象
         return statement;
     }
+
 
     /**
      * Backward compatibility signature 'addMappedStatement'.

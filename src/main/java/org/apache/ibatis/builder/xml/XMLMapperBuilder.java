@@ -108,20 +108,37 @@ public class XMLMapperBuilder extends BaseBuilder {
         return sqlFragments.get(refid);
     }
 
-    private void configurationElement(XNode context) {
+    /**
+     * 配置元素解析方法，用于解析XML配置文件中的Mapper元素。
+     * 通过此方法，可以设置当前的命名空间，处理缓存引用、缓存、参数映射、结果映射和SQL片段等配置。
+     *
+     * @param context 当前正在处理的XML节点，从中提取配置信息。
+     * @throws BuilderException 如果解析过程中出现错误，会抛出此异常。
+     */
+    private void configurationElement(XNode context) throws BuilderException {
         try {
+            // 从context中获取namespace属性，并检查是否为空，为空则抛出异常。
             String namespace = context.getStringAttribute("namespace");
             if (namespace == null || namespace.isEmpty()) {
                 throw new BuilderException("Mapper's namespace cannot be empty");
             }
+            // 设置当前的命名空间。
             builderAssistant.setCurrentNamespace(namespace);
+
+            // 处理cache-ref元素。
             cacheRefElement(context.evalNode("cache-ref"));
+            // 处理cache元素。
             cacheElement(context.evalNode("cache"));
+            // 处理parameterMap元素。
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+            // 处理resultMap元素。
             resultMapElements(context.evalNodes("/mapper/resultMap"));
+            // 处理sql元素。
             sqlElement(context.evalNodes("/mapper/sql"));
+            // 根据select|insert|update|delete节点构建语句。
             buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
         } catch (Exception e) {
+            // 如果在解析过程中发生异常，则抛出BuilderException，并包含错误的资源位置和原因。
             throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
         }
     }

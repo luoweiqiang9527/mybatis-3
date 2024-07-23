@@ -210,13 +210,25 @@ public class XPathParser {
         return evalNode(document, expression);
     }
 
+    /**
+     * 根据给定的XPath表达式，在指定的根节点下评估并返回一个XNode对象。
+     * 这个方法主要用于解析XPath表达式，找到对应的节点，并封装为XNode对象返回。
+     *
+     * @param root 根节点，用于XPath表达式的解析起点。
+     * @param expression XPath表达式，用于定位需要的节点。
+     * @return 如果找到对应的节点，则返回一个封装了该节点的XNode对象；如果未找到，则返回null。
+     */
     public XNode evalNode(Object root, String expression) {
+        // 使用XPath表达式评估方法，尝试找到对应的节点
         Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
+        // 如果评估结果为null，则说明未找到对应的节点，直接返回null
         if (node == null) {
             return null;
         }
+        // 如果找到了对应的节点，创建并返回一个新的XNode对象，其中包含评估得到的节点和变量信息
         return new XNode(this, node, variables);
     }
+
 
     private Object evaluate(String expression, Object root, QName returnType) {
         try {

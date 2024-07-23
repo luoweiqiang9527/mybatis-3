@@ -16,12 +16,16 @@
 package org.apache.ibatis.parsing;
 
 /**
+ * 通用令牌解析器
+ *
  * @author Clinton Begin
  */
 public class GenericTokenParser {
-
+    // 开始标记
     private final String openToken;
+    // 结束标记
     private final String closeToken;
+    // 标记处理器
     private final TokenHandler handler;
 
     public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {

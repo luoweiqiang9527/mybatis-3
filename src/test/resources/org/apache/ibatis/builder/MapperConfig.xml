@@ -25,12 +25,25 @@
     <properties resource="org/apache/ibatis/databases/blog/blog-derby.properties"/>
 
     <settings>
+        <!-- 启用缓存设置，允许MyBatis使用缓存来提高查询效率。 -->
         <setting name="cacheEnabled" value="true"/>
+
+        <!-- 设置懒加载，此处设置为false表示不使用懒加载，即在加载实体时立即加载关联数据。 -->
         <setting name="lazyLoadingEnabled" value="false"/>
+
+        <!-- 启用多个结果集的处理，允许在一个查询中返回多个结果集。 -->
         <setting name="multipleResultSetsEnabled" value="true"/>
+
+        <!-- 使用列标签而不是列名来引用数据库列，提高了代码的可维护性和兼容性。 -->
         <setting name="useColumnLabel" value="true"/>
+
+        <!-- 是否使用自动生成的键，此处设置为false表示不使用数据库自动生成的键。 -->
         <setting name="useGeneratedKeys" value="false"/>
+
+        <!-- 设置默认的执行器类型为SIMPLE，即简单执行器，不支持批量操作。 -->
         <setting name="defaultExecutorType" value="SIMPLE"/>
+
+        <!-- 设置默认的语句超时时间为25秒，防止查询过慢影响系统性能。 -->
         <setting name="defaultStatementTimeout" value="25"/>
     </settings>
 

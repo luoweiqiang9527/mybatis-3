@@ -61,75 +61,152 @@ import org.mockito.Mockito;
 class SqlSessionTest extends BaseDataTest {
     private static SqlSessionFactory sqlMapper;
 
+    /**
+     * 集群初始化设置。
+     * 本方法在所有测试方法执行前仅执行一次，负责配置和初始化与数据库相关的资源。
+     * 使用了静态块来确保这些资源在测试类的生命周期内只被初始化一次。
+     *
+     * @throws Exception 如果资源配置或数据库连接失败，抛出异常。
+     */
     @BeforeAll
     static void setup() throws Exception {
+        // 创建博客数据源。这是为了在测试环境中模拟真实数据库的行为。
         createBlogDataSource();
+
+        // 定义MyBatis配置文件的位置。
         final String resource = "org/apache/ibatis/builder/MapperConfig.xml";
+
+        // 加载MyBatis配置文件。
         final Reader reader = Resources.getResourceAsReader(resource);
+
+        // 根据配置文件构建SqlSessionFactory，它是MyBatis的核心对象，用于管理SQL会话。
         sqlMapper = new SqlSessionFactoryBuilder().build(reader);
     }
 
+
+    /**
+     * 测试Configuration类是否能够正确解析缓存的简短名称和完整限定名称。
+     * 该测试通过创建一个配置对象，添加一个具有完整限定名称的缓存实例，然后分别使用完整限定名称和简短名称来检索缓存，
+     * 以验证Configuration对象能否正确识别和返回相同的缓存实例。
+     */
     @Test
     void shouldResolveBothSimpleNameAndFullyQualifiedName() {
+        // 创建一个Configuration实例
         Configuration c = new Configuration();
+        // 定义一个缓存的完整限定类名
         final String fullName = "com.mycache.MyCache";
+        // 定义相同缓存的简短类名
         final String shortName = "MyCache";
+        // 创建一个具有完整限定名称的缓存实例
         final PerpetualCache cache = new PerpetualCache(fullName);
+        // 将缓存实例添加到配置中
         c.addCache(cache);
+        // 验证通过完整限定名称获取的缓存是否与原始缓存实例相同
         assertEquals(cache, c.getCache(fullName));
+        // 验证通过简短名称获取的缓存是否与原始缓存实例相同
         assertEquals(cache, c.getCache(shortName));
     }
 
+
+    /**
+     * 测试在无法找到确切缓存时是否能正确切换到最适用的简名。
+     * 此测试验证了当请求的缓存名称完全限定名不正确时，配置是否能退回到使用最匹配的简单名称。
+     * 它首先创建一个配置对象，并添加一个具有完全限定名的缓存实例。
+     * 然后，测试通过使用正确的完全限定名来验证缓存的检索。
+     * 最后，测试尝试使用一个不正确的命名空间的完全限定名来检索缓存，期望抛出IllegalArgumentException。
+     */
     @Test
     void shouldFailOverToMostApplicableSimpleName() {
+        // 创建一个配置实例
         Configuration c = new Configuration();
+        // 定义一个正确的完全限定缓存类名
         final String fullName = "com.mycache.MyCache";
+        // 定义一个错误的命名空间的完全限定缓存类名
         final String invalidName = "unknown.namespace.MyCache";
+        // 创建一个缓存实例并使用正确的完全限定名初始化
         final PerpetualCache cache = new PerpetualCache(fullName);
+        // 将缓存实例添加到配置中
         c.addCache(cache);
+        // 验证能否使用完全限定名正确检索到缓存
         assertEquals(cache, c.getCache(fullName));
+        // 验证使用错误的命名空间的完全限定名检索缓存时，是否抛出IllegalArgumentException
         Assertions.assertThrows(IllegalArgumentException.class, () -> c.getCache(invalidName));
     }
 
+
+    /**
+     * 测试在存在命名冲突的情况下，配置中获取缓存的ambiguity行为。
+     * 该测试期望在尝试获取一个非唯一匹配的简短名称缓存时抛出异常。
+     * <p>
+     * 测试首先创建并配置了两个具有相同类名但不同包名的缓存实例。
+     * 然后，通过它们的全限定名和一个共享简短名称来检索这些缓存。
+     * 预期在尝试使用简短名称获取缓存时会失败，并抛出说明ambiguity的异常。
+     */
     @Test
     void shouldSucceedWhenFullyQualifiedButFailDueToAmbiguity() {
+        // 创建一个新的配置实例
         Configuration c = new Configuration();
 
+        // 初始化并添加第一个缓存实例
         final String name1 = "com.mycache.MyCache";
         final PerpetualCache cache1 = new PerpetualCache(name1);
         c.addCache(cache1);
 
+        // 初始化并添加第二个缓存实例，与第一个缓存只有包名不同
         final String name2 = "com.other.MyCache";
         final PerpetualCache cache2 = new PerpetualCache(name2);
         c.addCache(cache2);
 
+        // 定义一个共享的简短名称，会导致获取缓存时的ambiguity
         final String shortName = "MyCache";
 
+        // 验证能否通过全限定名正确获取到缓存实例
         assertEquals(cache1, c.getCache(name1));
         assertEquals(cache2, c.getCache(name2));
 
+        // 尝试使用共享的简短名称获取缓存，并期望抛出异常
         try {
             c.getCache(shortName);
-            fail("Exception expected.");
+            fail("Exception expected due to ambiguity.");
         } catch (Exception e) {
+            // 验证异常消息中是否包含"ambiguous（模糊）"关键词
             assertTrue(e.getMessage().contains("ambiguous"));
         }
 
     }
 
+
+    /**
+     * 测试添加缓存时是否能正确处理名称冲突。
+     * 该测试期望在尝试添加一个已经存在的缓存时抛出异常。
+     * <p>
+     * 测试流程：
+     * 1. 创建一个Configuration实例。
+     * 2. 创建一个名为"com.mycache.MyCache"的PerpetualCache实例。
+     * 3. 尝试将该缓存实例添加到Configuration中两次。
+     * 4. 期望第二次添加时抛出异常，因为缓存名称已存在。
+     * 5. 如果抛出异常，则测试通过；否则，测试失败。
+     */
     @Test
     void shouldFailToAddDueToNameConflict() {
+        // 初始化Configuration对象和一个PerpetualCache对象
         Configuration c = new Configuration();
         final String fullName = "com.mycache.MyCache";
         final PerpetualCache cache = new PerpetualCache(fullName);
+
         try {
+            // 第一次添加缓存，预期成功。
             c.addCache(cache);
+            // 第二次添加相同的缓存，预期抛出异常。
             c.addCache(cache);
+            // 如果没有抛出异常，手动触发测试失败。
             fail("Exception expected.");
         } catch (Exception e) {
+            // 捕获异常，验证异常消息是否包含特定文本。
             assertTrue(e.getMessage().contains("already contains key"));
         }
     }
+
 
     @Test
     void shouldOpenAndClose() {

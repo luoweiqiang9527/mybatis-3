@@ -112,32 +112,46 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     /**
-     * 解析配置的主要方法
+     * 解析配置文件的根节点，加载和配置各种元素。
      *
-     * @param root root
+     * @param root 配置文件的根节点，用于从中提取和配置各项设置。
      */
     private void parseConfiguration(XNode root) {
         try {
+            // 优先读取属性配置
             // issue #117 read properties first
             propertiesElement(root.evalNode("properties"));
+            // 加载和配置设置
             Properties settings = settingsAsProperties(root.evalNode("settings"));
             loadCustomVfsImpl(settings);
             loadCustomLogImpl(settings);
+            // 处理类型别名配置
             typeAliasesElement(root.evalNode("typeAliases"));
+            // 处理插件配置
             pluginsElement(root.evalNode("plugins"));
+            // 处理对象工厂配置
             objectFactoryElement(root.evalNode("objectFactory"));
+            // 处理对象包装器工厂配置
             objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+            // 处理反射器工厂配置
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
+            // 应用全局设置
             settingsElement(settings);
+            // 处理环境配置，需在对象工厂和对象包装器工厂之后
             // read it after objectFactory and objectWrapperFactory issue #631
             environmentsElement(root.evalNode("environments"));
+            // 处理数据库ID提供者配置
             databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+            // 处理类型处理器配置
             typeHandlersElement(root.evalNode("typeHandlers"));
+            // 处理映射器配置
             mappersElement(root.evalNode("mappers"));
         } catch (Exception e) {
+            // 解析配置出错时，抛出构建器异常
             throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
         }
     }
+
 
     private Properties settingsAsProperties(XNode context) {
         if (context == null) {
@@ -239,29 +253,48 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 处理属性元素配置。
+     * 从给定的XNode对象中加载属性配置，这些属性可以来自资源文件、URL或已有的属性集合。
+     * 如果同时指定了资源(resource)和URL(url)，则抛出异常，因为两者不能同时使用。
+     * 最后，将加载的属性应用到解析器和配置对象中。
+     *
+     * @param context XNode对象，包含属性元素的配置信息。
+     * @throws Exception 如果同时指定了资源和URL，则抛出BuilderException异常。
+     */
     private void propertiesElement(XNode context) throws Exception {
+        // 如果上下文为空，则直接返回，不进行任何处理
         if (context == null) {
             return;
         }
+        // 从上下文中加载子元素作为属性集合
         Properties defaults = context.getChildrenAsProperties();
+        // 从上下文中获取resource属性和url属性的值
         String resource = context.getStringAttribute("resource");
         String url = context.getStringAttribute("url");
+        // 如果同时指定了resource和url，则抛出异常
         if (resource != null && url != null) {
             throw new BuilderException(
                 "The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
         }
+        // 如果指定了resource，则加载资源文件作为属性集合，并合并到默认属性中
         if (resource != null) {
             defaults.putAll(Resources.getResourceAsProperties(resource));
+        // 如果指定了url，则加载URL指向的属性文件，并合并到默认属性中
         } else if (url != null) {
             defaults.putAll(Resources.getUrlAsProperties(url));
         }
+        // 获取配置对象中的变量属性，并合并到默认属性中
         Properties vars = configuration.getVariables();
         if (vars != null) {
             defaults.putAll(vars);
         }
+        // 将合并后的属性应用到解析器中
         parser.setVariables(defaults);
+        // 将合并后的属性应用到配置对象中
         configuration.setVariables(defaults);
     }
+
 
     private void settingsElement(Properties props) {
         configuration

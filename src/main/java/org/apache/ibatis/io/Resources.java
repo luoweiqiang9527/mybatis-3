@@ -205,7 +205,7 @@ public class Resources {
     }
 
     /**
-     * Gets a URL as an input stream
+     * 获取 URL 作为输入流
      *
      * @param urlString - the URL to get
      * @return An input stream with the data from the URL

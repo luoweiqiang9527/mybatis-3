@@ -110,6 +110,12 @@ public class XNode {
         return xpathParser.evalNodes(node, expression);
     }
 
+    /**
+     * 根据给定的XPath表达式评估当前节点，并返回结果节点。
+     *
+     * @param expression XPath表达式，用于定位或筛选节点。
+     * @return 返回匹配XPath表达式的节点，如果不存在匹配的节点，则返回null。
+     */
     public XNode evalNode(String expression) {
         return xpathParser.evalNode(node, expression);
     }

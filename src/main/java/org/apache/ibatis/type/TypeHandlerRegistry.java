@@ -15,6 +15,11 @@
  */
 package org.apache.ibatis.type;
 
+import org.apache.ibatis.binding.MapperMethod.ParamMap;
+import org.apache.ibatis.io.ResolverUtil;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.Configuration;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
@@ -22,56 +27,41 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.chrono.JapaneseDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.ibatis.binding.MapperMethod.ParamMap;
-import org.apache.ibatis.io.ResolverUtil;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.Configuration;
-
 /**
+ * 类型处理器注册表
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public final class TypeHandlerRegistry {
-
+    // 存储JdbcType与TypeHandler的映射
     private final Map<JdbcType, TypeHandler<?>> jdbcTypeHandlerMap = new EnumMap<>(JdbcType.class);
+    // 存储Type与JdbcType与TypeHandler的映射
     private final Map<Type, Map<JdbcType, TypeHandler<?>>> typeHandlerMap = new ConcurrentHashMap<>();
+    // 未知类型处理器
     private final TypeHandler<Object> unknownTypeHandler;
+    // 存储Class与TypeHandler的映射
     private final Map<Class<?>, TypeHandler<?>> allTypeHandlersMap = new HashMap<>();
-
+    // 空类型处理器映射
     private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = Collections.emptyMap();
-
+    // 默认枚举类型处理器
     private Class<? extends TypeHandler> defaultEnumTypeHandler = EnumTypeHandler.class;
 
     /**
-     * The default constructor.
+     * 默认构造函数。
      */
     public TypeHandlerRegistry() {
         this(new Configuration());
     }
 
     /**
-     * The constructor that pass the MyBatis configuration.
+     * 传递MyBatis配置的构造函数。
      *
      * @param configuration a MyBatis configuration
      * @since 3.5.4
@@ -230,26 +220,38 @@ public final class TypeHandlerRegistry {
         return getTypeHandler(javaTypeReference.getRawType(), jdbcType);
     }
 
+    /**
+     * 根据给定的类型和JDBC类型获取相应的类型处理器
+     *
+     * @param type Java类型，用于确定类型处理器
+     * @param jdbcType JDBC类型，用于进一步确定类型处理器
+     * @return 对应的类型处理器，如果找不到，则返回null
+     */
     @SuppressWarnings("unchecked")
     private <T> TypeHandler<T> getTypeHandler(Type type, JdbcType jdbcType) {
+        // 如果是ParamMap类型，则不处理，直接返回null
         if (ParamMap.class.equals(type)) {
             return null;
         }
+        // 获取与Java类型相关联的JDBC处理器映射
         Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = getJdbcHandlerMap(type);
         TypeHandler<?> handler = null;
         if (jdbcHandlerMap != null) {
+            // 尝试根据JDBC类型获取处理器
             handler = jdbcHandlerMap.get(jdbcType);
             if (handler == null) {
+                // 如果未找到，尝试仅用null作为键获取处理器
                 handler = jdbcHandlerMap.get(null);
             }
             if (handler == null) {
-                // #591
+                // 如果仍然未找到，尝试从映射中挑选唯一的处理器
                 handler = pickSoleHandler(jdbcHandlerMap);
             }
         }
-        // type drives generics here
+        // 强制类型转换，确保返回的处理器与泛型参数T兼容
         return (TypeHandler<T>) handler;
     }
+
 
     private Map<JdbcType, TypeHandler<?>> getJdbcHandlerMap(Type type) {
         Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = typeHandlerMap.get(type);
@@ -306,18 +308,29 @@ public final class TypeHandlerRegistry {
         return getJdbcHandlerMapForSuperclass(superclass);
     }
 
+    /**
+     * 从给定的类型处理器映射中挑选出唯一的类型处理器如果映射中只有一个类型的处理器，则返回该处理器；否则返回null
+     *
+     * @param jdbcHandlerMap Jdbc类型到类型处理器的映射
+     * @return 唯一的类型处理器，如果存在；否则返回null
+     */
     private TypeHandler<?> pickSoleHandler(Map<JdbcType, TypeHandler<?>> jdbcHandlerMap) {
+        // 初始化唯一的处理器变量为null
         TypeHandler<?> soleHandler = null;
+        // 遍历jdbcHandlerMap中的每个类型处理器
         for (TypeHandler<?> handler : jdbcHandlerMap.values()) {
+            // 如果soleHandler为空，则将其初始化为当前处理器
             if (soleHandler == null) {
                 soleHandler = handler;
             } else if (!handler.getClass().equals(soleHandler.getClass())) {
-                // More than one type handlers registered.
+                // 如果遍历到的处理器与soleHandler类型不同，则说明存在多个类型的处理器，返回null
                 return null;
             }
         }
+        // 如果遍历完成没有返回null，则说明只有一个类型的处理器，返回该处理器
         return soleHandler;
     }
+
 
     public TypeHandler<Object> getUnknownTypeHandler() {
         return unknownTypeHandler;
@@ -360,23 +373,45 @@ public final class TypeHandlerRegistry {
 
     // java type + handler
 
+    /**
+     * 注册一个类型处理器，用于处理特定Java类型的参数。
+     * 该方法提供了一种更方便的注册方式，直接使用Java类型而不是Type对象。
+     *
+     * @param javaType    要注册的Java类型，如String.class。
+     * @param typeHandler 对应类型处理器，用于处理该类型的数据。
+     */
     public <T> void register(Class<T> javaType, TypeHandler<? extends T> typeHandler) {
         register((Type) javaType, typeHandler);
     }
 
+
+    /**
+     * 注册类型处理器到MyBatis框架中
+     * 该方法支持基于Java类型和JDBC类型的映射关系来注册类型处理器
+     * 如果提供了MappedJdbcTypes注解，则会根据注解内容注册多个JDBC类型对应的处理器；
+     * 否则，默认注册为null的JDBC类型处理器
+     *
+     * @param javaType    Java类型，与之关联的JDBC类型
+     * @param typeHandler 类型处理器，用于处理Java类型和JDBC类型之间的转换
+     */
     private <T> void register(Type javaType, TypeHandler<? extends T> typeHandler) {
+        // 获取类型处理器上可能标注的MappedJdbcTypes注解信息
         MappedJdbcTypes mappedJdbcTypes = typeHandler.getClass().getAnnotation(MappedJdbcTypes.class);
         if (mappedJdbcTypes != null) {
+            // 如果存在MappedJdbcTypes注解，则遍历注解中定义的JDBC类型，并注册对应的处理器
             for (JdbcType handledJdbcType : mappedJdbcTypes.value()) {
                 register(javaType, handledJdbcType, typeHandler);
             }
+            // 检查是否需要为null的JDBC类型注册处理器
             if (mappedJdbcTypes.includeNullJdbcType()) {
                 register(javaType, null, typeHandler);
             }
         } else {
+            // 如果没有MappedJdbcTypes注解，默认为null的JDBC类型注册处理器
             register(javaType, null, typeHandler);
         }
     }
+
 
     public <T> void register(TypeReference<T> javaTypeReference, TypeHandler<? extends T> handler) {
         register(javaTypeReference.getRawType(), handler);
@@ -390,17 +425,30 @@ public final class TypeHandlerRegistry {
         register((Type) type, jdbcType, handler);
     }
 
+    /**
+     * 注册类型处理器到相应的Java类型和JDBC类型映射中
+     *
+     * @param javaType    需要映射的Java类型
+     * @param jdbcType    需要映射的JDBC类型
+     * @param handler     类型处理器，用于在Java类型和JDBC类型间进行转换
+     */
     private void register(Type javaType, JdbcType jdbcType, TypeHandler<?> handler) {
+        // 检查Java类型是否为空，为空则无需注册
         if (javaType != null) {
+            // 获取或初始化存储JDBC类型到类型处理器映射的Map
             Map<JdbcType, TypeHandler<?>> map = typeHandlerMap.get(javaType);
             if (map == null || map == NULL_TYPE_HANDLER_MAP) {
                 map = new HashMap<>();
             }
+            // 将JDBC类型和类型处理器映射添加到Map中
             map.put(jdbcType, handler);
+            // 更新typeHandlerMap，建立Java类型和处理后的映射关系
             typeHandlerMap.put(javaType, map);
         }
+        // 将类型处理器映射到其对应的类上，确保每个类型的处理器唯一
         allTypeHandlersMap.put(handler.getClass(), handler);
     }
+
 
     //
     // REGISTER CLASS
@@ -408,19 +456,36 @@ public final class TypeHandlerRegistry {
 
     // Only handler type
 
+    /**
+     * 注册类型处理器。如果提供了MappedTypes注解，则会根据注解中的类型进行注册；
+     * 如果没有提供，则注册默认的类型处理器实例。
+     *
+     * @param typeHandlerClass 类型处理器类，用于注册到类型处理器映射中。
+     */
     public void register(Class<?> typeHandlerClass) {
+        // 标记是否找到了映射的类型，初始为未找到
         boolean mappedTypeFound = false;
+
+        // 获取类型处理器类上的MappedTypes注解
         MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
+
+        // 如果找到了MappedTypes注解
         if (mappedTypes != null) {
+            // 遍历MappedTypes注解中的所有Java类型
             for (Class<?> javaTypeClass : mappedTypes.value()) {
+                // 注册当前Java类型与类型处理器类的映射
                 register(javaTypeClass, typeHandlerClass);
+                // 标记为已找到映射的类型
                 mappedTypeFound = true;
             }
         }
+
+        // 如果没有找到映射的类型，则注册默认的类型处理器实例
         if (!mappedTypeFound) {
             register(getInstance(null, typeHandlerClass));
         }
     }
+
 
     // java type + handler type
 

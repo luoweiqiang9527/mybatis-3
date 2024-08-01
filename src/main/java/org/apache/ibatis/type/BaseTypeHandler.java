@@ -15,13 +15,13 @@
  */
 package org.apache.ibatis.type;
 
+import org.apache.ibatis.executor.result.ResultMapException;
+import org.apache.ibatis.session.Configuration;
+
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import org.apache.ibatis.executor.result.ResultMapException;
-import org.apache.ibatis.session.Configuration;
 
 /**
  * 用于引用泛型类型的基 {@link TypeHandler}。
@@ -68,19 +68,21 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
         if (parameter == null) {
             // 当参数为null时，必须指定JdbcType
             if (jdbcType == null) {
+                // 如果参数为null，则必须指定JdbcType
                 throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
             }
             try {
                 // 尝试使用指定的JdbcType设置null参数
                 ps.setNull(i, jdbcType.TYPE_CODE);
             } catch (SQLException e) {
+                // 如果设置null参数失败，则抛出异常
                 throw new TypeException("Error setting null for parameter #" + i + " with JdbcType " + jdbcType + " . "
                     + "Try setting a different JdbcType for this parameter or a different jdbcTypeForNull configuration property. "
                     + "Cause: " + e, e);
             }
         } else {
             try {
-                // 设置非null参数
+                // 设置非null参数，由子类实现
                 setNonNullParameter(ps, i, parameter, jdbcType);
             } catch (Exception e) {
                 throw new TypeException("Error setting non null for parameter #" + i + " with JdbcType " + jdbcType + " . "

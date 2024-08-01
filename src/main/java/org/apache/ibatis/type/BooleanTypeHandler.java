@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 参数和返回值都可以为null
+ *
  * @author Clinton Begin
  */
 public class BooleanTypeHandler extends BaseTypeHandler<Boolean> {

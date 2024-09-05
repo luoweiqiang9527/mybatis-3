@@ -183,45 +183,70 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 
     //
-    // HANDLE RESULT SETS
+    // 处理结果集
     //
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
+        // 在错误上下文中记录当前活动和关联的映射语句ID
         ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
 
+        // 创建一个列表来存储多个结果
         final List<Object> multipleResults = new ArrayList<>();
 
+        // 初始化结果集计数器
         int resultSetCount = 0;
+        // 从声明中获取第一个结果集包装器
         ResultSetWrapper rsw = getFirstResultSet(stmt);
 
+        // 获取映射语句的结果映射列表
         List<ResultMap> resultMaps = mappedStatement.getResultMaps();
+        // 计算结果映射的数量
         int resultMapCount = resultMaps.size();
+        // 验证结果集和结果映射的数量是否匹配
         validateResultMapsCount(rsw, resultMapCount);
+
+        // 当结果集存在且未处理完所有结果映射时，循环处理结果集
         while (rsw != null && resultMapCount > resultSetCount) {
+            // 根据计数获取当前结果映射
             ResultMap resultMap = resultMaps.get(resultSetCount);
+            // 处理当前结果集，将其添加到结果列表中
             handleResultSet(rsw, resultMap, multipleResults, null);
+            // 获取下一个结果集
             rsw = getNextResultSet(stmt);
+            // 处理结果集后清理工作
             cleanUpAfterHandlingResultSet();
+            // 增加结果集计数器
             resultSetCount++;
         }
 
+        // 如果存在命名结果集，则处理它们
         String[] resultSets = mappedStatement.getResultSets();
         if (resultSets != null) {
+            // 当结果集存在且未处理完所有命名结果集时，循环处理结果集
             while (rsw != null && resultSetCount < resultSets.length) {
+                // 获取当前结果集的父映射
                 ResultMapping parentMapping = nextResultMaps.get(resultSets[resultSetCount]);
                 if (parentMapping != null) {
+                    // 获取嵌套的结果映射ID
                     String nestedResultMapId = parentMapping.getNestedResultMapId();
+                    // 根据嵌套结果映射ID获取结果映射
                     ResultMap resultMap = configuration.getResultMap(nestedResultMapId);
+                    // 处理当前结果集
                     handleResultSet(rsw, resultMap, null, parentMapping);
                 }
+                // 获取下一个结果集
                 rsw = getNextResultSet(stmt);
+                // 处理结果集后清理工作
                 cleanUpAfterHandlingResultSet();
+                // 增加结果集计数器
                 resultSetCount++;
             }
         }
 
+        // 将结果列表简化为单个结果或保持原样
         return collapseSingleResultList(multipleResults);
     }
+
 
     @Override
     public <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException {

@@ -36,24 +36,30 @@ import org.junit.jupiter.api.Test;
 class AutoConstructorTest {
     private static SqlSessionFactory sqlSessionFactory;
 
+    /**
+     * 使用@BeforeAll注解的静态方法，用于在所有测试方法执行之前进行一次性的测试环境设置
+     * 包括创建SqlSessionFactory实例和填充内存数据库
+     * 该方法可能抛出Exception异常，因此调用方需要处理或声明抛出该异常
+     */
     @BeforeAll
     static void setUp() throws Exception {
-        // create a SqlSessionFactory
+        // 从配置资源中创建SqlSessionFactory实例
         try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
         }
 
-        // populate in-memory database
+        // 使用SqlSessionFactory的配置信息来获取DataSource，并执行SQL脚本以创建数据库结构
         BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
             "org/apache/ibatis/autoconstructor/CreateDB.sql");
     }
 
-    @Test
+
     /**
      * 此方法用于测试从数据库中完全填充一个主题对象。
      * 方法不接受参数，也不返回任何值。
      * 它会尝试打开一个SQL会话，使用AutoConstructorMapper来获取主题对象，并确保该对象不为空。
      */
+    @Test
     void fullyPopulatedSubject() {
         // 使用try-with-resources语句自动关闭SqlSession
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
@@ -67,7 +73,6 @@ class AutoConstructorTest {
     }
 
 
-    @Test
     /**
      * 尝试从数据库中获取主题信息的示例方法。
      * 这个方法尝试打开一个SQL会话，映射到AutoConstructorMapper接口，然后使用这个映射器来获取主题信息。
@@ -75,6 +80,7 @@ class AutoConstructorTest {
      *
      * 注意：此方法不接受参数，也不返回任何值。
      */
+    @Test
     void primitiveSubjects() {
         // 尝试使用SqlSessionFactory打开一个SqlSession，并在使用后自动关闭
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {

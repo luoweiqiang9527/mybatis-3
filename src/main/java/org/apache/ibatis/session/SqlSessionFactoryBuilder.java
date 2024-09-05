@@ -44,20 +44,33 @@ public class SqlSessionFactoryBuilder {
         return build(reader, null, properties);
     }
 
+    /**
+     * 构建SqlSessionFactory对象
+     *
+     * @param reader 提供配置信息的Reader对象
+     * @param environment 配置所使用的环境ID，允许覆盖在mybatis配置文件中默认指定的环境
+     * @param properties 传递给配置文件中使用占位符的属性值，允许动态替换配置文件中的属性
+     * @return 构建好的SqlSessionFactory对象
+     */
     public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
         try {
+            // 使用XMLConfigBuilder解析配置信息
             XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
+            // 调用内部方法build，根据解析后的配置构建SqlSessionFactory
             return build(parser.parse());
         } catch (Exception e) {
+            // 捕获异常并包装，提供更明确的错误信息
             throw ExceptionFactory.wrapException("Error building SqlSession.", e);
         } finally {
+            // 重置ErrorContext，以避免潜在的状态污染
             ErrorContext.instance().reset();
             try {
+                // 尝试关闭Reader资源，避免资源泄露
                 if (reader != null) {
                     reader.close();
                 }
             } catch (IOException e) {
-                // Intentionally ignore. Prefer previous error.
+                // 忽略IO异常，优先处理之前的错误
             }
         }
     }

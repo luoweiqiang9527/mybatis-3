@@ -25,7 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Offline entity resolver for the MyBatis DTDs.
+ * MyBatis DTD的离线实体解析器。
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
@@ -41,7 +41,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
     private static final String MYBATIS_MAPPER_DTD = "org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd";
 
     /**
-     * Converts a public DTD into a local one.
+     * 将公共DTD转换为本地DTD。
      *
      * @param publicId The public id that is what comes after "PUBLIC"
      * @param systemId The system id that is what comes after the public id.
@@ -66,16 +66,31 @@ public class XMLMapperEntityResolver implements EntityResolver {
         }
     }
 
+    /**
+     * 根据给定的路径和ID获取InputSource对象
+     * 该方法旨在为XML解析器提供输入源，以便从指定位置加载XML文档
+     * 如果路径有效，则尝试打开资源并创建InputSource对象，同时设置公共ID和系统ID
+     *
+     * @param path 资源路径，用于定位XML文件如果路径为null，将返回null
+     * @param publicId XML文档的公共标识符，用于解析过程可以在DTD中找到对应的公共ID
+     * @param systemId XML文档的系统标识符，通常是指向XML文件的实际位置可以在DTD中找到对应的系统ID
+     * @return 返回一个包含资源输入流、公共ID和系统ID的InputSource对象如果无法访问资源，则返回null
+     */
     private InputSource getInputSource(String path, String publicId, String systemId) {
         InputSource source = null;
+        // 检查路径是否已经提供
         if (path != null) {
             try {
+                // 尝试根据路径打开资源的输入流
                 InputStream in = Resources.getResourceAsStream(path);
+                // 使用输入流创建InputSource对象
                 source = new InputSource(in);
+                // 设置InputSource的公共ID和系统ID，以便在解析过程中使用
                 source.setPublicId(publicId);
                 source.setSystemId(systemId);
             } catch (IOException e) {
-                // ignore, null is ok
+                // 如果发生IO异常，忽略异常，认为是无法访问资源，返回null
+                // 这里选择不记录异常，因为函数的设计允许返回null作为有效结果
             }
         }
         return source;

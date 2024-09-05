@@ -15,23 +15,6 @@
  */
 package org.apache.ibatis.executor.resultset;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Parameter;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.ibatis.annotations.AutomapConstructor;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
@@ -67,6 +50,23 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.apache.ibatis.util.MapUtil;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Clinton Begin
@@ -327,17 +327,44 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     // HANDLE ROWS FOR SIMPLE RESULTMAP
     //
 
+    /**
+     * 处理行值
+     * 根据结果映射的类型，调用相应的方法处理行值
+     * 如果结果映射包含嵌套的结果映射，则调用处理嵌套结果映射的方法
+     * 否则，调用处理简单结果映射的方法
+     *
+     * @param rsw           结果集包装器
+     * @param resultMap     结果映射对象，描述了如何将数据库结果集映射到对象属性
+     * @param resultHandler 结果处理器，用于处理处理过程中产生的结果
+     * @param rowBounds     分页信息，用于控制要处理的行的范围
+     * @param parentMapping 父映射信息，对于嵌套查询，可能有父映射关系
+     * @throws SQLException 如果处理过程中发生SQL错误
+     */
     public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler,
                                 RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
+        // 如果结果映射包含嵌套的结果映射
         if (resultMap.hasNestedResultMaps()) {
+            // 确保没有行范围限制，因为嵌套查询可能不支持分页
             ensureNoRowBounds();
+            // 检查结果处理器是否为null或不支持的类型
             checkResultHandler();
+            // 处理包含嵌套结果映射的情况
             handleRowValuesForNestedResultMap(rsw, resultMap, resultHandler, rowBounds, parentMapping);
         } else {
+            // 处理简单结果映射的情况
             handleRowValuesForSimpleResultMap(rsw, resultMap, resultHandler, rowBounds, parentMapping);
         }
     }
 
+    /**
+     * 确保当前操作没有行界限限制
+     * <p>
+     * 当配置了安全行界限且`rowBounds`对象非空时，此方法用于检查是否存在行界限限制
+     * 如果存在限制且其限制条件小于默认的NO_ROW_LIMIT或偏移量大于NO_ROW_OFFSET，将抛出ExecutorException
+     * 这是为了确保带有嵌套结果映射的MappedStatement不会因行界限而导致查询问题
+     *
+     * @throws ExecutorException 如果存在不安全的行界限限制，则抛出此异常
+     */
     private void ensureNoRowBounds() {
         if (configuration.isSafeRowBoundsEnabled() && rowBounds != null
             && (rowBounds.getLimit() < RowBounds.NO_ROW_LIMIT || rowBounds.getOffset() > RowBounds.NO_ROW_OFFSET)) {
@@ -347,7 +374,15 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
     }
 
+
+    /**
+     * 检查结果处理器的使用是否安全
+     * 对于包含嵌套结果映射的Mapped Statement，使用自定义ResultHandler可能不安全
+     * 这个方法旨在预防这种不安全的使用方式
+     */
     protected void checkResultHandler() {
+        // 当结果处理器非空，且配置了安全结果处理器启用，同时Mapped Statement没有设置结果有序
+        // 则抛出异常，提示用户配置问题和可能的风险
         if (resultHandler != null && configuration.isSafeResultHandlerEnabled() && !mappedStatement.isResultOrdered()) {
             throw new ExecutorException(
                 "Mapped Statements with nested result mappings cannot be safely used with a custom ResultHandler. "
@@ -355,6 +390,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
                     + "or ensure your statement returns ordered data and set resultOrdered=true on it.");
         }
     }
+
 
     private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap,
                                                    ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
@@ -1003,40 +1039,68 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 
     //
-    // HANDLE NESTED RESULT MAPS
+    // HANDLE NESTED（嵌套） RESULT MAPS
     //
 
+    /**
+     * 处理嵌套ResultMap的行值
+     * 本方法主要用于处理嵌套查询的结果集，根据ResultMap的定义和RowBounds的限制，
+     * 将从数据库中获取的相关数据转换为适当的对象，并进行存储或处理
+     *
+     * @param rsw           结果集包装器，包含从数据库查询到的结果集以及相关信息
+     * @param resultMap     结果集映射对象，定义了如何将数据库查询结果映射到对象的属性上
+     * @param resultHandler 结果处理器，用于处理查询结果
+     * @param rowBounds     分页参数，定义了从结果集中开始处理的行数以及要处理的最大行数
+     * @param parentMapping 父映射关系，用于指示当前处理的结果集在嵌套结构中的位置
+     * @throws SQLException 如果处理结果集或执行存储过程中发生错误
+     */
     private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap,
                                                    ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
+        // 初始化一个默认的结果上下文对象，用于在处理结果时存储中间状态
         final DefaultResultContext<Object> resultContext = new DefaultResultContext<>();
+        // 获取结果集包装器中的结果集
         ResultSet resultSet = rsw.getResultSet();
+        // 根据RowBounds的设置跳过指定的行数
         skipRows(resultSet, rowBounds);
+        // 初始化行值为上一行的值，以便处理有序结果时使用
         Object rowValue = previousRowValue;
+        // 遍历结果集，直到满足处理条件或结果集结束
         while (shouldProcessMoreRows(resultContext, rowBounds) && !resultSet.isClosed() && resultSet.next()) {
+            // 解析被区分的结果映射，这在处理继承或类型区分时尤为重要
             final ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(resultSet, resultMap, null);
+            // 创建当前行的唯一键值，用于缓存中查找或存储
             final CacheKey rowKey = createRowKey(discriminatedResultMap, rsw, null);
+            // 从缓存中获取部分对象，如果存在的话
             Object partialObject = nestedResultObjects.get(rowKey);
-            // issue #577 && #542
+            // 根据MappedStatement的设置处理结果对象
             if (mappedStatement.isResultOrdered()) {
+                // 如果结果是有序的，且当前部分对象为空但上一行值不为空，则存储上一行值
                 if (partialObject == null && rowValue != null) {
                     nestedResultObjects.clear();
                     storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
                 }
+                // 获取当前行的值，更新rowValue
                 rowValue = getRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
             } else {
+                // 如果结果不是有序的，直接获取当前行的值并更新rowValue
                 rowValue = getRowValue(rsw, discriminatedResultMap, rowKey, null, partialObject);
+                // 如果当前部分对象为空，则存储当前行值
                 if (partialObject == null) {
                     storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
                 }
             }
         }
+        // 处理最后一个行值，如果结果是有序的，且最后一个行值未存储，则存储它
         if (rowValue != null && mappedStatement.isResultOrdered() && shouldProcessMoreRows(resultContext, rowBounds)) {
             storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
+            // 重置上一行值为null，因为已经处理完毕
             previousRowValue = null;
         } else if (rowValue != null) {
+            // 如果结果不是有序的，将最后一个行值存储到previousRowValue，留待下次处理
             previousRowValue = rowValue;
         }
     }
+
 
     //
     // NESTED RESULT MAP (JOIN MAPPING)

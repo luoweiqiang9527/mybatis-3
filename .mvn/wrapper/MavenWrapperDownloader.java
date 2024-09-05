@@ -21,14 +21,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class MavenWrapperDownloader {
-    private static final String WRAPPER_VERSION = "3.2.0";
+    private static final String WRAPPER_VERSION = "3.3.2";
 
     private static final boolean VERBOSE = Boolean.parseBoolean(System.getenv("MVNW_VERBOSE"));
 
@@ -42,7 +44,7 @@ public final class MavenWrapperDownloader {
 
         try {
             log(" - Downloader started");
-            final URL wrapperUrl = new URL(args[0]);
+            final URL wrapperUrl = URI.create(args[0]).toURL();
             final String jarPath = args[1].replace("..", ""); // Sanitize path
             final Path wrapperJarPath = Paths.get(jarPath).toAbsolutePath().normalize();
             downloadFileFromURL(wrapperUrl, wrapperJarPath);
@@ -57,7 +59,7 @@ public final class MavenWrapperDownloader {
     }
 
     private static void downloadFileFromURL(URL wrapperUrl, Path wrapperJarPath)
-        throws IOException {
+            throws IOException {
         log(" - Downloading to: " + wrapperJarPath);
         if (System.getenv("MVNW_USERNAME") != null && System.getenv("MVNW_PASSWORD") != null) {
             final String username = System.getenv("MVNW_USERNAME");
@@ -69,8 +71,15 @@ public final class MavenWrapperDownloader {
                 }
             });
         }
+        Path temp = wrapperJarPath
+                .getParent()
+                .resolve(wrapperJarPath.getFileName() + "."
+                        + Long.toUnsignedString(ThreadLocalRandom.current().nextLong()) + ".tmp");
         try (InputStream inStream = wrapperUrl.openStream()) {
-            Files.copy(inStream, wrapperJarPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(inStream, temp, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temp, wrapperJarPath, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            Files.deleteIfExists(temp);
         }
         log(" - Downloader complete");
     }

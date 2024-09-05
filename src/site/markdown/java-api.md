@@ -1,6 +1,8 @@
 title: MyBatis 3 | Java API
 author: Clinton Begin
 
+<h1 class="d-none">Avoid blank site</h1>
+
 ## Java API
 
 Now that you know how to configure MyBatis and create mappings, you're ready for the good stuff. The MyBatis Java API is

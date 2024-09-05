@@ -16,10 +16,14 @@
        limitations under the License.
 
 -->
-<extensions>
-    <extension>
-        <groupId>fr.jcgay.maven</groupId>
-        <artifactId>maven-profiler</artifactId>
-        <version>3.2</version>
-    </extension>
-</extensions>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+  namespace="org.apache.ibatis.submitted.literal_string.Mapper">
+
+  <insert id="insertXml">
+    insert into literal_string values(#{id}, '&#009;a&#032;&#032;b&#013;&#010;&#009;c&#010;')
+  </insert>
+
+</mapper>

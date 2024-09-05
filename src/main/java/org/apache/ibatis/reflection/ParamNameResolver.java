@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2024 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,15 @@ public class ParamNameResolver {
 
     public static final String GENERIC_NAME_PREFIX = "param";
 
-    private final boolean useActualParamName;
+  public static final String[] GENERIC_NAME_CACHE = new String[10];
+
+  static {
+    for (int i = 0; i < 10; i++) {
+      GENERIC_NAME_CACHE[i] = GENERIC_NAME_PREFIX + (i + 1);
+    }
+  }
+
+  private final boolean useActualParamName;
 
     /**
      * <p>
@@ -107,39 +115,41 @@ public class ParamNameResolver {
         return names.values().toArray(new String[0]);
     }
 
-    /**
-     * <p>
-     * A single non-special parameter is returned without a name. Multiple parameters are named using the naming rule. In
-     * addition to the default names, this method also adds the generic names (param1, param2, ...).
-     * </p>
-     *
-     * @param args the args
-     * @return the named params
-     */
-    public Object getNamedParams(Object[] args) {
-        final int paramCount = names.size();
-        if (args == null || paramCount == 0) {
-            return null;
-        }
-        if (!hasParamAnnotation && paramCount == 1) {
-            Object value = args[names.firstKey()];
-            return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null);
-        } else {
-            final Map<String, Object> param = new ParamMap<>();
-            int i = 0;
-            for (Map.Entry<Integer, String> entry : names.entrySet()) {
-                param.put(entry.getValue(), args[entry.getKey()]);
-                // add generic param names (param1, param2, ...)
-                final String genericParamName = GENERIC_NAME_PREFIX + (i + 1);
-                // ensure not to overwrite parameter named with @Param
-                if (!names.containsValue(genericParamName)) {
-                    param.put(genericParamName, args[entry.getKey()]);
-                }
-                i++;
-            }
-            return param;
-        }
+  /**
+   * <p>
+   * A single non-special parameter is returned without a name. Multiple parameters are named using the naming rule. In
+   * addition to the default names, this method also adds the generic names (param1, param2, ...).
+   * </p>
+   *
+   * @param args
+   *          the args
+   *
+   * @return the named params
+   */
+  public Object getNamedParams(Object[] args) {
+    final int paramCount = names.size();
+    if (args == null || paramCount == 0) {
+      return null;
     }
+    if (!hasParamAnnotation && paramCount == 1) {
+      Object value = args[names.firstKey()];
+      return wrapToMapIfCollection(value, useActualParamName ? names.get(names.firstKey()) : null);
+    } else {
+      final Map<String, Object> param = new ParamMap<>();
+      int i = 0;
+      for (Map.Entry<Integer, String> entry : names.entrySet()) {
+        param.put(entry.getValue(), args[entry.getKey()]);
+        // add generic param names (param1, param2, ...)
+        final String genericParamName = i < 10 ? GENERIC_NAME_CACHE[i] : GENERIC_NAME_PREFIX + (i + 1);
+        // ensure not to overwrite parameter named with @Param
+        if (!names.containsValue(genericParamName)) {
+          param.put(genericParamName, args[entry.getKey()]);
+        }
+        i++;
+      }
+      return param;
+    }
+  }
 
     /**
      * 如果对象是集合或数组，则将其包装到ParamMap中。

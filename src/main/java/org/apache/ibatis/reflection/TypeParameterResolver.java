@@ -1,5 +1,5 @@
 /*
- *    Copyright 2009-2023 the original author or authors.
+ *    Copyright 2009-2024 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -185,30 +185,31 @@ public class TypeParameterResolver {
         return Object.class;
     }
 
-    private static Type scanSuperTypes(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass, Class<?> clazz,
-                                       Type superclass) {
-        if (superclass instanceof ParameterizedType) {
-            ParameterizedType parentAsType = (ParameterizedType) superclass;
-            Class<?> parentAsClass = (Class<?>) parentAsType.getRawType();
-            TypeVariable<?>[] parentTypeVars = parentAsClass.getTypeParameters();
-            if (srcType instanceof ParameterizedType) {
-                parentAsType = translateParentTypeVars((ParameterizedType) srcType, clazz, parentAsType);
-            }
-            if (declaringClass == parentAsClass) {
-                for (int i = 0; i < parentTypeVars.length; i++) {
-                    if (typeVar.equals(parentTypeVars[i])) {
-                        return parentAsType.getActualTypeArguments()[i];
-                    }
-                }
-            }
-            if (declaringClass.isAssignableFrom(parentAsClass)) {
-                return resolveTypeVar(typeVar, parentAsType, declaringClass);
-            }
-        } else if (superclass instanceof Class && declaringClass.isAssignableFrom((Class<?>) superclass)) {
-            return resolveTypeVar(typeVar, superclass, declaringClass);
+  private static Type scanSuperTypes(TypeVariable<?> typeVar, Type srcType, Class<?> declaringClass, Class<?> clazz,
+      Type superclass) {
+    if (superclass instanceof ParameterizedType) {
+      ParameterizedType parentAsType = (ParameterizedType) superclass;
+      Class<?> parentAsClass = (Class<?>) parentAsType.getRawType();
+      TypeVariable<?>[] parentTypeVars = parentAsClass.getTypeParameters();
+      if (srcType instanceof ParameterizedType) {
+        parentAsType = translateParentTypeVars((ParameterizedType) srcType, clazz, parentAsType);
+      }
+      if (declaringClass == parentAsClass) {
+        for (int i = 0; i < parentTypeVars.length; i++) {
+          if (typeVar.equals(parentTypeVars[i])) {
+            Type actualType = parentAsType.getActualTypeArguments()[i];
+            return actualType instanceof TypeVariable<?> ? Object.class : actualType;
+          }
         }
-        return null;
+      }
+      if (declaringClass.isAssignableFrom(parentAsClass)) {
+        return resolveTypeVar(typeVar, parentAsType, declaringClass);
+      }
+    } else if (superclass instanceof Class && declaringClass.isAssignableFrom((Class<?>) superclass)) {
+      return resolveTypeVar(typeVar, superclass, declaringClass);
     }
+    return null;
+  }
 
     private static ParameterizedType translateParentTypeVars(ParameterizedType srcType, Class<?> srcClass,
                                                              ParameterizedType parentType) {

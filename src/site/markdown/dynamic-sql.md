@@ -1,6 +1,8 @@
 title: MyBatis 3 | Dynamic SQL
 author: Clinton Begin
 
+<h1 class="d-none">Avoid blank site</h1>
+
 ## Dynamic SQL
 
 One of the most powerful features of MyBatis has always been its Dynamic SQL capabilities. If you have any experience

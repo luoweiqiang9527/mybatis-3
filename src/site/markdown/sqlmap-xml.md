@@ -1,6 +1,8 @@
 title: MyBatis 3 | Mapper XML Files
 author: Clinton Begin
 
+<h1 class="d-none">Avoid blank site</h1>
+
 ## Mapper XML Files
 
 The true power of MyBatis is in the Mapped Statements. This is where the magic happens. For all of their power, the

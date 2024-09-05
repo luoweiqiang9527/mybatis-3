@@ -312,16 +312,31 @@ public final class MappedStatement {
         return resultSets;
     }
 
+    /**
+     * 获取用于执行的BoundSql对象
+     * 此方法主要负责从sqlSource中获取BoundSql，并处理参数映射
+     * 如果sqlSource生成的BoundSql不包含参数映射，则使用parameterMap中的参数映射来创建新的BoundSql
+     * 此外，此方法还会检查参数映射中是否存在嵌套的结果集映射，并在存在时进行相应处理
+     *
+     * @param parameterObject 传入SQL执行方法的参数对象
+     * @return 包含SQL语句和参数映射的BoundSql对象
+     */
     public BoundSql getBoundSql(Object parameterObject) {
+        // 从sqlSource中获取BoundSql对象
         BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+        // 获取BoundSql中的参数映射列表
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+
+        // 如果参数映射列表为空，则使用parameterMap中的参数映射创建新的BoundSql
         if (parameterMappings == null || parameterMappings.isEmpty()) {
             boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
         }
 
-        // check for nested result maps in parameter mappings (issue #30)
+        // 检查参数映射中是否存在嵌套的结果集映射
         for (ParameterMapping pm : boundSql.getParameterMappings()) {
+            // 获取参数映射关联的结果集映射ID
             String rmId = pm.getResultMapId();
+            // 如果关联了结果集映射，则检查该结果集映射是否存在以及是否包含嵌套的结果集映射
             if (rmId != null) {
                 ResultMap rm = configuration.getResultMap(rmId);
                 if (rm != null) {
@@ -330,6 +345,7 @@ public final class MappedStatement {
             }
         }
 
+        // 返回最终的BoundSql对象
         return boundSql;
     }
 

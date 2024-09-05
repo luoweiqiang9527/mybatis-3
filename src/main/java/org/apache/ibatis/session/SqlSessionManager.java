@@ -15,6 +15,10 @@
  */
 package org.apache.ibatis.session;
 
+import org.apache.ibatis.cursor.Cursor;
+import org.apache.ibatis.executor.BatchResult;
+import org.apache.ibatis.reflection.ExceptionUtil;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationHandler;
@@ -24,10 +28,6 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.ibatis.cursor.Cursor;
-import org.apache.ibatis.executor.BatchResult;
-import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Larry Meadors
@@ -45,7 +45,17 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
             new Class[]{SqlSession.class}, new SqlSessionInterceptor());
     }
 
+    /**
+     * 创建SqlSessionManager的实例
+     * 该方法使用指定的Reader对象来构建SqlSessionFactory，进而创建SqlSessionManager实例
+     * 主要用于配置数据库访问的初始化，是mybatis连接数据库的重要入口之一
+     *
+     * @param reader Reader对象，包含数据库连接的配置信息
+     * @return SqlSessionManager的实例，用于管理SQL会话
+     */
     public static SqlSessionManager newInstance(Reader reader) {
+        // 使用SqlSessionFactoryBuilder构建SqlSessionFactory实例
+        // 然后使用新建的SqlSessionFactory创建SqlSessionManager实例并返回
         return new SqlSessionManager(new SqlSessionFactoryBuilder().build(reader, null, null));
     }
 
@@ -126,6 +136,7 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         // 调用SqlSessionFactory的openSession方法来创建并返回一个新的SqlSession实例。
         return sqlSessionFactory.openSession();
     }
+
     @Override
     public SqlSession openSession(boolean autoCommit) {
         return sqlSessionFactory.openSession(autoCommit);
@@ -352,27 +363,50 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
             // Prevent Synthetic Access
         }
 
+        /**
+         * 动态代理方法调用
+         * 当调用代理对象的方法时，此方法会被触发
+         * 主要功能是管理SqlSession的生命周期，确保每个方法调用都在有效的SqlSession内执行
+         *
+         * @param proxy  代理对象本身，用于反射调用
+         * @param method 被调用的方法对象
+         * @param args   方法调用时传递的参数数组
+         * @return 方法的执行结果
+         * @throws Throwable 如果方法调用中出现异常，则抛出
+         */
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            // 尝试从线程本地获取当前SqlSession
             final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
+            // 如果SqlSession存在
             if (sqlSession != null) {
                 try {
+                    // 直接在当前SqlSession上执行方法
                     return method.invoke(sqlSession, args);
                 } catch (Throwable t) {
+                    // 如果执行中出现异常，包装并抛出
                     throw ExceptionUtil.unwrapThrowable(t);
                 }
             }
+            // 如果当前线程没有SqlSession，创建一个新的
             try (SqlSession autoSqlSession = openSession()) {
                 try {
+                    // 为什么不在此处设置SqlSession？
+                    // SqlSessionManager.this.localSqlSession.set(autoSqlSession);
+                    // 在新的SqlSession中执行方法
                     final Object result = method.invoke(autoSqlSession, args);
+                    // 如果执行成功，提交事务
                     autoSqlSession.commit();
                     return result;
                 } catch (Throwable t) {
+                    // 如果执行中出现异常，回滚事务
                     autoSqlSession.rollback();
+                    // 包装并抛出异常
                     throw ExceptionUtil.unwrapThrowable(t);
                 }
             }
         }
+
     }
 
 }

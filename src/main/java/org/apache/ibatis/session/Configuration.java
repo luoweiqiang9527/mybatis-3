@@ -916,10 +916,20 @@ public class Configuration {
         return this.getMappedStatement(id, true);
     }
 
+    /**
+     * 根据id获取映射语句。此方法用于从缓存中检索特定的映射语句，如果设置了验证未完成语句的标志，
+     * 则会在检索前构建所有未完成的语句。
+     *
+     * @param id 用于标识所需映射语句的唯一字符串。
+     * @param validateIncompleteStatements 布尔值，指示是否在检索前构建所有未完成的语句。
+     * @return 返回找到的映射语句实例，如果找不到则可能返回null。
+     */
     public MappedStatement getMappedStatement(String id, boolean validateIncompleteStatements) {
+        // 如果需要验证未完成的语句，则构建所有语句
         if (validateIncompleteStatements) {
             buildAllStatements();
         }
+        // 从映射语句缓存中获取对应的语句
         return mappedStatements.get(id);
     }
 
@@ -966,16 +976,21 @@ public class Configuration {
         cacheRefMap.put(namespace, referencedNamespace);
     }
 
-    /*
-     * Parses all the unprocessed statement nodes in the cache. It is recommended to call this method once all the mappers
-     * are added as it provides fail-fast statement validation.
+    /**
+     * 解析缓存中所有未处理的语句节点。建议在所有映射器添加完毕后调用此方法，
+     * 因为它提供了快速失败的语句验证。
      */
     protected void buildAllStatements() {
+        // 解析所有待处理的结果映射
         parsePendingResultMaps(true);
+        // 解析所有待处理的缓存引用
         parsePendingCacheRefs(true);
+        // 解析所有待处理的语句
         parsePendingStatements(true);
+        // 解析所有待处理的方法
         parsePendingMethods(true);
     }
+
 
     public void parsePendingMethods(boolean reportUnresolved) {
         if (incompleteMethods.isEmpty()) {

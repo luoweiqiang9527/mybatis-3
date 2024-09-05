@@ -137,15 +137,35 @@ public class DefaultSqlSession implements SqlSession {
         return this.selectList(statement, null);
     }
 
+    /**
+     * 根据提供的SQL语句和参数选择一个列表
+     * 此方法是一个泛型方法，用于执行SQL查询并返回一个列表
+     * 它通过重载实现，使用默认的RowBounds.DEFAULT来分页
+     *
+     * @param <E>     泛型参数，指定返回列表的元素类型
+     * @param statement SQL语句的标识，用于映射配置文件或动态SQL
+     * @param parameter 传递给SQL语句的参数
+     * @return 包含查询结果的列表，如果无结果则返回空列表
+     */
     @Override
     public <E> List<E> selectList(String statement, Object parameter) {
         return this.selectList(statement, parameter, RowBounds.DEFAULT);
     }
 
+    /**
+     * 根据提供的SQL语句、参数和RowBounds对象从数据库中查询数据，并返回一个包含查询结果的列表
+     * 此方法通过重载基础的selectList方法，提供了额外的rowBounds参数，以便实现分页查询功能
+     *
+     * @param statement SQL语句，用于指定查询的操作
+     * @param parameter 查询参数，用于传递给SQL语句中的参数占位符
+     * @param rowBounds RowBounds对象，用于指定分页查询的起始行数和结束行数
+     * @return 包含查询结果的列表，列表中的每个元素对应数据库中的一行记录
+     */
     @Override
     public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
         return selectList(statement, parameter, rowBounds, Executor.NO_RESULT_HANDLER);
     }
+
 
     private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
         try {

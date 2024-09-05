@@ -15,14 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.cursor.Cursor;
@@ -43,6 +35,14 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
 
 /**
  * @author Clinton Begin
@@ -265,41 +265,56 @@ public abstract class BaseExecutor implements Executor {
 
     @Override
     public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
+        // 检查executor是否已关闭，避免在关闭后执行操作
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+        // 创建缓存键对象，用于后续的缓存存储
         CacheKey cacheKey = new CacheKey();
+        // 将MappedStatement的ID更新到缓存键中，作为缓存键的一部分
         cacheKey.update(ms.getId());
+        // 将RowBounds的偏移量更新到缓存键中，用于分页查询的区分
         cacheKey.update(rowBounds.getOffset());
+        // 将RowBounds的限制更新到缓存键中，用于分页查询的区分
         cacheKey.update(rowBounds.getLimit());
+        // 将BoundSql的SQL语句更新到缓存键中，用于查询结果的区分
         cacheKey.update(boundSql.getSql());
+        // 获取BoundSql的参数映射列表，用于处理查询参数
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        // 获取类型处理器注册表，用于处理不同类型的参数对象
         TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
-        // mimic DefaultParameterHandler logic
+        // 模拟DefaultParameterHandler逻辑，用于遍历参数映射并更新缓存键
         MetaObject metaObject = null;
         for (ParameterMapping parameterMapping : parameterMappings) {
+            // 只处理非输出参数模式的参数映射
             if (parameterMapping.getMode() != ParameterMode.OUT) {
                 Object value;
                 String propertyName = parameterMapping.getProperty();
+                // 如果BoundSql包含附加参数，则获取该参数值
                 if (boundSql.hasAdditionalParameter(propertyName)) {
                     value = boundSql.getAdditionalParameter(propertyName);
                 } else if (parameterObject == null) {
+                    // 如果参数对象为空，则值为null
                     value = null;
                 } else if (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) {
+                    // 如果参数对象的类有相应的类型处理器，则值为参数对象本身
                     value = parameterObject;
                 } else {
+                    // 否则，通过MetaObject获取属性值
                     if (metaObject == null) {
                         metaObject = configuration.newMetaObject(parameterObject);
                     }
                     value = metaObject.getValue(propertyName);
                 }
+                // 将参数值更新到缓存键中
                 cacheKey.update(value);
             }
         }
+        // 如果配置的环境不为空，则将环境ID更新到缓存键中，用于区分不同环境下的缓存
         if (configuration.getEnvironment() != null) {
-            // issue #176
             cacheKey.update(configuration.getEnvironment().getId());
         }
+        // 返回创建的缓存键对象
         return cacheKey;
     }
 
@@ -392,19 +407,41 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    /**
+     * 从数据库查询数据的通用方法
+     * <p>
+     * 本方法主要用于从数据库执行查询操作，并将结果缓存起来
+     * 它处理了参数映射、结果转换等复杂逻辑，并考虑了存储过程（Callable Statement）的场景
+     *
+     * @param <E>           泛型标记，表示查询结果的元素类型
+     * @param ms            MappedStatement对象，包含SQL映射信息
+     * @param parameter     查询参数
+     * @param rowBounds     分页信息
+     * @param resultHandler 结果处理器
+     * @param key           缓存键，用于标识查询结果
+     * @param boundSql      预编译的SQL对象，包含SQL语句和参数映射信息
+     * @return 查询结果的列表
+     * @throws SQLException 如果查询过程中发生SQL错误
+     */
     private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
                                           ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
         List<E> list;
+        // 将占位符放入本地缓存，用于标记正在执行的查询
         localCache.putObject(key, EXECUTION_PLACEHOLDER);
         try {
+            // 执行实际的数据库查询操作
             list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
         } finally {
+            // 查询完成后，移除本地缓存中的占位符
             localCache.removeObject(key);
         }
+        // 将查询结果存入本地缓存
         localCache.putObject(key, list);
+        // 如果查询语句类型为Callable，则将输出参数存入本地缓存
         if (ms.getStatementType() == StatementType.CALLABLE) {
             localOutputParameterCache.putObject(key, parameter);
         }
+        // 返回查询结果
         return list;
     }
 

@@ -15,6 +15,12 @@
  */
 package org.apache.ibatis.reflection;
 
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.binding.MapperMethod.ParamMap;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -24,12 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.binding.MapperMethod.ParamMap;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 
 public class ParamNameResolver {
 
@@ -142,30 +142,43 @@ public class ParamNameResolver {
     }
 
     /**
-     * Wrap to a {@link ParamMap} if object is {@link Collection} or array.
+     * 如果对象是集合或数组，则将其包装到ParamMap中。
+     * <p>
+     * 此方法旨在将传入的对象封装到一个ParamMap中，以便于处理那些本质上是集合或数组的对象。
+     * 它根据对象的类型（集合或数组）创建ParamMap，并将对象与一个键一起存储在ParamMap中。
+     * 如果提供了实际的参数名称，该对象还会被赋予该名称的键值对。
      *
-     * @param object          a parameter object
-     * @param actualParamName an actual parameter name (If specify a name, set an object to {@link ParamMap} with specified name)
-     * @return a {@link ParamMap}
+     * @param object          待包装的对象，可以是任意类型。
+     * @param actualParamName 实际的参数名称，如果指定了名称，则会使用该名称作为键将对象存入ParamMap。
+     * @return 返回一个包含对象的ParamMap，或者在对象既不是集合也不是数组时，返回原对象。
      * @since 3.5.5
      */
     public static Object wrapToMapIfCollection(Object object, String actualParamName) {
+        // 如果对象是集合类型
         if (object instanceof Collection) {
             ParamMap<Object> map = new ParamMap<>();
+            // 将集合以键"collection"存入ParamMap
             map.put("collection", object);
+            // 如果对象是List类型，也以键"list"存入ParamMap
             if (object instanceof List) {
                 map.put("list", object);
             }
+            // 如果提供了参数名称，也将对象以该名称作为键存入ParamMap
             Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
             return map;
         }
+        // 如果对象是数组类型
         if (object != null && object.getClass().isArray()) {
             ParamMap<Object> map = new ParamMap<>();
+            // 将数组以键"array"存入ParamMap
             map.put("array", object);
+            // 如果提供了参数名称，也将对象以该名称作为键存入ParamMap
             Optional.ofNullable(actualParamName).ifPresent(name -> map.put(name, object));
             return map;
         }
+        // 如果对象既不是集合也不是数组，直接返回原对象
         return object;
     }
+
 
 }

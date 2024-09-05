@@ -15,9 +15,6 @@
  */
 package org.apache.ibatis.executor;
 
-import java.sql.SQLException;
-import java.util.List;
-
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.cache.TransactionalCacheManager;
@@ -31,6 +28,9 @@ import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
+
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author Clinton Begin
@@ -82,33 +82,73 @@ public class CachingExecutor implements Executor {
         return delegate.queryCursor(ms, parameter, rowBounds);
     }
 
+    /**
+     * 执行查询操作
+     * 该方法首先根据提供的参数生成一个缓存键，用于在缓存中查找或存储查询结果
+     * 如果缓存中已存在对应键的查询结果，则直接返回缓存中的数据，以提高查询效率
+     * 否则，将执行实际的数据库查询操作，并将结果存储到缓存中，以供后续相同查询使用
+     *
+     * @param ms              映射的SQL语句对象，包含了SQL语句及其相关信息
+     * @param parameterObject 查询参数对象，用于在SQL语句中动态替换参数
+     * @param rowBounds       用于分页查询的行边界对象，定义了查询的起始行和结束行
+     * @param resultHandler   结果处理器，用于处理查询结果
+     * @return 查询结果列表，包含符合查询条件的记录
+     * @throws SQLException 如果查询过程中发生SQL错误，将抛出此异常
+     */
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler)
         throws SQLException {
+        // 根据映射的SQL语句和参数对象获取SQL的绑定版本
         BoundSql boundSql = ms.getBoundSql(parameterObject);
+
+        // 根据映射的SQL语句、参数对象、行边界和绑定的SQL创建缓存键
         CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+
+        // 使用缓存键和绑定的SQL执行查询操作，并返回查询结果
         return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
     }
 
+
     @Override
+    /**
+     * 根据提供的MappedStatement和其他参数查询数据库，利用缓存机制优化查询性能
+     *
+     * @param ms MappedStatement，包含了SQL映射的所有信息
+     * @param parameterObject 查询参数对象
+     * @param rowBounds 分页相关参数
+     * @param resultHandler 结果集处理者
+     * @param key 缓存键
+     * @param boundSql 准备好的SQL语句
+     * @return 查询结果列表，类型为泛型E
+     * @throws SQLException 如果查询过程中发生错误
+     */
     public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler,
                              CacheKey key, BoundSql boundSql) throws SQLException {
+        // 获取当前MappedStatement配置的缓存
         Cache cache = ms.getCache();
         if (cache != null) {
+            // 根据需要刷新缓存
             flushCacheIfRequired(ms);
+            // 检查是否可以使用缓存，并且resultHandler为null（缓存不支持结果处理者）
             if (ms.isUseCache() && resultHandler == null) {
+                // 确保没有输出参数，因为缓存不支持输出参数
                 ensureNoOutParams(ms, boundSql);
+                // 从缓存中获取数据
                 @SuppressWarnings("unchecked")
                 List<E> list = (List<E>) tcm.getObject(cache, key);
                 if (list == null) {
+                    // 如果缓存中没有数据，则从数据库查询
                     list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+                    // 将查询结果存入缓存
                     tcm.putObject(cache, key, list); // issue #578 and #116
                 }
                 return list;
             }
         }
+        // 如果没有配置缓存或者不符合使用缓存的条件，则直接从数据库查询
         return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
     }
+
 
     @Override
     public List<BatchResult> flushStatements() throws SQLException {

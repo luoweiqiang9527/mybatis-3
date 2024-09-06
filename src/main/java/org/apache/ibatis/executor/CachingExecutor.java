@@ -136,7 +136,7 @@ public class CachingExecutor implements Executor {
                 // 从缓存中获取数据
                 @SuppressWarnings("unchecked")
                 List<E> list = (List<E>) tcm.getObject(cache, key);
-                if (list == null) {
+                if (list == null) { 
                     // 如果缓存中没有数据，则从数据库查询
                     list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
                     // 将查询结果存入缓存

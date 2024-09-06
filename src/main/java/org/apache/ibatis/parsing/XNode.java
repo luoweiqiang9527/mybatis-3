@@ -94,9 +94,16 @@ public class XNode {
         return builder.toString();
     }
 
+        /**
+     * 评估给定的XPath表达式，并将结果作为字符串返回。
+     *
+     * @param expression 要评估的XPath表达式。
+     * @return 评估结果，以字符串形式返回。
+     */
     public String evalString(String expression) {
         return xpathParser.evalString(node, expression);
     }
+
 
     public Boolean evalBoolean(String expression) {
         return xpathParser.evalBoolean(node, expression);

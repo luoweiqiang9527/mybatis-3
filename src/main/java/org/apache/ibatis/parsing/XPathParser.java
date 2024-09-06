@@ -140,10 +140,22 @@ public class XPathParser {
         return evalString(document, expression);
     }
 
+    /**
+     * 根据给定的XPath表达式和根对象评估字符串值
+     * 此方法使用XPath评估表达式，然后解析结果字符串
+     * 使用提供的变量替换结果中的占位符
+     *
+     * @param root 根对象，用于XPath评估的起点
+     * @param expression XPath表达式，用于评估字符串值
+     * @return 解析后的字符串，其中的占位符已被提供的变量替换
+     */
     public String evalString(Object root, String expression) {
+        // 使用XPath评估表达式，获得字符串类型的结果
         String result = (String) evaluate(expression, root, XPathConstants.STRING);
+        // 解析评估结果中的占位符，返回解析后的字符串
         return PropertyParser.parse(result, variables);
     }
+
 
     public Boolean evalBoolean(String expression) {
         return evalBoolean(document, expression);

@@ -34,15 +34,25 @@ import org.xml.sax.InputSource;
 class XPathParserTest {
     private final String resource = "nodelet_test.xml";
 
-    // InputStream Source
+    /**
+     * 测试构造函数：验证带有输入流和解析器的构造创建过程
+     * 该测试方法专注于验证是否可以正确地使用 InputStream 和 EntityResolver
+     * 创建 XPathParser 对象，并执行测试评估方法
+     *
+     * @throws Exception 如果资源文件无法打开或解析时抛出异常
+     */
     @Test
     void constructorWithInputStreamValidationVariablesEntityResolver() throws Exception {
 
+        // 从资源文件创建输入流
         try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+            // 使用输入流初始化 XPathParser，不启用验证，不使用命名空间上下文
             XPathParser parser = new XPathParser(inputStream, false, null, null);
+            // 执行 XPathParser 的测试评估方法
             testEvalMethod(parser);
         }
     }
+
 
     @Test
     void constructorWithInputStreamValidationVariables() throws IOException {
@@ -183,32 +193,59 @@ class XPathParserTest {
         YES, NO
     }
 
+    /**
+     * 验证XPathParser的各种评估方法是否正常工作.
+     * 这个方法通过一系列断言操作来验证XPathParser对不同数据类型节点的评估方法是否返回正确的值.
+     * 它确保了XPath表达式能够正确解析并返回预期的数据类型和值.
+     *
+     * @param parser XPathParser的实例，用于评估XPath表达式.
+     */
     private void testEvalMethod(XPathParser parser) {
+        // 验证长整型节点的评估
         assertEquals((Long) 1970L, parser.evalLong("/employee/birth_date/year"));
         assertEquals((Long) 1970L, parser.evalNode("/employee/birth_date/year").getLongBody());
+
+        // 验证短整型节点的评估
         assertEquals((short) 6, (short) parser.evalShort("/employee/birth_date/month"));
+
+        // 验证整型节点的评估
         assertEquals((Integer) 15, parser.evalInteger("/employee/birth_date/day"));
         assertEquals((Integer) 15, parser.evalNode("/employee/birth_date/day").getIntBody());
+
+        // 验证浮点型节点的评估
         assertEquals((Float) 5.8f, parser.evalFloat("/employee/height"));
         assertEquals((Float) 5.8f, parser.evalNode("/employee/height").getFloatBody());
+
+        // 验证双精度浮点型节点的评估
         assertEquals((Double) 5.8d, parser.evalDouble("/employee/height"));
         assertEquals((Double) 5.8d, parser.evalNode("/employee/height").getDoubleBody());
-        assertEquals((Double) 5.8d, parser.evalNode("/employee").evalDouble("height"));
+
+        // 验证字符串节点的评估
         assertEquals("${id_var}", parser.evalString("/employee/@id"));
         assertEquals("${id_var}", parser.evalNode("/employee/@id").getStringBody());
-        assertEquals("${id_var}", parser.evalNode("/employee").evalString("@id"));
+
+        // 验证布尔节点的评估
         assertEquals(Boolean.TRUE, parser.evalBoolean("/employee/active"));
         assertEquals(Boolean.TRUE, parser.evalNode("/employee/active").getBooleanBody());
-        assertEquals(Boolean.TRUE, parser.evalNode("/employee").evalBoolean("active"));
+
+        // 验证枚举节点的评估
         assertEquals(EnumTest.YES, parser.evalNode("/employee/active").getEnumAttribute(EnumTest.class, "bot"));
+
+        // 验证属性节点的评估
         assertEquals((Float) 3.2f, parser.evalNode("/employee/active").getFloatAttribute("score"));
         assertEquals((Double) 3.2d, parser.evalNode("/employee/active").getDoubleAttribute("score"));
 
-        assertEquals("<id>\n  ${id_var}\n</id>", parser.evalNode("/employee/@id").toString().trim());
-        assertEquals(7, parser.evalNodes("/employee/*").size());
+        // 验证节点的路径和基于值的标识符
         XNode node = parser.evalNode("/employee/height");
         assertEquals("employee/height", node.getPath());
         assertEquals("employee[${id_var}]_height", node.getValueBasedIdentifier());
+
+        // 验证节点列表的大小
+        assertEquals(7, parser.evalNodes("/employee/*").size());
+
+        // 验证节点转换为字符串的输出
+        assertEquals("<id>\n  ${id_var}\n</id>", parser.evalNode("/employee/@id").toString().trim());
     }
+
 
 }

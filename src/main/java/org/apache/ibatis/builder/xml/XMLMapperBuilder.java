@@ -93,16 +93,29 @@ public class XMLMapperBuilder extends BaseBuilder {
         this.resource = resource;
     }
 
+    /**
+     * 解析当前的mapper配置文件
+     * 此方法负责解析mapper配置文件中的元素，并将mapper配置文件的资源标记为已加载
+     * 同时，它还会绑定命名空间下的mapper，并解析所有待处理的resultMaps、cacheRefs和statements
+     */
     public void parse() {
+        // 如果配置文件的资源尚未被加载
         if (!configuration.isResourceLoaded(resource)) {
+            // 解析配置文件中的<mapper>节点
             configurationElement(parser.evalNode("/mapper"));
+            // 将配置文件的资源标记为已加载
             configuration.addLoadedResource(resource);
+            // 绑定命名空间下的mapper
             bindMapperForNamespace();
         }
+        // 解析所有待处理的resultMaps，但不进行延迟解析
         configuration.parsePendingResultMaps(false);
+        // 解析所有待处理的cacheRefs，但不进行延迟解析
         configuration.parsePendingCacheRefs(false);
+        // 解析所有待处理的statements，但不进行延迟解析
         configuration.parsePendingStatements(false);
     }
+
 
     public XNode getSqlFragment(String refid) {
         return sqlFragments.get(refid);

@@ -121,13 +121,30 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
     }
 
+    /**
+     * 使用新的缓存策略替换现有缓存
+     *
+     * @param typeClass 缓存实现的类型类，如果未指定，则默认为 PerpetualCache
+     * @param evictionClass 缓存淘汰策略的类型类，如果未指定，则默认为 LruCache
+     * @param flushInterval 缓存清理的间隔时间，单位为毫秒如果为 null，则表示永不清理
+     * @param size 缓存的最大大小如果为 null，则使用默认大小
+     * @param readWrite 指定缓存是否支持读写如果为 true，则创建读写缓存；否则创建只读缓存
+     * @param blocking 指定在缓存写操作时是否阻塞如果为 true，则在缓存满时写操作会阻塞；否则写操作会覆盖旧值
+     * @param props 额外的缓存配置属性
+     * @return 返回新创建的缓存实例
+     */
     public Cache useNewCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval,
                              Integer size, boolean readWrite, boolean blocking, Properties props) {
+        // 创建新的缓存实例，配置命名空间、缓存类型、缓存装饰器、清理间隔、大小、读写模式、阻塞模式以及额外属性
         Cache cache = new CacheBuilder(currentNamespace).implementation(valueOrDefault(typeClass, PerpetualCache.class))
             .addDecorator(valueOrDefault(evictionClass, LruCache.class)).clearInterval(flushInterval).size(size)
             .readWrite(readWrite).blocking(blocking).properties(props).build();
+
+        // 将新缓存添加到配置中，并设置为当前使用的缓存
         configuration.addCache(cache);
         currentCache = cache;
+
+        // 返回新创建的缓存实例
         return cache;
     }
 

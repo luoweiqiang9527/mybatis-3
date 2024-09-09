@@ -111,53 +111,79 @@ public class MapperAnnotationBuilder {
         this.type = type;
     }
 
+    /**
+     * 解析功能的主要方法
+     * 本方法负责根据当前类型和配置解析XML资源，并加载到配置中
+     * 它还会初始化和解析缓存、缓存引用以及所有可解析的方法
+     */
     public void parse() {
+        // 获取当前要解析的资源标识
         String resource = type.toString();
+        // 检查该资源是否已经被加载过
         if (!configuration.isResourceLoaded(resource)) {
+            // 如果没有被加载过，则加载XML资源
             loadXmlResource();
+            // 将该资源标记为已加载
             configuration.addLoadedResource(resource);
+            // 设置当前命名空间
             assistant.setCurrentNamespace(type.getName());
+            // 解析缓存配置
             parseCache();
+            // 解析缓存引用配置
             parseCacheRef();
+            // 遍历当前类型的所有方法
             for (Method method : type.getMethods()) {
+                // 检查方法是否可以有Statement
                 if (!canHaveStatement(method)) {
                     continue;
                 }
+                // 检查方法是否具有Select或SelectProvider注解，且没有ResultMap注解
                 if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
                     && method.getAnnotation(ResultMap.class) == null) {
+                    // 解析ResultMap
                     parseResultMap(method);
                 }
                 try {
+                    // 解析Statement
                     parseStatement(method);
                 } catch (IncompleteElementException e) {
+                    // 如果解析不完整，则将方法添加到待解析列表
                     configuration.addIncompleteMethod(new MethodResolver(this, method));
                 }
             }
         }
+        // 解析剩余的不完整方法
         configuration.parsePendingMethods(false);
     }
+
 
     private static boolean canHaveStatement(Method method) {
         // issue #237
         return !method.isBridge() && !method.isDefault();
     }
 
+    /**
+     * 加载XML资源
+     * 本方法负责从资源文件或类路径中加载XML映射文件
+     * 如果Spring无法确定实际的资源名称，我们通过检查一个标志来防止重复加载资源
+     * 该标志在XMLMapperBuilder的bindMapperForNamespace方法中设置
+     */
     private void loadXmlResource() {
-        // Spring may not know the real resource name so we check a flag
-        // to prevent loading again a resource twice
-        // this flag is set at XMLMapperBuilder#bindMapperForNamespace
+        // 检查资源是否已加载，避免重复加载
         if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
+            // 根据类名生成XML资源文件名
             String xmlResource = type.getName().replace('.', '/') + ".xml";
-            // #1347
+            // 尝试从资源文件流中加载XML映射
             InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
             if (inputStream == null) {
-                // Search XML mapper that is not in the module but in the classpath.
+                // 如果资源不在模块中，尝试从类路径中加载XML映射
                 try {
                     inputStream = Resources.getResourceAsStream(type.getClassLoader(), xmlResource);
                 } catch (IOException e2) {
-                    // ignore, resource is not required
+                    // 忽略异常，资源不是必需的
                 }
             }
+            // 如果成功获取到资源流，解析XML映射
             if (inputStream != null) {
                 XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
                     configuration.getSqlFragments(), type.getName());
@@ -166,25 +192,47 @@ public class MapperAnnotationBuilder {
         }
     }
 
+
+    /**
+     * 解析缓存配置
+     * 本方法负责解析类型上的缓存命名空间注解，并根据解析到的配置来初始化缓存实例
+     */
     private void parseCache() {
+        // 获取类型上的缓存命名空间注解
         CacheNamespace cacheDomain = type.getAnnotation(CacheNamespace.class);
         if (cacheDomain != null) {
+            // 解析缓存大小，若未指定则为null
             Integer size = cacheDomain.size() == 0 ? null : cacheDomain.size();
+            // 解析缓存刷新间隔，若未指定则为null
             Long flushInterval = cacheDomain.flushInterval() == 0 ? null : cacheDomain.flushInterval();
+            // 将缓存属性转换为Properties对象
             Properties props = convertToProperties(cacheDomain.properties());
+            // 使用解析到的配置初始化新的缓存实例
             assistant.useNewCache(cacheDomain.implementation(), cacheDomain.eviction(), flushInterval, size,
                 cacheDomain.readWrite(), cacheDomain.blocking(), props);
         }
     }
 
+
+    /**
+     * 将Property数组转换为Java的Properties对象
+     *
+     * @param properties Property数组，包含键值对
+     * @return Properties对象，如果输入数组为空，则返回null
+     */
     private Properties convertToProperties(Property[] properties) {
+        // 当属性数组为空时，直接返回null以节省资源
         if (properties.length == 0) {
             return null;
         }
+        // 初始化Properties对象用于存储键值对
         Properties props = new Properties();
+        // 遍历属性数组，将每个键值对添加到Properties对象中
         for (Property property : properties) {
+            // 使用PropertyParser解析属性值，并将解析后的值存入Properties对象
             props.setProperty(property.name(), PropertyParser.parse(property.value(), configuration.getVariables()));
         }
+        // 返回填充了键值对的Properties对象
         return props;
     }
 
@@ -279,40 +327,59 @@ public class MapperAnnotationBuilder {
         return null;
     }
 
+    /**
+     * 解析映射语句
+     *
+     * @param method 要解析的方法
+     */
     void parseStatement(Method method) {
+        // 获取方法的参数类型
         final Class<?> parameterTypeClass = getParameterType(method);
+        // 获取方法的语言驱动
         final LanguageDriver languageDriver = getLanguageDriver(method);
 
+        // 获取方法上的语句注解（如@Select、@Insert等）
         getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
+            // 构建SQL源
             final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
                 languageDriver, method);
+            // 获取SQL命令类型（如INSERT、SELECT等）
             final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
+            // 获取方法上的Options注解
             final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
                 .orElse(null);
+            // 构建映射语句的ID
             final String mappedStatementId = type.getName() + "." + method.getName();
 
+            // 初始化主键生成器
             final KeyGenerator keyGenerator;
             String keyProperty = null;
             String keyColumn = null;
+            // 根据SQL命令类型配置主键生成策略
             if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
-                // first check for SelectKey annotation - that overrides everything else
+                // 首先检查SelectKey注解，它优先于其他所有配置
                 SelectKey selectKey = getAnnotationWrapper(method, false, SelectKey.class)
                     .map(x -> (SelectKey) x.getAnnotation()).orElse(null);
                 if (selectKey != null) {
+                    // 处理SelectKey注解
                     keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method),
                         languageDriver);
                     keyProperty = selectKey.keyProperty();
                 } else if (options == null) {
+                    // 如果没有Options注解，则根据配置决定使用Jdbc3KeyGenerator还是NoKeyGenerator
                     keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
                 } else {
+                    // 根据Options注解配置主键生成器
                     keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
                     keyProperty = options.keyProperty();
                     keyColumn = options.keyColumn();
                 }
             } else {
+                // 对于非INSERT和UPDATE操作，使用NoKeyGenerator
                 keyGenerator = NoKeyGenerator.INSTANCE;
             }
 
+            // 默认配置
             Integer fetchSize = null;
             Integer timeout = null;
             StatementType statementType = StatementType.PREPARED;
@@ -320,41 +387,31 @@ public class MapperAnnotationBuilder {
             boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
             boolean flushCache = !isSelect;
             boolean useCache = isSelect;
+            // 根据Options注解进一步配置
             if (options != null) {
-                if (FlushCachePolicy.TRUE.equals(options.flushCache())) {
-                    flushCache = true;
-                } else if (FlushCachePolicy.FALSE.equals(options.flushCache())) {
-                    flushCache = false;
-                }
+                flushCache = FlushCachePolicy.TRUE.equals(options.flushCache()) ? true : FlushCachePolicy.FALSE.equals(options.flushCache()) ? false : flushCache;
                 useCache = options.useCache();
-                // issue #348
                 fetchSize = options.fetchSize() > -1 || options.fetchSize() == Integer.MIN_VALUE ? options.fetchSize() : null;
                 timeout = options.timeout() > -1 ? options.timeout() : null;
                 statementType = options.statementType();
-                if (options.resultSetType() != ResultSetType.DEFAULT) {
-                    resultSetType = options.resultSetType();
-                }
+                resultSetType = options.resultSetType() != ResultSetType.DEFAULT ? options.resultSetType() : resultSetType;
             }
 
+            // 处理SELECT语句的结果映射
             String resultMapId = null;
             if (isSelect) {
                 ResultMap resultMapAnnotation = method.getAnnotation(ResultMap.class);
-                if (resultMapAnnotation != null) {
-                    resultMapId = String.join(",", resultMapAnnotation.value());
-                } else {
-                    resultMapId = generateResultMapName(method);
-                }
+                resultMapId = resultMapAnnotation != null ? String.join(",", resultMapAnnotation.value()) : generateResultMapName(method);
             }
 
+            // 添加映射语句
             assistant.addMappedStatement(mappedStatementId, sqlSource, statementType, sqlCommandType, fetchSize, timeout,
-                // ParameterMapID
                 null, parameterTypeClass, resultMapId, getReturnType(method, type), resultSetType, flushCache, useCache,
-                // TODO gcode issue #577
                 false, keyGenerator, keyProperty, keyColumn, statementAnnotation.getDatabaseId(), languageDriver,
-                // ResultSets
                 options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect());
         });
     }
+
 
     private LanguageDriver getLanguageDriver(Method method) {
         Lang lang = method.getAnnotation(Lang.class);
@@ -365,22 +422,38 @@ public class MapperAnnotationBuilder {
         return configuration.getLanguageDriver(langClass);
     }
 
+    /**
+     * 获取方法的参数类型
+     * 此方法旨在解析方法的参数类型，尤其关注那些不是RowBounds或ResultHandler类型的参数
+     * 如果存在多个此类参数，则返回ParamMap类，以应对多参数情况
+     *
+     * @param method 反射方法，用于获取参数类型
+     * @return 解析后的参数类型，可能是单个参数类型或ParamMap类
+     */
     private Class<?> getParameterType(Method method) {
+        // 初始化参数类型为null
         Class<?> parameterType = null;
+        // 获取方法的所有参数类型
         Class<?>[] parameterTypes = method.getParameterTypes();
+        // 遍历所有参数类型
         for (Class<?> currentParameterType : parameterTypes) {
+            // 排除RowBounds和ResultHandler类，它们可能作为特殊参数处理
             if (!RowBounds.class.isAssignableFrom(currentParameterType)
                 && !ResultHandler.class.isAssignableFrom(currentParameterType)) {
+                // 如果parameterType尚未初始化，则初始化为当前参数类型
                 if (parameterType == null) {
                     parameterType = currentParameterType;
                 } else {
-                    // issue #135
+                    // 如果已存在parameterType且有其他参数类型，则设置为ParamMap类
+                    // 这是为了处理有多个参数的情况
                     parameterType = ParamMap.class;
                 }
             }
         }
+        // 返回解析得到的参数类型
         return parameterType;
     }
+
 
     private static Class<?> getReturnType(Method method, Class<?> type) {
         Class<?> returnType = method.getReturnType();

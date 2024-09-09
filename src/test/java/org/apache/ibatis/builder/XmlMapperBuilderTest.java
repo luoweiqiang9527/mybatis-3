@@ -82,16 +82,27 @@ class XmlMapperBuilderTest {
 
     @Test
     void parseExpression() {
+        // 创建一个BaseBuilder实例，用于测试parseExpression方法的不同情景
         BaseBuilder builder = new BaseBuilder(new Configuration()) {
         };
+
+        // 测试当提供一个数字和字母的正则表达式时，生成的Pattern能够正确匹配数字但不匹配字母
         {
+            // 使用builder的parseExpression方法解析正则表达式，返回一个Pattern对象
             Pattern pattern = builder.parseExpression("[0-9]", "[a-z]");
+            // 验证"0"是否匹配生成的Pattern，预期结果为true
             assertThat(pattern.matcher("0").find()).isTrue();
+            // 验证"a"是否匹配生成的Pattern，预期结果为false
             assertThat(pattern.matcher("a").find()).isFalse();
         }
+
+        // 测试当提供null和字母的正则表达式时，生成的Pattern能够正确不匹配数字但匹配字母
         {
+            // 使用builder的parseExpression方法解析正则表达式，返回一个Pattern对象
             Pattern pattern = builder.parseExpression(null, "[a-z]");
+            // 验证"0"是否匹配生成的Pattern，预期结果为false
             assertThat(pattern.matcher("0").find()).isFalse();
+            // 验证"a"是否匹配生成的Pattern，预期结果为true
             assertThat(pattern.matcher("a").find()).isTrue();
         }
     }

@@ -21,6 +21,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 
 /**
  * Specify the behavior when detects an unknown column (or unknown property type) of automatic mapping target.
+ * 指定检测到自动映射目标的未知列（或未知属性类型）时的行为。
  *
  * @author Kazuki Shimizu
  * @since 3.4.0
@@ -29,6 +30,7 @@ public enum AutoMappingUnknownColumnBehavior {
 
     /**
      * Do nothing (Default).
+     * 不作任何处理
      */
     NONE {
         @Override
@@ -40,6 +42,7 @@ public enum AutoMappingUnknownColumnBehavior {
     /**
      * Output warning log. Note: The log level of {@code 'org.apache.ibatis.session.AutoMappingUnknownColumnBehavior'}
      * must be set to {@code WARN}.
+     * 输出告警日志
      */
     WARNING {
         @Override
@@ -50,6 +53,7 @@ public enum AutoMappingUnknownColumnBehavior {
 
     /**
      * Fail mapping. Note: throw {@link SqlSessionException}.
+     * 抛出异常
      */
     FAILING {
         @Override
@@ -71,15 +75,24 @@ public enum AutoMappingUnknownColumnBehavior {
                                   Class<?> propertyType);
 
     /**
-     * build error message.
+     * 构建错误消息.
+     * 当自动映射过程中检测到未知列时，此方法用于构建相应的错误信息.
+     *
+     * @param mappedStatement 映射语句对象，包含了SQL信息和映射参数等
+     * @param columnName      数据库中的列名
+     * @param property        映射到的对象属性名
+     * @param propertyType    映射到的对象属性的类型
+     * @return 返回构建的错误消息字符串，包含映射语句ID和映射参数信息
      */
     private static String buildMessage(MappedStatement mappedStatement, String columnName, String property,
                                        Class<?> propertyType) {
+        // 使用StringBuilder拼接错误信息的各个部分
         return new StringBuilder("Unknown column is detected on '").append(mappedStatement.getId())
             .append("' auto-mapping. Mapping parameters are ").append("[").append("columnName=").append(columnName)
             .append(",").append("propertyName=").append(property).append(",").append("propertyType=")
             .append(propertyType != null ? propertyType.getName() : null).append("]").toString();
     }
+
 
     private static class LogHolder {
         private static final Log log = LogFactory.getLog(AutoMappingUnknownColumnBehavior.class);

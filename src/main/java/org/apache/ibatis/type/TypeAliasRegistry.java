@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.type;
 
+import org.apache.ibatis.io.ResolverUtil;
+import org.apache.ibatis.io.Resources;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -29,16 +32,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.ibatis.io.ResolverUtil;
-import org.apache.ibatis.io.Resources;
-
 /**
+ * 类别名注册器，含基本类型及其包装类型，基本类型数组和包装类型数组。
+ * 主要有2类方法。注册类型别名(registerAlias)和根据类型别名获取到对应的类型(resolveAlias)。
+ *
  * @author Clinton Begin
  */
 public class TypeAliasRegistry {
 
     private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
+    //无参构造器，默认注册一些常用的类型别名。
     public TypeAliasRegistry() {
         registerAlias("string", String.class);
 
@@ -139,29 +143,61 @@ public class TypeAliasRegistry {
         }
     }
 
+    /**
+     * 根据指定的包名注册别名
+     * 该方法重载了registerAliases方法，当未指定别名类型时，默认将包名下的所有类注册为Object类型
+     *
+     * @param packageName 需要注册别名的包名
+     */
     public void registerAliases(String packageName) {
         registerAliases(packageName, Object.class);
     }
 
+    /**
+     * 在给定的包名下注册所有具有指定超类型的类的别名
+     * 这个方法用于发现所有符合特定条件的类，并为它们注册别名
+     *
+     * @param packageName 要扫描的包名
+     * @param superType   指定的超类型，用于筛选符合条件的类
+     */
     public void registerAliases(String packageName, Class<?> superType) {
+        // 使用ResolverUtil工具来查找符合条件的类
         ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+        // 查找所有扩展了指定超类型的类
         resolverUtil.find(new ResolverUtil.IsA(superType), packageName);
+        // 获取所有找到的类集合
         Set<Class<? extends Class<?>>> typeSet = resolverUtil.getClasses();
+
+        // 遍历所有找到的类
         for (Class<?> type : typeSet) {
-            // Ignore inner classes and interfaces (including package-info.java)
-            // Skip also inner classes. See issue #6
+            // 忽略匿名内部类、接口和成员内部类，只处理符合条件的顶级类
             if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
+                // 为符合条件的类注册别名
                 registerAlias(type);
             }
         }
     }
 
+
+    /**
+     * 注册类的别名
+     * 该方法用于在系统中注册一个类的别名，方便后续通过别名引用该类
+     * 它首先尝试使用类上的Alias注解定义的别名，如果未定义，则使用类的简单名称作为别名
+     *
+     * @param type 要注册的类的类型对象 该类型对象用于获取类的名称或其上定义的Alias注解
+     */
     public void registerAlias(Class<?> type) {
+        // 默认别名初始化为类的简单名称
         String alias = type.getSimpleName();
+
+        // 检查类上是否定义了Alias注解
         Alias aliasAnnotation = type.getAnnotation(Alias.class);
         if (aliasAnnotation != null) {
+            // 如果定义了Alias注解，则使用注解中指定的别名值
             alias = aliasAnnotation.value();
         }
+
+        // 调用重载的registerAlias方法，完成别名与类型的注册
         registerAlias(alias, type);
     }
 
@@ -188,16 +224,31 @@ public class TypeAliasRegistry {
     }
 
 
+    /**
+     * 注册类型别名。
+     * <p>
+     * 此方法将字符串注册为类类型的别名，允许在后续查找类时使用该别名。
+     * 这主要简化了配置过程，提高了代码的可读性和可维护性。
+     * </p>
+     *
+     * @param alias 要注册的别名，作为类类型的简化表示。
+     * @param value 别名所代表的完全限定类名。
+     * @throws TypeException 如果找不到指定的完全限定类名对应的类，则抛出包含 ClassNotFoundException 的 TypeException。
+     */
     public void registerAlias(String alias, String value) {
         try {
+            // 尝试通过将完全限定类名转换为类类型来注册别名
             registerAlias(alias, Resources.classForName(value));
         } catch (ClassNotFoundException e) {
-            throw new TypeException("Error registering type alias " + alias + " for " + value + ". Cause: " + e, e);
+            // 如果找不到类，则抛出包含 ClassNotFoundException 的 TypeException
+            throw new TypeException("注册类型别名 " + alias + " 对应 " + value + " 时出错。原因: " + e, e);
         }
     }
 
+
     /**
      * Gets the type aliases.
+     * 获取所有注册的类型别名。
      *
      * @return the type aliases
      * @since 3.2.2

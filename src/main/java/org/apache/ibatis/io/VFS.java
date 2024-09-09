@@ -15,6 +15,9 @@
  */
 package org.apache.ibatis.io;
 
+import org.apache.ibatis.logging.Log;
+import org.apache.ibatis.logging.LogFactory;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,11 +27,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
-
 /**
  * Provides a very simple API for accessing resources within an application server.
+ * 提供一个非常简单的 API，用于访问应用程序服务器中的资源。
  *
  * @author Ben Gunter
  */
@@ -37,20 +38,29 @@ public abstract class VFS {
 
     /**
      * The built-in implementations.
+     * 内置的实现类
      */
     public static final Class<?>[] IMPLEMENTATIONS = {JBoss6VFS.class, DefaultVFS.class};
 
     /**
      * The list to which implementations are added by {@link #addImplClass(Class)}.
+     * 用户自定义的实现类，使用addImplClass()方法添加
      */
     public static final List<Class<? extends VFS>> USER_IMPLEMENTATIONS = new ArrayList<>();
 
     /**
      * Singleton instance holder.
+     * 单例实例持有者
      */
     private static class VFSHolder {
         static final VFS INSTANCE = createVFS();
 
+        /**
+         * 创建一个VFS实例
+         * 此方法首先尝试用户定义的实现，然后尝试内置实现，直到找到一个有效的VFS实现为止
+         *
+         * @return 返回一个有效的VFS实例，如果找不到有效的实现，则返回null
+         */
         @SuppressWarnings("unchecked")
         static VFS createVFS() {
             // Try the user implementations first, then the built-ins
@@ -58,11 +68,13 @@ public abstract class VFS {
             impls.addAll(Arrays.asList((Class<? extends VFS>[]) IMPLEMENTATIONS));
 
             // Try each implementation class until a valid one is found
+            // 逐个尝试实现类，直到找到一个有效的VFS实现
             VFS vfs = null;
             for (int i = 0; vfs == null || !vfs.isValid(); i++) {
                 Class<? extends VFS> impl = impls.get(i);
                 try {
                     vfs = impl.getDeclaredConstructor().newInstance();
+                    // 如果此实现无效，则记录调试信息
                     if (!vfs.isValid() && log.isDebugEnabled()) {
                         log.debug("VFS implementation " + impl.getName() + " is not valid in this environment.");
                     }
@@ -72,7 +84,7 @@ public abstract class VFS {
                     return null;
                 }
             }
-
+            // 记录使用的VFS适配器信息
             if (log.isDebugEnabled()) {
                 log.debug("Using VFS adapter " + vfs.getClass().getName());
             }

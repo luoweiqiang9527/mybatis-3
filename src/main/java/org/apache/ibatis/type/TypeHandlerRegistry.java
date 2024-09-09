@@ -527,17 +527,31 @@ public final class TypeHandlerRegistry {
 
     // scan
 
-    public void register(String packageName) {
-        ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
-        resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
-        Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
-        for (Class<?> type : handlerSet) {
-            // Ignore inner classes and interfaces (including package-info.java) and abstract classes
-            if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
-                register(type);
-            }
+    /**
+ * 注册指定包名下的所有类型处理器。
+ *
+ * 该方法使用 ResolverUtil 扫描指定包名下的所有类，过滤掉内部类、接口和抽象类，
+ * 并将剩余的类注册为类型处理器。
+ *
+ * @param packageName 要扫描类型处理器的包名。
+ */
+public void register(String packageName) {
+    // 创建 ResolverUtil 实例用于类解析
+    ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+    // 使用 ResolverUtil 查找指定包下所有实现了 TypeHandler 接口的类
+    resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
+    // 获取实现 TypeHandler 接口的类集合
+    Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
+    // 遍历类型处理器集合
+    for (Class<?> type : handlerSet) {
+        // 忽略内部类、接口和抽象类
+        if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
+            // 将符合条件的类注册为类型处理器
+            register(type);
         }
     }
+}
+
 
     // get information
 

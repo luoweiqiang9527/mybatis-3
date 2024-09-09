@@ -73,46 +73,89 @@ import org.junit.jupiter.api.Test;
 
 class XmlConfigBuilderTest {
 
+    /**
+     * 测试加载最小XML配置文件的功能
+     * 此方法验证了XML配置文件是否能被正确解析，并检查了配置对象中的各种设置是否符合预期
+     * 验证的设置包括自动映射行为、缓存启用状态、代理工厂类型、懒加载设置、结果集和列标签使用等
+     * 该测试用例确保了MyBatis配置文件的解析功能正常工作，并且默认配置符合预期的行为
+     *
+     * @throws Exception 如果配置文件解析失败或配置项不符合预期
+     */
     @Test
     void shouldSuccessfullyLoadMinimalXMLConfigFile() throws Exception {
+        // 定义资源路径
         String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
+        // 使用try-with-resources确保输入流在使用后正确关闭
         try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+            // 创建XML配置构建器并传递输入流
             XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
+            // 解析XML配置并获取配置对象
             Configuration config = builder.parse();
+            // 确认配置对象不为空
             assertNotNull(config);
+            // 检查自动映射行为是否为PARTIAL
             assertThat(config.getAutoMappingBehavior()).isEqualTo(AutoMappingBehavior.PARTIAL);
+            // 检查未知列行为是否为NONE
             assertThat(config.getAutoMappingUnknownColumnBehavior()).isEqualTo(AutoMappingUnknownColumnBehavior.NONE);
+            // 检查缓存是否已启用
             assertThat(config.isCacheEnabled()).isTrue();
+            // 检查代理工厂是否为JavassistProxyFactory实例
             assertThat(config.getProxyFactory()).isInstanceOf(JavassistProxyFactory.class);
+            // 检查懒加载是否已禁用
             assertThat(config.isLazyLoadingEnabled()).isFalse();
+            // 检查是否启用激进的懒加载
             assertThat(config.isAggressiveLazyLoading()).isFalse();
+            // 检查是否支持多个结果集
             assertThat(config.isMultipleResultSetsEnabled()).isTrue();
+            // 检查是否使用列标签
             assertThat(config.isUseColumnLabel()).isTrue();
+            // 检查是否使用生成的键
             assertThat(config.isUseGeneratedKeys()).isFalse();
+            // 检查默认执行器类型是否为SIMPLE
             assertThat(config.getDefaultExecutorType()).isEqualTo(ExecutorType.SIMPLE);
+            // 检查默认语句超时是否未设置
             assertNull(config.getDefaultStatementTimeout());
+            // 检查默认获取大小是否未设置
             assertNull(config.getDefaultFetchSize());
+            // 检查默认结果集类型是否未设置
             assertNull(config.getDefaultResultSetType());
+            // 检查是否将下划线映射到驼峰命名
             assertThat(config.isMapUnderscoreToCamelCase()).isFalse();
+            // 检查是否启用了安全的行界限
             assertThat(config.isSafeRowBoundsEnabled()).isFalse();
+            // 检查本地缓存范围是否为SESSION
             assertThat(config.getLocalCacheScope()).isEqualTo(LocalCacheScope.SESSION);
+            // 检查为null值设置的JDBC类型
             assertThat(config.getJdbcTypeForNull()).isEqualTo(JdbcType.OTHER);
+            // 检查懒加载触发方法是否包括equals、clone、hashCode和toString
             assertThat(config.getLazyLoadTriggerMethods())
                 .isEqualTo(new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString")));
+            // 检查是否启用了安全的结果处理器
             assertThat(config.isSafeResultHandlerEnabled()).isTrue();
+            // 检查默认脚本语言驱动是否为XMLLanguageDriver实例
             assertThat(config.getDefaultScriptingLanuageInstance()).isInstanceOf(XMLLanguageDriver.class);
+            // 检查是否在nulls上调用设置器
             assertThat(config.isCallSettersOnNulls()).isFalse();
+            // 检查日志前缀是否未设置
             assertNull(config.getLogPrefix());
+            // 检查日志实现是否未设置
             assertNull(config.getLogImpl());
+            // 检查配置工厂是否未设置
             assertNull(config.getConfigurationFactory());
+            // 检查RoundingMode类的类型处理器是否为EnumTypeHandler实例
             assertThat(config.getTypeHandlerRegistry().getTypeHandler(RoundingMode.class))
                 .isInstanceOf(EnumTypeHandler.class);
+            // 检查是否在SQL中缩小空格
             assertThat(config.isShrinkWhitespacesInSql()).isFalse();
+            // 检查是否启用了基于名称的构造函数自动映射
             assertThat(config.isArgNameBasedConstructorAutoMapping()).isFalse();
+            // 检查默认SQL提供者类型是否未设置
             assertThat(config.getDefaultSqlProviderType()).isNull();
+            // 检查是否在ForEach中启用可空值
             assertThat(config.isNullableOnForEach()).isFalse();
         }
     }
+
 
     enum MyEnum {
 
@@ -345,23 +388,45 @@ class XmlConfigBuilderTest {
         }
     }
 
+    /**
+     * 测试允许子类配置的解析
+     * 该测试用例旨在验证XMLConfigBuilder是否允许通过子类配置来扩展默认配置
+     *
+     * @throws IOException 如果在读取或解析配置文件时发生错误
+     */
     @Test
     void shouldAllowSubclassedConfiguration() throws IOException {
+        // 定义配置文件的路径
         String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
+        // 使用try-with-resources确保文件资源的自动关闭
         try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+            // 创建一个XMLConfigBuilder实例，传入子类配置和输入流
             XMLConfigBuilder builder = new XMLConfigBuilder(MyConfiguration.class, inputStream, null, null);
+            // 解析配置文件并获取配置实例
             Configuration config = builder.parse();
 
+            // 验证返回的配置实例是否是预期的子类类型
             assertThat(config).isInstanceOf(MyConfiguration.class);
         }
     }
 
+
+    /**
+     * 测试子类配置没有默认构造函数时的情况
+     * 该测试用例验证了当尝试为没有默认构造函数的子类配置创建 Configuration 实例时，是否正确抛出了异常
+     *
+     * @throws IOException 如果处理输入流时发生错误
+     */
     @Test
     void noDefaultConstructorForSubclassedConfiguration() throws IOException {
+        // 定义要读取的资源文件路径
         String resource = "org/apache/ibatis/builder/MinimalMapperConfig.xml";
+        // 使用 try-with-resources 确保资源文件的输入流在使用后能被正确关闭
         try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+            // 针对 BadConfiguration 类和给定的输入流，预期构造 XMLConfigBuilder 时抛出异常
             Exception exception = Assertions.assertThrows(Exception.class,
                 () -> new XMLConfigBuilder(BadConfiguration.class, inputStream, null, null));
+            // 验证抛出的异常消息是否与预期相符
             assertEquals("Failed to create a new Configuration instance.", exception.getMessage());
         }
     }

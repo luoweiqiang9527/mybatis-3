@@ -15,21 +15,6 @@
  */
 package org.apache.ibatis.parsing;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.ibatis.builder.BuilderException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -40,6 +25,20 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
@@ -49,6 +48,7 @@ public class XPathParser {
     private final Document document;
     private boolean validation;
     private EntityResolver entityResolver;
+    // 路径解析需要用到设置好的属性
     private Properties variables;
     private XPath xpath;
 
@@ -145,7 +145,7 @@ public class XPathParser {
      * 此方法使用XPath评估表达式，然后解析结果字符串
      * 使用提供的变量替换结果中的占位符
      *
-     * @param root 根对象，用于XPath评估的起点
+     * @param root       根对象，用于XPath评估的起点
      * @param expression XPath表达式，用于评估字符串值
      * @return 解析后的字符串，其中的占位符已被提供的变量替换
      */
@@ -218,6 +218,14 @@ public class XPathParser {
         return xnodes;
     }
 
+    /**
+     * 根据给定的XPath表达式评估并返回对应的XNode节点.
+     * 此方法提供了对文档的XPath表达式评估的简便封装.
+     *
+     * @param expression XPath表达式，用于定位文档中的节点.
+     * @return 返回与XPath表达式匹配的XNode节点.
+     * 如果没有找到匹配的节点，则返回null.
+     */
     public XNode evalNode(String expression) {
         return evalNode(document, expression);
     }
@@ -226,7 +234,7 @@ public class XPathParser {
      * 根据给定的XPath表达式，在指定的根节点下评估并返回一个XNode对象。
      * 这个方法主要用于解析XPath表达式，找到对应的节点，并封装为XNode对象返回。
      *
-     * @param root 根节点，用于XPath表达式的解析起点。
+     * @param root       根节点，用于XPath表达式的解析起点。
      * @param expression XPath表达式，用于定位需要的节点。
      * @return 如果找到对应的节点，则返回一个封装了该节点的XNode对象；如果未找到，则返回null。
      */
@@ -242,13 +250,25 @@ public class XPathParser {
     }
 
 
+    /**
+     * 评估指定根对象上的XPath表达式并返回结果。
+     *
+     * @param expression 要评估的XPath表达式。
+     * @param root       用于评估XPath表达式的根对象。
+     * @param returnType XPath表达式的预期返回类型。
+     * @return 评估XPath表达式的结果。
+     * @throws BuilderException 如果在评估XPath表达式时发生错误，将抛出BuilderException，并将原始异常作为其原因。
+     */
     private Object evaluate(String expression, Object root, QName returnType) {
         try {
+            // 尝试评估XPath表达式
             return xpath.evaluate(expression, root, returnType);
         } catch (Exception e) {
-            throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);
+            // 如果在评估XPath表达式时发生错误，抛出BuilderException
+            throw new BuilderException("评估XPath时发生错误。 原因: " + e, e);
         }
     }
+
 
     private Document createDocument(InputSource inputSource) {
         // important: this must only be called AFTER common constructor
@@ -287,12 +307,27 @@ public class XPathParser {
         }
     }
 
+    /**
+     * 构造函数，用于初始化包含验证标志、变量和实体解析器的公共属性
+     * 此构造器主要用于配置XML解析器的状态，使其能够根据传入的参数进行XML文档的解析
+     *
+     * @param validation     表示是否启用验证的布尔标志，true为启用验证，false为不启用
+     * @param variables      一组变量，用于在解析过程中提供动态值替换
+     * @param entityResolver 实体解析器对象，用于解析XML文档中的外部实体
+     */
     private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
+        // 将传入的验证标志赋值给类属性validation
         this.validation = validation;
+        // 将传入的实体解析器赋值给类属性entityResolver
         this.entityResolver = entityResolver;
+        // 将传入的变量赋值给类属性variables
         this.variables = variables;
+
+        // 创建一个新的XPathFactory实例，用于后续的XPath查询
         XPathFactory factory = XPathFactory.newInstance();
+        // 使用XPathFactory实例创建一个新的XPath对象，用于执行XPath表达式
         this.xpath = factory.newXPath();
     }
+
 
 }

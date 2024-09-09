@@ -15,20 +15,6 @@
  */
 package org.apache.ibatis.session;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BiFunction;
-
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.IncompleteElementException;
@@ -96,6 +82,20 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 
 /**
  * mybatis 核心配置类
@@ -183,6 +183,7 @@ public class Configuration {
     protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
     protected final InterceptorChain interceptorChain = new InterceptorChain();
     protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
+    // 类别名 注册器
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
@@ -218,6 +219,7 @@ public class Configuration {
         this.environment = environment;
     }
 
+    // 默认构造器，注册了一些类型别名。
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
@@ -920,7 +922,7 @@ public class Configuration {
      * 根据id获取映射语句。此方法用于从缓存中检索特定的映射语句，如果设置了验证未完成语句的标志，
      * 则会在检索前构建所有未完成的语句。
      *
-     * @param id 用于标识所需映射语句的唯一字符串。
+     * @param id                           用于标识所需映射语句的唯一字符串。
      * @param validateIncompleteStatements 布尔值，指示是否在检索前构建所有未完成的语句。
      * @return 返回找到的映射语句实例，如果找不到则可能返回null。
      */
@@ -1011,70 +1013,115 @@ public class Configuration {
         }
     }
 
+    /**
+     * 处理挂起的未解析语句
+     * 此方法旨在处理那些在创建时不完整，因此未能立即解析的语句
+     * 它尝试解析这些未解析的语句，并根据参数决定是否报告未解析的错误
+     *
+     * @param reportUnresolved 一个布尔值，指示是否应当抛出异常以报告未解析的语句
+     *                         如果为true，当遇到未解析的语句时，将抛出异常
+     *                         如果为false，未解析的语句将被忽略
+     */
     public void parsePendingStatements(boolean reportUnresolved) {
+        // 如果没有未完成的语句，则无需进一步处理
         if (incompleteStatements.isEmpty()) {
             return;
         }
+
+        // 加锁以确保线程安全，在修改未完成语句列表时防止并发修改异常
         incompleteStatementsLock.lock();
         try {
+            // 尝试从列表中移除所有未完成的语句，通过调用其parseStatementNode方法来完成解析
+            // 使用lambda表达式设定移除条件，即解析所有语句节点后从列表中移除
             incompleteStatements.removeIf(x -> {
                 x.parseStatementNode();
                 return true;
             });
         } catch (IncompleteElementException e) {
+            // 当解析过程中遇到未完成或无法解析的元素时，抛出异常
+            // 如果reportUnresolved参数为true，表明需要报告未解析的语句，因此直接抛出异常
             if (reportUnresolved) {
                 throw e;
             }
         } finally {
+            // 解锁，确保即使在发生异常时也能保持线程安全
             incompleteStatementsLock.unlock();
         }
     }
 
+    /**
+     * 解析待处理的缓存引用，并根据参数决定是否上报未解决的引用
+     * 此方法主要用于处理挂起的缓存引用解析，它会移除那些能够解析的缓存引用，
+     * 并根据参数决定是否需要对未解析的缓存引用进行上报
+     *
+     * @param reportUnresolved 一个布尔值，指示是否需要对未解析的缓存引用进行上报
+     */
     public void parsePendingCacheRefs(boolean reportUnresolved) {
+        // 如果缓存引用列表为空，则直接返回，无需进一步操作
         if (incompleteCacheRefs.isEmpty()) {
             return;
         }
+        // 锁定缓存引用列表以确保线程安全
         incompleteCacheRefsLock.lock();
         try {
+            // 移除所有能够解析的缓存引用
             incompleteCacheRefs.removeIf(x -> x.resolveCacheRef() != null);
         } catch (IncompleteElementException e) {
+            // 如果遇到未解析的缓存引用异常，并且需要上报未解析的引用，则抛出此异常
             if (reportUnresolved) {
                 throw e;
             }
         } finally {
+            // 确保在完成操作后解锁
             incompleteCacheRefsLock.unlock();
         }
     }
 
+    /**
+     * 解析待处理的结果映射图
+     * 该方法主要用于解析那些可能因为等待某些依赖而未完成的结果映射图
+     * 如果启用了报告未解析映射，则在至少有一个结果映射图无法解析时抛出异常
+     *
+     * @param reportUnresolved 是否报告未解析的映射图如果为真，则在至少有一个映射图无法解析时抛出异常
+     */
     public void parsePendingResultMaps(boolean reportUnresolved) {
+        // 如果待处理的结果映射图集为空，则无需进一步处理，直接返回
         if (incompleteResultMaps.isEmpty()) {
             return;
         }
+        // 加锁以确保线程安全地访问incompleteResultMaps集合
         incompleteResultMapsLock.lock();
         try {
             boolean resolved;
             IncompleteElementException ex = null;
             do {
                 resolved = false;
+                // 遍历所有待处理的结果映射图
                 Iterator<ResultMapResolver> iterator = incompleteResultMaps.iterator();
                 while (iterator.hasNext()) {
                     try {
+                        // 尝试解析当前结果映射图
                         iterator.next().resolve();
+                        // 解析成功后，从待处理集合中移除该映射图
                         iterator.remove();
                         resolved = true;
                     } catch (IncompleteElementException e) {
+                        // 如果解析失败，则记录该异常
                         ex = e;
                     }
                 }
             } while (resolved);
+            // 如果启用了报告未解析映射，并且仍然存在未解析的映射图，则抛出记录的异常
             if (reportUnresolved && !incompleteResultMaps.isEmpty() && ex != null) {
-                // At least one result map is unresolvable.
+                // 至少有一个结果映射图无法解析
                 throw ex;
             }
         } finally {
+            // 确保在方法执行完毕后释放锁
             incompleteResultMapsLock.unlock();
         }
     }
+
 
     /**
      * Extracts namespace from fully qualified statement id.

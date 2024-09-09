@@ -15,16 +15,6 @@
  */
 package org.apache.ibatis.builder.xml;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.builder.CacheRefResolver;
@@ -46,6 +36,16 @@ import org.apache.ibatis.reflection.MetaClass;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
+
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Clinton Begin
@@ -410,23 +410,32 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 为命名空间绑定Mapper
+     * 本方法尝试根据当前命名空间获取其对应的类，并在配置中注册Mapper，
+     * 这是为了确保Spring能够正确地加载资源
+     */
     private void bindMapperForNamespace() {
+        // 获取当前的命名空间
         String namespace = builderAssistant.getCurrentNamespace();
         if (namespace != null) {
             Class<?> boundType = null;
+            // 尝试根据命名空间获取对应的类
             try {
                 boundType = Resources.classForName(namespace);
             } catch (ClassNotFoundException e) {
-                // ignore, bound type is not required
+                // 如果类不存在，则忽略，因为某些情况下绑定类型可能是不必要的
             }
+            // 如果找到了对应的类且配置中还未注册该Mapper，则进行注册
             if (boundType != null && !configuration.hasMapper(boundType)) {
-                // Spring may not know the real resource name so we set a flag
-                // to prevent loading again this resource from the mapper interface
-                // look at MapperAnnotationBuilder#loadXmlResource
+                // 由于Spring可能无法确定真实的资源名称，我们设置一个标志，
+                // 这个标志用来防止再次从Mapper接口中加载这个资源
                 configuration.addLoadedResource("namespace:" + namespace);
+                // 在配置中添加Mapper，以便Spring能够正确地加载资源
                 configuration.addMapper(boundType);
             }
         }
     }
+
 
 }
